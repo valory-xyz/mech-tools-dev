@@ -1,7 +1,8 @@
 {
     "dev": {
-        "agent/valory/mech/0.1.0": "bafybeibtwnrdkabckpwvcgemfnhmz7imtzaafr3433vfu4jmt6utdtuc6q",
-        "service/valory/mech/0.1.0": "bafybeiffu2kjfyauzfrub3unldkmvh5mlrib3ms3yomjfivlz2xqflnyza"
+        "custom/nic/prediction_tool/0.1.0": "bafybeifs4be7qqqvak23wt2rb6za2pmskpths3fmj2laczy2ckxm5r7wfe",
+        "agent/valory/mech/0.1.0": "bafybeie2hk5ibi2afdij2rmkjk5f75274socavwnozltokye2pz7ir5lia",
+        "service/valory/mech/0.1.0": "bafybeig5b524fqlhgcym4yi5omz4xyi72k6czfhe5dmdpnl5fuhcfkxrle"
     },
     "third_party": {
         "protocol/valory/acn_data_share/0.1.0": "bafybeih5ydonnvrwvy2ygfqgfabkr47s4yw3uqxztmwyfprulwfsoe7ipq",

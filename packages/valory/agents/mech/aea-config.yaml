@@ -85,6 +85,10 @@ dependencies:
     version: ==6.21.6
   open-aea-ledger-ethereum:
     version: ==1.63.0
+  openai:
+    version: ==1.30.2
+  httpx:
+    version: ==0.25.2
 default_connection: null
 ---
 public_id: valory/websocket_client:0.1.0:bafybeiexove4oqyhoae5xmk2hilskthosov5imdp65olpgj3cfrepbouyy
