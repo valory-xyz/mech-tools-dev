@@ -3,6 +3,9 @@
 packages/fetchai/
 packages/open_aea/
 packages/valory
+!/packages/valory/customs
+!/packages/valory/agents
+!/packages/valory/services
 
 *test_mech.py
 
@@ -28,5 +31,3 @@ log
 .benchmark-cache
 mech/
 mech_service/
-!/packages/valory/agents
-!/packages/valory/services
