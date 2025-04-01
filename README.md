@@ -151,7 +151,7 @@ autonomy push-all
 
 **6.** In the file `packages/valory/services/mech/service.yaml`, change the value of the key `agent` to the hash for `agent/valory/mech/0.1.0` found in `packages/packages.json`.
 
-**7.** Push to the origin.
+**7.** Push to changes.
 
 ## Testing the tool
 
