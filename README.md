@@ -155,4 +155,4 @@ autonomy push-all
 
 ## Testing the tool
 
-In order to test a tool, you can use the [quickstart](https://github.com/valory-xyz/quickstart/). You will need the hashes of your tools found in `packages/packages.json` and the service hash (corresponding to the key `service/valory/mech/0.1.0` in the same file).
+You can test any of the added tools by running a Mech service using them. For this purpose, you can use the [quickstart](https://github.com/valory-xyz/quickstart/). Follow the instruction in the README file of this repository. You will need the hashes of your tools found in `packages/packages.json` and the service hash (corresponding to the key `service/valory/mech/0.1.0` in the same file).
