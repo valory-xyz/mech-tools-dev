@@ -3,7 +3,7 @@
 This repository implements the core logic of Mech and is the reference repository for developers to streamline the development 
 and testing of tools and their integration to a Mech.
 
-In order to do so, always fork this repository first and clone the forked copy. This can be done as follows: 
+In order to do so, always fork this repository first and clone the forked copy. This can be done as follows, after installing the github CLI: 
 
 ```bash
 gh repo fork https://github.com/valory-xyz/mech-tools-dev --clone=true
@@ -60,24 +60,7 @@ EOF
 
 for file in __init__.py "$TOOL_NAME.py"; do
   cat > $TOOL_PATH/$file <<EOF
-# -*- coding: utf-8 -*-
-# ------------------------------------------------------------------------------
-#
-#   Copyright $YEAR Valory AG
-#
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
-#   You may obtain a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#   See the License for the specific language governing permissions and
-#   limitations under the License.
-#
-# ------------------------------------------------------------------------------
+# Short description of the tool.
 
 EOF
 done
@@ -149,9 +132,7 @@ autonomy push-all
 
 **5.** Add the tool's dependencies to the list of dependencies in the file `packages/valory/agents/mech/aea-config.yaml`.
 
-**6.** In the file `packages/valory/services/mech/service.yaml`, change the value of the key `agent` to the hash for `agent/valory/mech/0.1.0` found in `packages/packages.json`.
-
-**7.** Push to changes.
+**6.** Push the changes.
 
 ## Testing added tools
 
