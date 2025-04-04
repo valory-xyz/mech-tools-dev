@@ -36,7 +36,7 @@ extra_css:
 
 
 nav:
-  - mech-tools-dev: 'mech-tool/index.md'
+  - mech-tools-dev: 'index.md'
 
 
 plugins:
