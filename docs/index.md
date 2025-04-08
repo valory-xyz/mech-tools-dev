@@ -210,31 +210,37 @@ git clone https://github.com/valory-xyz/quickstart.git
 cd quickstart
 ```
 
-**2.** Configure the Mech service by changing the variables in the file `configs/config_mech.json`. You can in particular 
-change the value of "agent_id". This corresponds to the code of the off-chain agent in the Mech service. The list of agents can be found [there](https://registry.olas.network/ethereum/agents). Change the value of "use_mech_marketplace" to true if you want to deploy a Mech on the Mech Marketplace. 
-
-**3.** Change the value the key "value" in `METADATA_HASH` and in `TOOLS_TO_PACKAGE_HASH` in order to use your custom tools.
-In order to change the first one, use the [mech-client](https://github.com/valory-xyz/mech-client.git). 
-Clone the repository and create a local file, following the model provided by the IPFS hash in the file `configs/config_mech.json`. Then run the following, replacing `<file_name>` with the name of your file:
-
-```bash
-poetry add mech-client &&\
-mechx push-to-ipfs ./<file_name>
-```
-
-Then place the second hash value which appears in the terminal in the file `configs/config_mech.json`. 
-
-In order to change the value in `TOOLS_TO_PACKAGE_HASH`, follow the format and add your tools and their hashes (created in the first [section](#1-creating-and-publishing-a-tool)).
-
-
-**3.** Run the following in order to deploy and run a new Mech: 
+**2.** Run the following in order to deploy and run a new Mech: 
 
 ```bash
 chmod +x run_service.sh
 ./run_service.sh configs/config_mech.json
 ```
 
-**4.** You will be prompted to provide an RPC endpoint (using QuickNode for instance), to choose to use a staking contract or not (choose option 1 by default), to enter API keys, the payment model of the Mech (Native, Token, Nevermined), and to add funds to two addresses, which correspond to the agent's address and the safe contract address of the Mech. The API keys dictionary that you enter should contain all the keys necessary for running your tools. You can find the Mech address using the transaction hashes displayed in the logs.
+**3.** You will be prompted to : 
+
+- Provide an RPC endpoint (you can create one with QuickNode for instance); 
+
+- Choose to use a staking contract or not (choose option 1 by default); 
+
+- Enter API keys as a dictionary; you can find in the prompt the format of this; The API keys dictionary that you enter should contain all the keys necessary for running your tools; 
+
+- Enter the tools to package mapping, which provides a hash for each of the tools; you can find an example with the correct format in the prompt, and replace the tools by your own, using the hashes created in the first [section](#1-creating-and-publishing-a-tool); 
+
+- Enter the metadata hash, which declares the tools used by the mech; in order to create this, use the [mech-client](https://github.com/valory-xyz/mech-client.git). Clone the repository and create a local file, following the model provided by the IPFS hash in the file `configs/config_mech.json`. Then run the following, replacing `<file_name>` with the name of your file:
+
+```bash
+poetry add mech-client &&\
+mechx push-to-ipfs ./<file_name>
+```
+
+- Provide the payment model of the Mech (Native, Token, Nevermined);
+
+- Add funds to two addresses, which correspond to the agent's address and the safe contract address of the Mech. 
+
+You can find the Mech address using the transaction hashes displayed in the logs. Note that other variables can be 
+customized in the file `configs/config_mech.json`. You can in particular 
+change the value of "agent_id". This corresponds to the code of the off-chain agent in the Mech service. The list of agents can be found [there](https://registry.olas.network/ethereum/agents). 
 
 **5.** When you see the following, the service is running: 
 
