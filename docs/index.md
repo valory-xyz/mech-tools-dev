@@ -26,11 +26,11 @@ In order to contribute to Mechs' abilities, you can create and publish a tool. I
 
 In order to create a tool, the steps are as follows: 
 
-**1.** Fork the [mech](https://github.com/valory-xyz/mech) repository and clone the forked copy.
+**1.** Fork the [mech](https://github.com/valory-xyz/mech-tools-dev) repository and clone the forked copy.
 You may use GitHub's UI or its CLI tools:
 
 ```bash
-gh repo fork https://github.com/valory-xyz/mech --clone=true
+gh repo fork https://github.com/valory-xyz/mech-tools-dev --clone=true
 ```
 
 **2.** Install the dependencies, set up a remote registry, and fetch the third-party packages from IPFS.
