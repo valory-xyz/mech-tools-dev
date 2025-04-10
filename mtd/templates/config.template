@@ -1,0 +1,14 @@
+name: ${tool_name}
+author: ${authorname}
+version: 0.1.0
+type: custom
+description: ${tool_description}
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+    __init__.py:
+    ${tool_name}.py:
+fingerprint_ignore_patterns: []
+entry_point: ${tool_name}.py
+callable: run
+dependencies: {}
