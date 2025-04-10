@@ -39,7 +39,7 @@ You may use the following command after replacing the value for the `AUTHORNAME`
 ```bash
 AUTHORNAME=author
 
-cd mech && \
+cd mech-tools-dev && \
 poetry install && \
 poetry run autonomy init --remote --ipfs --author $AUTHORNAME && \
 poetry run autonomy packages sync --update-packages
