@@ -31,8 +31,15 @@ In order to contribute to Mechs' abilities, you can create and publish a tool. I
 
 In order to create a tool, the steps are as follows: 
 
-**1.** Fork the [mech-tools-dev](https://github.com/valory-xyz/mech-tools-dev) repository and clone the forked copy.
-You may use GitHub's UI or its CLI tools:
+**1.** Fork and clone the [mech-tools-dev](https://github.com/valory-xyz/mech-tools-dev) repository. 
+
+- Option 1: Fork the repository from the GitHub page. Then, clone your fork using:
+
+```bash
+git clone https://github.com/<your-username>/mech-tools-dev.git
+```
+
+- Option 2: Use GitHub's UI or its CLI tools:
 
 ```bash
 gh repo fork https://github.com/valory-xyz/mech-tools-dev --clone=true
