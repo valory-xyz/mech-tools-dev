@@ -211,9 +211,9 @@ After this the tool can be deployed to be used by a [Mech](#2-running-a-mech-loc
 
 ## 2. Running a Mech locally
 
-In order to deploy a Mech agent and register it on the Mech Marketplace, you can use the [quickstart](https://github.com/valory-xyz/quickstart/blob/main/README.md).
+In order to deploy a Mech agent, register it on the Mech Marketplace and run it locally in order to test your tools, you can use the [quickstart](https://github.com/valory-xyz/quickstart/blob/main/README.md).
 
-Alternatively, you can follow the instructions below.
+<!-- Alternatively, you can follow the instructions below.
 
 ### 2.1 Creating a Mech service
 
@@ -296,7 +296,7 @@ In order to accrue the payments of your Mech, find [here](https://github.com/val
 
 - Nevermined: BalanceTrackerNvmSubscriptionNative
 
-Enter its address in the scan of the chosen network. Click on "Contract" and then "Write Contract" and trigger the function processPaymentByMultisig. Enter the address of your Mech and click on "Write". This will transfer the funds stored in the Mech Marketplace to the address of your Mech contract. 
+Enter its address in the scan of the chosen network. Click on "Contract" and then "Write Contract" and trigger the function processPaymentByMultisig. Enter the address of your Mech and click on "Write". This will transfer the funds stored in the Mech Marketplace to the address of your Mech contract.  -->
 
 ## Appendix : What is the Mech Marketplace ?
 
