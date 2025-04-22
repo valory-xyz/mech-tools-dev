@@ -1,28 +1,33 @@
 ## **Overview** 
 
-This guide contains guidelines for contributing to the development of Mechs and offer services.
+This guide explains how to contribute to the Mech ecosystem by developing and offering services. Anyone can offer services by creating and deploying their own Mech agents. The process typically involves the following steps:
 
-In order to offer services, anyone can create and deploy their own Mech agents. First, developers can use existing pieces of code, called tools, or create and publish new ones. Once tools are created, Mech agents can be deployed on the Olas Registry. At this point, a Mech contract can be created via the [Mech MarketPlace](#appendix-what-is-the-mech-marketplace). Mech agents, when creating on-chain Mech contracts via the Mech Marketplace, can choose among three distinct payment models, each defining how the requester can pay for the service requested. Specifically, the payment models are the following:
+1. **Tool development**: Developers can either reuse existing tools (modular components of Mechs) or create and publish new ones.
 
-- Native:  A fixed-price model where the requester pays using the chain with native token native token for each delivered service;
+2. **Agent deployment**: Once the necessary tools are ready, a Mech agent can be deployed and registered on the Olas Registry.
 
-- Token: Similar to the Native model, but payments are made using a specified ERC20 token;
+3. **Contract creation**: A Mech contract can then be created via the [Mech Marketplace](#appendix-what-is-the-mech-marketplace). When doing so, developers must choose a payment model that determines how requesters will pay for services.
 
-- Nevermined subscription: A dynamic pricing model that allows flexible pricing across different services.
+There are three available payment models:
 
-Mech agent deployment and related Mech contract creation process is handled by the [Mech quickstart](#2-running-a-mech-locally-on-the-mech-marketplace), and the main inputs to provide are the list of tools to be used, and the chosen payment model. It is also possible to follow these steps [manually](#3-deploying-a-mech-on-the-mech-marketplace-manually).
+- **Native**: A fixed-price model where the requester pays in the chain’s native token for each delivered service.
 
-The detailed instructions to create tools, test them locally and deploy a Mech agent, and accrue payments can be found below.
+- **Token**: Similar to the Native model, but payments are made using a specified ERC20 token.
+
+- **Nevermined subscription**: A dynamic pricing model that enables flexible pricing and access to multiple services through a single subscription.
+
+Detailed instructions for creating tools, testing them locally, deploying Mech agents, and receiving payments are provided below.
+This guide contains guidelines for contributing to the development of the Mech Marketplace and offer services.
  
 ## 1. Creating and publishing a tool
 
 In order to contribute to Mechs' abilities, you can create and publish a tool. In order to do so, follow the instructions below. 
 
-### 1. 1. Creating a tool
-
 **Requirements**:
   - [Python](https://www.python.org/) `>= 3.10`
   - [Poetry](https://python-poetry.org/docs/) `>=1.4.0` 
+
+### 1. 1. Creating a tool
 
 In order to create a tool, the steps are as follows: 
 
@@ -37,7 +42,7 @@ gh repo fork https://github.com/valory-xyz/mech-tools-dev --clone=true
 You may use the following command after replacing the value for the `AUTHORNAME` variable:
 
 ```bash
-AUTHORNAME=author
+AUTHORNAME=authorw
 
 cd mech-tools-dev && \
 poetry install && \
@@ -103,7 +108,7 @@ cat >> "$TOOL_PATH/$TOOL_NAME.py" <<EOF
 def run(*args, **kwargs):
     """The callable for the $TOOL_NAME tool."""
     # TODO: Implement the tool logic
-    print(f"Running $TOOL_NAME with {args=} and {kwargs=}.)
+    print(f"Running $TOOL_NAME with {args=} and {kwargs=}.")
 
 EOF
 
@@ -180,101 +185,73 @@ package hash (this can be found in `packages.json` under the `packages` folder);
 NFT image URL (for instance on IPFS, supported domains are listed in the window). 
 In order to push an image on IPFS, there are two options: 
 
-1. Use this [script](https://github.com/dvilelaf/tsunami/blob/v0.9.0/scripts/ipfs_pin.py). 
+- Use this [script](https://github.com/dvilelaf/tsunami/blob/v0.9.0/scripts/ipfs_pin.py). 
    Place the image in a folder called `mints` in `.jpg` format. 
    Then, run the script:
 ```bash
 python ipfs_pin.py
 ```
 
-2. Use the [mech-client](https://github.com/valory-xyz/mech-client.git), 
+- Use the [mech-client](https://github.com/valory-xyz/mech-client.git), 
    replacing `<file_name>` with the name of your file:
 ```bash
 poetry add mech-client &&\
 mechx push-to-ipfs ./<file_name>
 ```
 
-After this the tool can be deployed to be used by a [Mech](#2-running-a-mech-locally-on-the-mech-marketplace). 
+After this the tool can be deployed to be used by a [Mech](#2-running-a-mech-locally). 
 
 
-## 2. Running a Mech locally on the Mech Marketplace
+## 2. Running a Mech locally
 
-In order to register a Mech on the Mech Marketplace - including Mech service creation and deployment, and Mech contract deployment - follow the instructions below. 
+In order to deploy a Mech agent and register it on the Mech Marketplace, you can use the [quickstart](https://github.com/valory-xyz/quickstart/blob/main/README.md).
 
-**Requirements**: [Python](https://www.python.org/) == 3.10; [Poetry](https://python-poetry.org/docs/) >= 1.8.3 ; [Docker Compose](https://docs.docker.com/compose/install/) 
+Alternatively, you can follow the instructions below.
 
-**1.** Clone the quickstart repository:
+### 2.1 Creating a Mech service
 
-```bash
-git clone https://github.com/valory-xyz/quickstart.git
-cd quickstart
-```
+To create the service, go to the [Olas Registry](https://registry.olas.network/gnosis/services) webpage. 
 
-**2.** Run the following in order to deploy and run a new Mech: 
+**1.** Select the appropriate network and connect your wallet.
 
-```bash
-chmod +x run_service.sh
-./run_service.sh configs/config_mech.json
-```
+**2.** Click the **"Mint"** button to begin service creation.
 
-**3.** You will be prompted to : 
+**3.** Fill in the service creation form as follows:
 
-- Provide an RPC endpoint (you can create one with QuickNode for instance); 
+- Click **"Prefill address"** to automatically populate the **owner address** field.  
+  Ensure this address has sufficient funds for deploying the service.
 
-- Choose to use a staking contract or not (choose option 1 by default); 
+- For the **metadata hash**, click **"Generate Hash & File"**.  
+  You should use the hash found in the `packages/packages.json` file of the [mech-predict repository](https://github.com/valory-xyz/mech-tools-dev/), under the key starting with `service/valory/mech/`.
 
-- Enter API keys as a dictionary; you can find in the prompt the format of this; The API keys dictionary that you enter should contain all the keys necessary for running your tools; 
+- Select the appropriate prefix and paste the remaining part of the key into the field.  
+  For example, if the full key is `service/valory/mech/0.1.0`, then the version is `0.1.0`.
 
-- Enter the tools to package mapping, which provides a hash for each of the tools; you can find an example with the correct format in the prompt, and replace the tools by your own, using the hashes created in the first [section](#1-creating-and-publishing-a-tool); 
+- For the **Agent ID**, follow the instructions provided in the interface. (You can use Agent ID = `9` for testing purposes.)
 
-- Enter the metadata hash, which declares the tools used by the mech; in order to create this, use the [mech-client](https://github.com/valory-xyz/mech-client.git). Clone the repository and create a local file, following the model provided by the IPFS hash in the file `configs/config_mech.json`. Then run the following, replacing `<file_name>` with the name of your file:
+- Set **Number of Slots** to the number of agents the service will use (we suggest `1` for testing).
 
-```bash
-poetry add mech-client &&\
-mechx push-to-ipfs ./<file_name>
-```
+- For **Agent bond cost**, enter a small value such as `1000000000000000` GörliWei (= 0.001 GörliETH).
 
-- Provide the payment model of the Mech (Native, Token, Nevermined);
+- For **Threshold** to `1` for testing.
 
-- Add funds to two addresses, which correspond to the agent's address and the safe contract address of the Mech. 
+Once all fields are filled, click **"Submit"**.
 
-You can find the Mech address using the transaction hashes displayed in the logs. Note that other variables can be 
-customized in the file `configs/config_mech.json`. You can in particular 
-change the value of "agent_id". This corresponds to the code of the off-chain agent in the Mech service. The list of agents can be found [there](https://registry.olas.network/ethereum/agents). 
+**4.** Click the **"Services"** tab. Your newly created service will appear as the most recent entry. Click **"View"** to inspect it.
 
-**5.** When you see the following, the service is running: 
+**5.** Complete the following three steps in order:
 
-![alt text](imgs/image.png)
+- **Step 1**: Click **"Activate Registration"**.
 
-**6.** In order to see the logs, run the following command in a separate terminal: 
-{% raw %}
-```bash
-docker logs $(docker ps --filter "name=<mech>" --format "{{.Names}}" | grep "_abci" | head -n 1) --follow
-```
-{% endraw %}
+- **Step 2**: In the **"Agent Instance Addresses"** field, enter one address per agent (these must be distinct from the owner address), then click **"Register Agents"**.
 
+- **Step 3**: Choose a **service multisig** and click **"Submit"**.
 
-## 3. Deploying a Mech on the Mech Marketplace (manually)
+**6.** Your service is now deployed. 
 
-In order to deploy a Mech, it is also possible to do so manually, first by deploying a service, registering it on the Mech Marketplace, and then running it locally.
+You will see the address of the associated safe (multisig) contract — keep this address, as it is required for running the Mech.
 
-### 3.1 Creating a Mech service
-
-In order to create the service, go to the [Olas Registry](https://registry.olas.network/gnosis/services) webpage. 
-
-**1.** Choose the network and connect your wallet. 
-
-**2.** Click on the button "Mint".
-
-**3.** Click on the `Prefill address` button in order to fill the `owner address` field. You will need to have funds on this address in order to deploy the service. For the hash of the metadata file, click on "Generate Hash & File". The hash should be the one found in the file `packages/packages.json` in the mech-predict [repository](https://github.com/valory-xyz/mech-predict/) for the key `service/valory/mech/`. Select first the prefix and fill the field with the remaining part. The version is contained in this key (e.g. `service/valory/mech/0.1.0`). For the agent id, follow the instructions on the opened page (for instance agent id = 9 to test). The number of slots corresponds to the number of agents that the service contains (we suggest 1 to test). For the cost of agent bound, we suggest that you use a small value (e.g., 1000000000000000 GörliWei = 0.001 GörliETH). We suggest to write threshold = 1 to test. Then click on submit.
-
-**4.** Click on "Services". The last entry corresponds to the service you have created. Click on "View".
-
-**5.** Click first on "Activate registration" (Step 1). Then in the field "Agent Instance Addresses" (Step 2), enter one address (not the same one as the one used as owner address) for each agent in the service, and click on "Register Agents". Choose a service multisig (Step 3) and click on "Submit".
-
-**6.** The service is now deployed, and you can see the safe contract address below. You will need this address in order to run the Mech.
-
-### 3.2 Registering the service on the Mech Marketplace
+### 2.2 Registering the service on the Mech Marketplace
 
 In order to register your service on the Mech Marketplace, follow the instructions below.
 
@@ -287,7 +264,7 @@ In order to register your service on the Mech Marketplace, follow the instructio
 
     - For Native, look for the MechFactoryFixedPriceNative address.
 
-    - For Token: MechFactoryFixedPriceToken
+    - For Token: MechFactoryFixedPriceToken address.
 
     - For Nevermined, find MechFactoryNvmSubscriptionNative.
 
@@ -298,19 +275,11 @@ is equal to 10^18. Then Use [ABI Hashex Encoder](https://abi.hashex.org/). Selec
 
 :warning: You must use the same EOA as the one used to deploy the service.
 
-### 3.3 Running the Mech service
+### 2.3 Running the Mech service
 
-In order to run the Mech service that you created, follow the steps below.
+In order to run the Mech service that you created, use this repository. The steps are the same as in this [README.md](https://github.com/valory-xyz/mech-predict/blob/main/README.md#running-the-old-base-mech) (section 'Running the old base Mech').
 
-Clone the `mech-predict` repository:
-
-```
-git clone https://github.com/valory-xyz/mech-predict.git
-```
-
-Then follow the instructions in the README.md file (section 'Running the Mech').
-
-## 4. How to accrue the payments
+## 3. How to accrue the payments
 
 In order to accrue the payments of your Mech, find [here](https://github.com/valory-xyz/ai-registry-mech/blob/v0.4.0/docs/configuration.json) the BalanceTracker contract which corresponds to the payment model of your Mech. The key is the following for each of the three payment models: 
 
