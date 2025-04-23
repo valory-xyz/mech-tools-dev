@@ -38,7 +38,7 @@ In order to create a tool, the steps are as follows:
 git clone https://github.com/<your-username>/mech-tools-dev.git
 ```
 
-- Option 2: Use GitHub's UI or its CLI tools:
+- Option 2: To clone and fork in a single command, you can use Github's CLI tools:
 
 ```bash
 gh repo fork https://github.com/valory-xyz/mech-tools-dev --clone=true
@@ -48,7 +48,7 @@ gh repo fork https://github.com/valory-xyz/mech-tools-dev --clone=true
 You may use the following command after replacing the value for the `AUTHORNAME` variable:
 
 ```bash
-AUTHORNAME=authorw
+AUTHORNAME=author
 
 cd mech-tools-dev && \
 poetry install && \
@@ -180,16 +180,14 @@ autonomy push-all
 ```
 
 **3.** Mint the tool [here](https://registry.olas.network/ethereum/components/mint) as a component on the Olas Registry; 
-For this is needed: an address (EOA), 
-and the hash of the meta-data file. 
-In order to generate this hash, 
-click on “Generate Hash & File” and provide the following information: 
-name (name of the tool); 
-description (of the tool); 
-version (this needs to match the version in the file `component.yaml`); 
-package hash (this can be found in `packages.json` under the `packages` folder); 
-NFT image URL (for instance on IPFS, supported domains are listed in the window). 
-In order to push an image on IPFS, there are two options: 
+For this you need an address (EOA) and the hash of the meta-data file. 
+In order to generate this hash, click on “Generate Hash & File” and provide the following information: 
+
+- name (of the tool); 
+- description (of the tool); 
+- version (this needs to match the version in the file `component.yaml`); 
+- package hash (this can be found in `packages.json` under the `packages` folder); 
+- [Optional] NFT image URL (for instance on IPFS, supported domains are listed in the window). In order to push an image on IPFS, there are two options: 
 
 - Use this [script](https://github.com/dvilelaf/tsunami/blob/v0.9.0/scripts/ipfs_pin.py). 
    Place the image in a folder called `mints` in `.jpg` format. 
