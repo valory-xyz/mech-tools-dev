@@ -17,7 +17,6 @@ There are three available payment models:
 - **Nevermined subscription**: A dynamic pricing model that enables flexible pricing and access to multiple services through a single subscription.
 
 Detailed instructions for creating tools, testing them locally, deploying Mech agents, and receiving payments are provided below.
-This guide contains guidelines for contributing to the development of the Mech Marketplace and offer services.
  
 ## 1. Creating and publishing a tool
 
@@ -212,91 +211,6 @@ After this the tool can be deployed to be used by a [Mech](#2-running-a-mech-loc
 ## 2. Running a Mech locally
 
 In order to deploy a Mech agent, register it on the Mech Marketplace and run it locally in order to test your tools, you can use the [quickstart](https://github.com/valory-xyz/quickstart/blob/main/README.md).
-
-<!-- Alternatively, you can follow the instructions below.
-
-### 2.1 Creating a Mech service
-
-To create the service, go to the [Olas Registry](https://registry.olas.network/gnosis/services) webpage. 
-
-**1.** Select the appropriate network and connect your wallet.
-
-**2.** Click the **"Mint"** button to begin service creation.
-
-**3.** Fill in the service creation form as follows:
-
-- Click **"Prefill address"** to automatically populate the **owner address** field.  
-  Ensure this address has sufficient funds for deploying the service.
-
-- For the **metadata hash**, click **"Generate Hash & File"**.  
-  You should use the hash found in the `packages/packages.json` file of the [mech-predict repository](https://github.com/valory-xyz/mech-tools-dev/), under the key starting with `service/valory/mech/`.
-
-- Select the appropriate prefix and paste the remaining part of the key into the field.  
-  For example, if the full key is `service/valory/mech/0.1.0`, then the version is `0.1.0`.
-
-- For the **Agent ID**, follow the instructions provided in the interface. (You can use Agent ID = `9` for testing purposes.)
-
-- Set **Number of Slots** to the number of agents the service will use (we suggest `1` for testing).
-
-- For **Agent bond cost**, enter a small value such as `1000000000000000` GörliWei (= 0.001 GörliETH).
-
-- For **Threshold** to `1` for testing.
-
-Once all fields are filled, click **"Submit"**.
-
-**4.** Click the **"Services"** tab. Your newly created service will appear as the most recent entry. Click **"View"** to inspect it.
-
-**5.** Complete the following three steps in order:
-
-- **Step 1**: Click **"Activate Registration"**.
-
-- **Step 2**: In the **"Agent Instance Addresses"** field, enter one address per agent (these must be distinct from the owner address), then click **"Register Agents"**.
-
-- **Step 3**: Choose a **service multisig** and click **"Submit"**.
-
-**6.** Your service is now deployed. 
-
-You will see the address of the associated safe (multisig) contract — keep this address, as it is required for running the Mech.
-
-### 2.2 Registering the service on the Mech Marketplace
-
-In order to register your service on the Mech Marketplace, follow the instructions below.
-
-**1.** Find [here](https://github.com/valory-xyz/ai-registry-mech/blob/v0.4.0/docs/configuration.json) the address of MechMarketPlaceProxy for the chosen network.
-
-**2.** Using the scan of the chosen network, trigger the function `create` of this contract with the following inputs (in order):
-
-- The service id.
-- The Mech Factory address for the selected network and payment model. To find the correct address, refer to the [configuration file](https://github.com/valory-xyz/ai-registry-mech/blob/v0.4.0/docs/configuration.json). Search for the address that matches the chosen payment model:
-
-    - For Native, look for the MechFactoryFixedPriceNative address.
-
-    - For Token: MechFactoryFixedPriceToken address.
-
-    - For Nevermined, find MechFactoryNvmSubscriptionNative.
-
-- The maximum price of the Mech (also called maxDeliveryRate), converted to Wei. In order to do this, first multiply 
-the price in xDAI by 10^18. For instance, for a price of 1 xDAI, this 
-is equal to 10^18. Then Use [ABI Hashex Encoder](https://abi.hashex.org/). Select uint256 as the type and enter the obtained value (for 1 xDAI this is 1000000000000000000 in wei). The tool will generate the encoded result, which is the following in the example: 0000000000000000000000000000000000000000000000000de0b6b3a7640000. Finally add 0x at the beginning of the sequence to obtain 0x0000000000000000000000000000000000000000000000000de0b6b3a7640000 in the example. This is the sequence that should be entered. 
-
-
-:warning: You must use the same EOA as the one used to deploy the service.
-
-### 2.3 Running the Mech service
-
-In order to run the Mech service that you created, use this repository. The steps are the same as in this [README.md](https://github.com/valory-xyz/mech-predict/blob/main/README.md#running-the-old-base-mech) (section 'Running the old base Mech').
-
-## 3. How to accrue the payments
-
-In order to accrue the payments of your Mech, find [here](https://github.com/valory-xyz/ai-registry-mech/blob/v0.4.0/docs/configuration.json) the BalanceTracker contract which corresponds to the payment model of your Mech. The key is the following for each of the three payment models: 
-
-- Native: BalanceTrackerFixedPriceNative
-
-- Token: BalanceTrackerFixedPriceToken
-
-- Nevermined: BalanceTrackerNvmSubscriptionNative
-
-Enter its address in the scan of the chosen network. Click on "Contract" and then "Write Contract" and trigger the function processPaymentByMultisig. Enter the address of your Mech and click on "Write". This will transfer the funds stored in the Mech Marketplace to the address of your Mech contract.  -->
 
 ## Appendix : What is the Mech Marketplace ?
 
