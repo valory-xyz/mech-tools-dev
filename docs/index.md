@@ -179,9 +179,16 @@ At this point you will be prompted to choose "dev" or "third-part". Choose "dev"
 autonomy push-all
 ```
 
-**3.** Mint the tool [here](https://registry.olas.network/ethereum/components/mint) as a component on the Olas Registry; 
-For this you need an address (EOA) and the hash of the meta-data file. 
-In order to generate this hash, click on “Generate Hash & File” and provide the following information: 
+After this the tool can be deployed to be used by a [Mech](#2-running-a-mech-locally). 
+
+
+## 2. Running a Mech locally
+
+In order to deploy a Mech agent, register it on the Mech Marketplace and run it locally in order to test your tools, you can use the [quickstart](https://github.com/valory-xyz/quickstart/blob/main/README.md).
+
+## 3. Minting the tool
+
+Once a definitive version of the tool is ready, in order to receive dev rewards, you can mint the tool as a component on the Olas Registry. For this, go to the [Olas Registry](https://registry.olas.network/ethereum/components/mint). You need a funded address (EOA) to enter in the field "Owner address". In order to create the hash of the meta-data file, click on “Generate Hash & File” and provide the following information: 
 
 - name (of the tool); 
 - description (of the tool); 
@@ -203,12 +210,7 @@ poetry add mech-client &&\
 mechx push-to-ipfs ./<file_name>
 ```
 
-After this the tool can be deployed to be used by a [Mech](#2-running-a-mech-locally). 
-
-
-## 2. Running a Mech locally
-
-In order to deploy a Mech agent, register it on the Mech Marketplace and run it locally in order to test your tools, you can use the [quickstart](https://github.com/valory-xyz/quickstart/blob/main/README.md).
+You will see the hash in the logs. 
 
 ## Appendix : What is the Mech Marketplace ?
 
