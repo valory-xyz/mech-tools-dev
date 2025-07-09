@@ -1,4 +1,3 @@
-import os
 import yaml
 import json
 import importlib.util
@@ -14,6 +13,7 @@ INIT_PY = "__init__.py"
 COMPONENT_YAML = "component.yaml"
 ALLOWED_TOOLS = "ALLOWED_TOOLS"
 AVAILABLE_TOOLS = "AVAILABLE_TOOLS"
+KEYS = [ALLOWED_TOOLS, AVAILABLE_TOOLS]
 METADATA_TEMPLATE = {
     "name": "Autonolas Mech III",
     "description": "The mech executes AI tasks requested on-chain and delivers the results to the requester.",
@@ -53,31 +53,22 @@ OUTPUT_SCHEMA = {
 
 
 def find_customs_folders() -> List[str]:
-    matched_folders = []
-    for dirpath, dirnames, _ in os.walk(ROOT_DIR):
-        for dirname in dirnames:
-            if CUSTOMS in dirname:
-                matched_folders.append(Path(dirpath) / dirname)
-    return matched_folders
+    return [p for p in Path(ROOT_DIR).rglob("*") if p.is_dir() and CUSTOMS in p.name]
 
 
 def get_immediate_subfolders(folder_path) -> List[str]:
-    subfolders = []
-    for item in os.listdir(folder_path):
-        full_path = Path(folder_path) / item
-        if Path(full_path).is_dir():
-            subfolders.append(full_path)
-    return subfolders
+    folder = Path(folder_path)
+    return [item for item in folder.iterdir() if item.is_dir()]
 
 
 def read_files_in_folder(folder_path) -> Dict[str, str]:
     contents = {}
+    folder = Path(folder_path)
     try:
-        for filename in os.listdir(folder_path):
-            file_path = Path(folder_path) / filename
-            if Path(file_path).is_file():
+        for file_path in folder.iterdir():
+            if file_path.is_file():
                 with open(file_path, "r", encoding="utf-8") as f:
-                    contents[filename] = f.read()
+                    contents[file_path.name] = f.read()
     except Exception as e:
         print(f"Error reading files in {folder_path}: {e}")
     return contents
@@ -116,8 +107,7 @@ def generate_tools_data() -> List[Dict[str, Any]]:
                     file = str(Path(sub) / fname)
                     try:
                         mod = import_module_from_path(fname, file)
-                        keys = [ALLOWED_TOOLS, AVAILABLE_TOOLS]
-                        for k in keys:
+                        for k in KEYS:
                             tools = getattr(mod, k, None)
                             if isinstance(tools, list):
                                 tool_entry["allowed_tools"] = tools
