@@ -13,7 +13,7 @@ INIT_PY = "__init__.py"
 COMPONENT_YAML = "component.yaml"
 ALLOWED_TOOLS = "ALLOWED_TOOLS"
 AVAILABLE_TOOLS = "AVAILABLE_TOOLS"
-KEYS = [ALLOWED_TOOLS, AVAILABLE_TOOLS]
+TOOLS_IDENTIFIERS = frozenset([ALLOWED_TOOLS, AVAILABLE_TOOLS])
 METADATA_TEMPLATE = {
     "name": "Autonolas Mech III",
     "description": "The mech executes AI tasks requested on-chain and delivers the results to the requester.",
@@ -107,7 +107,7 @@ def generate_tools_data() -> List[Dict[str, Any]]:
                     file = str(Path(sub) / fname)
                     try:
                         mod = import_module_from_path(fname, file)
-                        for k in KEYS:
+                        for k in TOOLS_IDENTIFIERS:
                             tools = getattr(mod, k, None)
                             if isinstance(tools, list):
                                 tool_entry["allowed_tools"] = tools
