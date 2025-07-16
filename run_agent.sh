@@ -26,9 +26,12 @@ autonomy packages lock
 # Fetch the agent
 autonomy fetch --local --agent valory/mech --alias agent
 
-# Copy and add the keys, env and issue certificates
+# Replace params with env vars
+source .env
+python scripts/aea-config-replace.py
+
+# Copy and add the keys and issue certificates
 cd agent
-cp $PWD/../.agentenv .
 cp $PWD/../ethereum_private_key.txt .
 autonomy add-key ethereum ethereum_private_key.txt
 autonomy issue-certificates

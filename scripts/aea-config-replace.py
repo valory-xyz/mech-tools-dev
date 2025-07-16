@@ -28,30 +28,27 @@ import yaml
 from dotenv import load_dotenv
 
 
-AGENT_NAME = "impact_evaluator"
+AGENT_NAME = "agent"
 
 PATH_TO_VAR = {
     # Ledgers
     "config/ledger_apis/ethereum/address": "ETHEREUM_LEDGER_RPC_0",
     "config/ledger_apis/ethereum/chain_id": "ETHEREUM_LEDGER_CHAIN_ID",
-    "config/ledger_apis/gnosis/address": "GNOSIS_LEDGER_RPC_0",
-
+    "config/ledger_apis/gnosis/address": "GNOSIS_RPC_0",
     # Agent
     "models/params/args/setup/all_participants": "ALL_PARTICIPANTS",
     "models/params/args/setup/safe_contract_address": "SAFE_CONTRACT_ADDRESS",
     "models/params/args/on_chain_service_id": "ON_CHAIN_SERVICE_ID",
     "models/params/args/num_agents": "NUM_AGENTS",
     "models/params/args/reset_pause_duration": "RESET_PAUSE_DURATION",
-
     # Tools
-    "models/params/args/setup/tools_to_package_hash": "TOOLS_TO_PACKAGE_HASH",
-    "models/params/args/setup/api_keys": "API_KEYS",
-
+    "models/params/args/tools_to_package_hash": "TOOLS_TO_PACKAGE_HASH",
+    "models/params/args/api_keys": "API_KEYS",
     # Mech
-    "models/params/args/setup/mech_to_config": "MECH_TO_CONFIG",
-    "models/params/args/setup/mech_marketplace_address": "MECH_MARKETPLACE_ADDRESS",
-    "models/params/args/setup/checkpoint_address": "CHECKPOINT_ADDRESS",
-    "models/params/args/setup/agent_registry_address": "AGENT_REGISTRY_ADDRESS",
+    "models/params/args/mech_to_config": "MECH_TO_CONFIG",
+    "models/params/args/mech_marketplace_address": "MECH_MARKETPLACE_ADDRESS",
+    "models/params/args/hash_checkpoint_address": "CHECKPOINT_ADDRESS",
+    "models/params/args/agent_registry_address": "AGENT_REGISTRY_ADDRESS",
 }
 
 CONFIG_REGEX = r"\${.*?:(.*)}"
@@ -70,6 +67,9 @@ def find_and_replace(config, path, new_value):
             section_index = i
         except KeyError:
             continue
+
+    if section_index is None:
+        raise KeyError(f"Path {path} not found in the config.")
 
     # To persist the changes in the config variable,
     # access iterating the path parts but the last part
@@ -102,11 +102,7 @@ def main() -> None:
     # Search and replace all the secrets
     for path, var in PATH_TO_VAR.items():
         try:
-            config = find_and_replace(
-                config,
-                path.split("/"),
-                os.getenv(var)
-            )
+            config = find_and_replace(config, path.split("/"), os.getenv(var))
         except Exception as e:
             print(f"Exception while replacing {path}:\n{e}")
             raise ValueError from e

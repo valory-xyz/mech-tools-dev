@@ -153,6 +153,8 @@ models:
       round_timeout_seconds: ${float:30.0}
       reset_period_count: ${int:1000}
       on_chain_service_id: ${int:1}
+      reset_pause_duration: ${int:10}
+      tools_to_package_hash: ${dict:{}}
       mech_staking_instance_address: ${str:0x0000000000000000000000000000000000000000}
       mech_marketplace_address: ${str:0x0000000000000000000000000000000000000000}
       agent_registry_address: ${str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
