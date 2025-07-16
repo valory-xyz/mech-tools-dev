@@ -6,8 +6,8 @@ description: A dummy mech tool.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: bafybeigaez6pqhtv7kbhtkbnwsid2llsmmvsyqxhxzkebdu27liklxelga
-  dummy_tool.py: bafybeiad34vrhww3ankvknx2nmdr7l7rvdyrss7mdqq75lmh3vujmkf22u
+  __init__.py: bafybeibjxc67rw3olmd3pdai3jqihxaapaewfgdfatzvm4pmxyh3dr7ywu
+  echo.py: bafybeibi3aqbj2n3emkjtytbjjcqn3lrpr3izpl5pmpxx4oc7zewlftiaq
 fingerprint_ignore_patterns: []
 entry_point: echo.py
 callable: run
