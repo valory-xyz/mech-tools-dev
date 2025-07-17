@@ -28,7 +28,7 @@ autonomy fetch --local --agent valory/mech --alias agent
 
 # Replace params with env vars
 source .env
-python scripts/aea-config-replace.py
+python utils/aea-config-replace.py
 
 # Copy and add the keys and issue certificates
 cd agent
