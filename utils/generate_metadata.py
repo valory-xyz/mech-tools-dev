@@ -18,6 +18,8 @@
 #
 # ------------------------------------------------------------------------------
 
+"""Generate metadata for the tools in customs folders."""
+
 
 import importlib.util
 import json
@@ -75,15 +77,18 @@ OUTPUT_SCHEMA = {
 
 
 def find_customs_folders() -> List[str]:
-    return [p for p in Path(ROOT_DIR).rglob("*") if p.is_dir() and CUSTOMS in p.name]
+    """find_customs_folders"""
+    return [p for p in Path(ROOT_DIR).rglob("*") if p.is_dir() and CUSTOMS in p.name]  # type: ignore
 
 
-def get_immediate_subfolders(folder_path) -> List[str]:
+def get_immediate_subfolders(folder_path: str) -> List[str]:  # type: ignore
+    """get_immediate_subfolders"""
     folder = Path(folder_path)
-    return [item for item in folder.iterdir() if item.is_dir()]
+    return [item for item in folder.iterdir() if item.is_dir()]  # type: ignore
 
 
-def read_files_in_folder(folder_path) -> Dict[str, str]:
+def read_files_in_folder(folder_path: str) -> Dict[str, str]:
+    """read_files_in_folder"""
     contents = {}
     folder = Path(folder_path)
     try:
@@ -91,22 +96,24 @@ def read_files_in_folder(folder_path) -> Dict[str, str]:
             if file_path.is_file():
                 with open(file_path, "r", encoding="utf-8") as f:
                     contents[file_path.name] = f.read()
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         print(f"Error reading files in {folder_path}: {e}")
     return contents
 
 
 def import_module_from_path(module_name: str, file_path: str) -> ModuleType:
+    """Import a module from a given file path."""
     spec = importlib.util.spec_from_file_location(module_name, file_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    module = importlib.util.module_from_spec(spec)  # type: ignore
+    spec.loader.exec_module(module)  # type: ignore
     return module
 
 
 def generate_tools_data() -> List[Dict[str, Any]]:
+    """Generate tools data from customs folders."""
     tools_data: List[Dict[str, Any]] = []
     matches = find_customs_folders()
-    for folder in matches:
+    for folder in matches:  # pylint: disable=too-many-nested-blocks
         print(f"\n Matched folder: {folder}")
         subfolders = get_immediate_subfolders(folder)
         for sub in subfolders:
@@ -122,7 +129,7 @@ def generate_tools_data() -> List[Dict[str, Any]]:
                         tool_entry["author"] = data.get("author")
                         tool_entry["tool_name"] = data.get("name")
                         tool_entry["description"] = data.get("description")
-                    except Exception as e:
+                    except Exception as e:  # pylint: disable=broad-except
                         print(f"Failed to parse YAML in {sub}: {e}")
                         continue
                 else:
@@ -134,7 +141,7 @@ def generate_tools_data() -> List[Dict[str, Any]]:
                             if isinstance(tools, list):
                                 tool_entry["allowed_tools"] = tools
                                 break
-                    except Exception as e:
+                    except Exception as e:  # pylint: disable=broad-except
                         print(f"Failed to parse PY from {file}: {e}")
                         continue
 
@@ -144,7 +151,8 @@ def generate_tools_data() -> List[Dict[str, Any]]:
     return tools_data
 
 
-def build_tools_metadata(tools_data: List[Dict[str, Any]]):
+def build_tools_metadata(tools_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Build metadata for the tools."""
     result = METADATA_TEMPLATE
 
     for entry in tools_data:
@@ -153,14 +161,14 @@ def build_tools_metadata(tools_data: List[Dict[str, Any]]):
         allowed_tools = entry.get("allowed_tools", [])
         if not allowed_tools:
             print(
-                f"Warning: '{tool_name}' by '{author}' has no allowed tools/invalid format!"
+                f"Warning: {tool_name!r} by {author!r} has no allowed tools/invalid format!"
             )
 
         for tool in entry.get("allowed_tools", []):
             if tool not in result["tools"]:
-                result["tools"].append(tool)
+                result["tools"].append(tool)  # type: ignore
 
-            result["toolMetadata"][tool] = {
+            result["toolMetadata"][tool] = {  # type: ignore
                 "name": entry.get("tool_name", ""),
                 "description": entry.get("description", ""),
                 "input": INPUT_SCHEMA,
@@ -171,11 +179,12 @@ def build_tools_metadata(tools_data: List[Dict[str, Any]]):
 
 
 def main() -> None:
+    """Main function to generate metadata."""
     tools_data = generate_tools_data()
     metadata = build_tools_metadata(tools_data)
 
     # Dump the result to the JSON file
-    with open(METADATA_FILE_PATH, "w") as f:
+    with open(METADATA_FILE_PATH, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=4)
 
     print(f"Metadata has been stored to {METADATA_FILE_PATH}")

@@ -20,12 +20,14 @@
 
 
 """Updates fetched agent with correct config"""
+
 import os
 import re
 from pathlib import Path
+from typing import Any
 
 import yaml
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # type: ignore
 
 
 AGENT_NAME = "agent"
@@ -54,7 +56,7 @@ PATH_TO_VAR = {
 CONFIG_REGEX = r"\${.*?:(.*)}"
 
 
-def find_and_replace(config, path, new_value):
+def find_and_replace(config: list, path: list, new_value: Any) -> list[Any]:
     """Find and replace a variable"""
 
     # Find the correct section where this variable fits
@@ -82,7 +84,7 @@ def find_and_replace(config, path, new_value):
 
     # Extract the old variable value
     match = re.match(CONFIG_REGEX, old_str_value)
-    old_var_value = match.groups()[0]
+    old_var_value = match.groups()[0]  # type: ignore
 
     # Replace the old variable with the secret value in the complete string
     new_str_value = old_str_value.replace(old_var_value, new_value)
