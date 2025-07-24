@@ -44,4 +44,4 @@ tendermint node --proxy_app=tcp://127.0.0.1:26658 --rpc.laddr=tcp://127.0.0.1:26
 tm_subprocess_pid=$!
 
 # Run the agent
-aea -s run --env .agentenv
+aea -s run
