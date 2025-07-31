@@ -129,6 +129,7 @@ def generate_tools_data() -> List[Dict[str, Any]]:
                         tool_entry["author"] = data.get("author")
                         tool_entry["tool_name"] = data.get("name")
                         tool_entry["description"] = data.get("description")
+                        tool_entry["allowed_tools"] = [data.get("name")]
                     except Exception as e:  # pylint: disable=broad-except
                         print(f"Failed to parse YAML in {sub}: {e}")
                         continue
