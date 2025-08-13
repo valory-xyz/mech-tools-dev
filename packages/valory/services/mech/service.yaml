@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeif7ia4jdlazy6745ke2k2x5yoqlwsgwr6sbztbgqtwvs3ndm2p7ba
 fingerprint_ignore_patterns: []
-agent: valory/mech:0.1.0:bafybeifxr23grlqgbf5jhnbynz2dyyguzhhet7rt76jsv7b5rkfchybtda
+agent: valory/mech:0.1.0:bafybeig4vwpljgvrwaod5t6jrrs2o7twdidgt3t5tnmuniabfm5h53soiq
 number_of_agents: 4
 deployment:
   agent:
@@ -54,17 +54,17 @@ type: skill
         slash_threshold_amount: ${SLASH_THRESHOLD_AMOUNT:int:10000000000000000}
         light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
         serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
-        agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
-        agent_id: ${AGENT_ID:int:3}
+        complementary_service_metadata_address: ${COMPLEMENTARY_SERVICE_METADATA_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
         metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
         profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
         hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
-        mech_to_subscription: ${MECH_TO_SUBSCRIPTION:dict:{}}
+        mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
         minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
         mech_staking_instance_address: ${MECH_STAKING_INSTANCE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         service_owner_share: ${SERVICE_SHARE:float:0}
+        default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 1:
   models:
     params:
@@ -81,7 +81,7 @@ type: skill
         share_tm_config_on_startup: ${USE_ACN:bool:false}
         tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
         tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
-        tendermint_p2p_url: ${TM_P2P_ENDPOINT_NODE_0:str:node0:26656}
+        tendermint_p2p_url: ${TM_P2P_ENDPOINT_NODE_1:str:node0:26656}
         termination_sleep: ${TERMINATION_SLEEP:int:900}
         use_termination: ${USE_TERMINATION:bool:false}
         reset_period_count: ${RESET_PERIOD_COUNT:int:1000}
@@ -91,19 +91,19 @@ type: skill
         termination_from_block: ${TERMINATION_FROM_BLOCK:int:0}
         light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
         serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
-        agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
-        agent_id: ${AGENT_ID:int:3}
+        complementary_service_metadata_address: ${COMPLEMENTARY_SERVICE_METADATA_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
         metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
         profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
         hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
         service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
-        mech_to_subscription: ${MECH_TO_SUBSCRIPTION:dict:{}}
+        mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
         mech_marketplace_address: ${MECH_MARKETPLACE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
         mech_staking_instance_address: ${MECH_STAKING_INSTANCE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         service_owner_share: ${SERVICE_SHARE:float:0}
+        default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 2:
   models:
     params:
@@ -121,7 +121,7 @@ type: skill
         tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
         termination_from_block: ${TERMINATION_FROM_BLOCK:int:0}
         tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
-        tendermint_p2p_url: ${TM_P2P_ENDPOINT_NODE_0:str:node0:26656}
+        tendermint_p2p_url: ${TM_P2P_ENDPOINT_NODE_2:str:node0:26656}
         termination_sleep: ${TERMINATION_SLEEP:int:900}
         use_termination: ${USE_TERMINATION:bool:false}
         reset_period_count: ${RESET_PERIOD_COUNT:int:1000}
@@ -132,17 +132,17 @@ type: skill
         light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
         serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
         service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
-        agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
-        agent_id: ${AGENT_ID:int:3}
+        complementary_service_metadata_address: ${COMPLEMENTARY_SERVICE_METADATA_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
         metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
         profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
         hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
-        mech_to_subscription: ${MECH_TO_SUBSCRIPTION:dict:{}}
+        mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
         minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
         mech_staking_instance_address: ${MECH_STAKING_INSTANCE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         service_owner_share: ${SERVICE_SHARE:float:0}
+        default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 3:
   models:
     params:
@@ -160,7 +160,7 @@ type: skill
         tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
         tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
         termination_from_block: ${TERMINATION_FROM_BLOCK:int:0}
-        tendermint_p2p_url: ${TM_P2P_ENDPOINT_NODE_0:str:node0:26656}
+        tendermint_p2p_url: ${TM_P2P_ENDPOINT_NODE_3:str:node0:26656}
         termination_sleep: ${TERMINATION_SLEEP:int:900}
         use_termination: ${USE_TERMINATION:bool:false}
         reset_period_count: ${RESET_PERIOD_COUNT:int:1000}
@@ -169,19 +169,19 @@ type: skill
         slash_threshold_amount: ${SLASH_THRESHOLD_AMOUNT:int:10000000000000000}
         light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
         serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
-        agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
-        agent_id: ${AGENT_ID:int:3}
+        complementary_service_metadata_address: ${COMPLEMENTARY_SERVICE_METADATA_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
         mech_marketplace_address: ${MECH_MARKETPLACE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
         profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
         hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
         service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
-        mech_to_subscription: ${MECH_TO_SUBSCRIPTION:dict:{}}
+        mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
         minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
         mech_staking_instance_address: ${MECH_STAKING_INSTANCE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         service_owner_share: ${SERVICE_SHARE:float:0}
+        default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 ---
 public_id: valory/task_execution:0.1.0
 type: skill
@@ -199,6 +199,7 @@ type: skill
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+        default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 1:
   models:
     params:
@@ -213,6 +214,7 @@ type: skill
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+        default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 2:
   models:
     params:
@@ -227,6 +229,7 @@ type: skill
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+        default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 3:
   models:
     params:
@@ -241,49 +244,62 @@ type: skill
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+        default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 ---
 public_id: valory/ledger:0.19.0
 type: connection
 0:
   config:
     ledger_apis:
-      ethereum:
-        address: ${ETHEREUM_LEDGER_RPC_0:str:http://host.docker.internal:8545}
-        chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:1}
-        poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
-        default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
+      base:
+        address: ${BASE_LEDGER_RPC_0:str:http://host.docker.internal:8545}
+        chain_id: ${BASE_LEDGER_CHAIN_ID:int:8453}
+        poa_chain: ${BASE_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${BASE_LEDGER_PRICING:str:eip1559}
       gnosis:
-        address: ${GNOSIS_RPC_0:str:http://host.docker.internal:8545}
+        address: ${GNOSIS_LEDGER_RPC_0:str:http://host.docker.internal:8545}
+        chain_id: ${GNOSIS_LEDGER_CHAIN_ID:int:100}
+        poa_chain: ${GNOSIS_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${GNOSIS_LEDGER_PRICING:str:eip1559}
 1:
   config:
     ledger_apis:
-      ethereum:
-        address: ${ETHEREUM_LEDGER_RPC_1:str:http://host.docker.internal:8545}
-        chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:1}
-        poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
-        default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
+      base:
+        address: ${BASE_LEDGER_RPC_1:str:http://host.docker.internal:8545}
+        chain_id: ${BASE_LEDGER_CHAIN_ID:int:8453}
+        poa_chain: ${BASE_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${BASE_LEDGER_PRICING:str:eip1559}
       gnosis:
-        address: ${GNOSIS_RPC_1:str:http://host.docker.internal:8545}
+        address: ${GNOSIS_LEDGER_RPC_1:str:http://host.docker.internal:8545}
+        chain_id: ${GNOSIS_LEDGER_CHAIN_ID:int:100}
+        poa_chain: ${GNOSIS_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${GNOSIS_LEDGER_PRICING:str:eip1559}
 2:
   config:
     ledger_apis:
-      ethereum:
-        address: ${ETHEREUM_LEDGER_RPC_2:str:http://host.docker.internal:8545}
-        chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:1}
-        poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
-        default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
+      base:
+        address: ${BASE_LEDGER_RPC_2:str:http://host.docker.internal:8545}
+        chain_id: ${BASE_LEDGER_CHAIN_ID:int:8453}
+        poa_chain: ${BASE_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${BASE_LEDGER_PRICING:str:eip1559}
       gnosis:
-        address: ${GNOSIS_RPC_2:str:http://host.docker.internal:8545}
+        address: ${GNOSIS_LEDGER_RPC_2:str:http://host.docker.internal:8545}
+        chain_id: ${GNOSIS_LEDGER_CHAIN_ID:int:100}
+        poa_chain: ${GNOSIS_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${GNOSIS_LEDGER_PRICING:str:eip1559}
 3:
   config:
     ledger_apis:
-      ethereum:
-        address: ${ETHEREUM_LEDGER_RPC_3:str:http://host.docker.internal:8545}
-        chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:1}
-        poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
-        default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
+      base:
+        address: ${BASE_LEDGER_RPC_3:str:http://host.docker.internal:8545}
+        chain_id: ${BASE_LEDGER_CHAIN_ID:int:8453}
+        poa_chain: ${BASE_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${BASE_LEDGER_PRICING:str:eip1559}
       gnosis:
-        address: ${GNOSIS_RPC_3:str:http://host.docker.internal:8545}
+        address: ${GNOSIS_LEDGER_RPC_3:str:http://host.docker.internal:8545}
+        chain_id: ${GNOSIS_LEDGER_CHAIN_ID:int:100}
+        poa_chain: ${GNOSIS_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${GNOSIS_LEDGER_PRICING:str:eip1559}
 ---
 public_id: valory/p2p_libp2p_client:0.1.0
 type: connection
