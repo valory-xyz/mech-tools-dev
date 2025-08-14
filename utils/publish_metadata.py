@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2025 Valory AG
+#   Copyright 2025 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-"""Push metadata to IPFS."""
-# pylint: disable=import-error
+"""The script allows the user to publish the metadata of the tools on ipfs"""
 import argparse
 import sys
 
@@ -27,7 +24,8 @@ from aea.helpers.cid import to_v1
 from aea_cli_ipfs.ipfs_utils import IPFSTool
 from multibase import multibase
 from multicodec import multicodec
-from utils.generate_metadata import METADATA_FILE_PATH  # type: ignore[import]
+
+from scripts.generate_metadata import METADATA_FILE_PATH
 
 
 PREFIX = "f01701220"
@@ -37,7 +35,7 @@ DEFAULT_IPFS_NODE = "/dns/registry.autonolas.tech/tcp/443/https"
 
 
 def push_metadata_to_ipfs() -> None:
-    """Push metadata to IPFS."""
+    """Pushes the metadata to ipfs"""
     parser = argparse.ArgumentParser(description="Pushes metadata.json to ipfs")
     parser.add_argument("--ipfs-node", type=str, default=DEFAULT_IPFS_NODE)
     args = parser.parse_args()
@@ -46,12 +44,12 @@ def push_metadata_to_ipfs() -> None:
         response = IPFSTool(addr=addr).client.add(
             METADATA_FILE_PATH, pin=True, recursive=True, wrap_with_directory=False
         )
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:
         print(f"Error pushing metadata to ipfs: {e}")
         sys.exit(1)
 
     if RESPONSE_KEY not in response:
-        print(f"Key {RESPONSE_KEY!r} not found in ipfs response")
+        print(f"Key '{RESPONSE_KEY!r}' not found in ipfs response")
         sys.exit(1)
 
     cid_bytes = multibase.decode(to_v1(response[RESPONSE_KEY]))
@@ -62,7 +60,7 @@ def push_metadata_to_ipfs() -> None:
 
 
 def main() -> None:
-    """Main function to execute the script."""
+    """Run the publish_metadata script."""
     push_metadata_to_ipfs()
 
 
