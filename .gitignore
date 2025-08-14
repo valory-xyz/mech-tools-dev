@@ -31,3 +31,5 @@ log
 .benchmark-cache
 mech/
 mech_service/
+
+.operate/
