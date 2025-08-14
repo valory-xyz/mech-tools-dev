@@ -83,7 +83,7 @@
         "TOOLS_TO_PACKAGE_HASH": {
             "name": "Tools to package mapping",
             "description": "Tools to package hash tracks services for each tool packages.",
-            "value": "{\"dummy_tool_name\":\"bafybei\"}",
+            "value": "{\"echo\":\"bafybeidpvf2grbylmmehj25nwh3v2tkeryu43nb7ufreiaw6pteqadkogi\"}",
             "provision_type": "fixed"
         },
         "ETHEREUM_LEDGER_RPC_0": {
@@ -138,6 +138,12 @@
             "name": "",
             "description": "",
             "value": "0x0598081D48FB80B0A7E52FAD2905AE9beCd6fC69",
+            "provision_type": "fixed"
+        },
+        "RESET_PAUSE_DURATION": {
+            "name": "",
+            "description": "",
+            "value": 10,
             "provision_type": "fixed"
         }
     }

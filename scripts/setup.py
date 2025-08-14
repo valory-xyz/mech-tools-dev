@@ -19,7 +19,15 @@ def read_and_update_env(data: dict) -> None:
     for line in lines:
         if "=" in line:
             key = line.split("=")[0].strip()
-            value = data["env_variables"].get(key, {}).get("value", "")
+            if key == "SAFE_CONTRACT_ADDRESS":
+                value = data["chain_configs"]["gnosis"]["chain_data"]["multisig"]
+
+            elif key == "ALL_PARTICIPANTS":
+                value = json.dumps(data["agent_addresses"])
+
+            else:
+                value = data["env_variables"].get(key, {}).get("value", "")
+
             filled_lines.append(f"{key}={value!r}\n")
         else:
             filled_lines.append(line)
