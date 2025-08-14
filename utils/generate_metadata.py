@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2025 Valory AG
+#   Copyright 2025 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,12 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-"""Generate metadata for the tools in customs folders."""
-
-
+"""The script allows the user to generate the metadata of the tools"""
 import importlib.util
 import json
+import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Dict, List
@@ -76,19 +73,19 @@ OUTPUT_SCHEMA = {
 }
 
 
-def find_customs_folders() -> List[str]:
-    """find_customs_folders"""
-    return [p for p in Path(ROOT_DIR).rglob("*") if p.is_dir() and CUSTOMS in p.name]  # type: ignore
+def find_customs_folders() -> List[Path]:
+    """Finds all the customs folders inside the packages dir"""
+    return [p for p in Path(ROOT_DIR).rglob("*") if p.is_dir() and CUSTOMS in p.name]
 
 
-def get_immediate_subfolders(folder_path: str) -> List[str]:  # type: ignore
-    """get_immediate_subfolders"""
+def get_immediate_subfolders(folder_path: Path) -> List[Path]:
+    """Finds all the subfolders inside the dir"""
     folder = Path(folder_path)
-    return [item for item in folder.iterdir() if item.is_dir()]  # type: ignore
+    return [item for item in folder.iterdir() if item.is_dir()]
 
 
-def read_files_in_folder(folder_path: str) -> Dict[str, str]:
-    """read_files_in_folder"""
+def read_files_in_folder(folder_path: Path) -> Dict[str, str]:
+    """Reads contents of all the files inside the dir"""
     contents = {}
     folder = Path(folder_path)
     try:
@@ -96,24 +93,28 @@ def read_files_in_folder(folder_path: str) -> Dict[str, str]:
             if file_path.is_file():
                 with open(file_path, "r", encoding="utf-8") as f:
                     contents[file_path.name] = f.read()
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:
         print(f"Error reading files in {folder_path}: {e}")
     return contents
 
 
 def import_module_from_path(module_name: str, file_path: str) -> ModuleType:
-    """Import a module from a given file path."""
+    """Imports the py file as a module"""
     spec = importlib.util.spec_from_file_location(module_name, file_path)
-    module = importlib.util.module_from_spec(spec)  # type: ignore
-    spec.loader.exec_module(module)  # type: ignore
+    if spec is None or spec.loader is None:
+        print(f"Cannot load module '{module_name!r}' from '{file_path!r}'")
+        sys.exit(1)
+
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
     return module
 
 
 def generate_tools_data() -> List[Dict[str, Any]]:
-    """Generate tools data from customs folders."""
+    """Generates the tools data needed for the metadata.json"""
     tools_data: List[Dict[str, Any]] = []
     matches = find_customs_folders()
-    for folder in matches:  # pylint: disable=too-many-nested-blocks
+    for folder in matches:
         print(f"\n Matched folder: {folder}")
         subfolders = get_immediate_subfolders(folder)
         for sub in subfolders:
@@ -129,8 +130,7 @@ def generate_tools_data() -> List[Dict[str, Any]]:
                         tool_entry["author"] = data.get("author")
                         tool_entry["tool_name"] = data.get("name")
                         tool_entry["description"] = data.get("description")
-                        tool_entry["allowed_tools"] = [data.get("name")]
-                    except Exception as e:  # pylint: disable=broad-except
+                    except Exception as e:
                         print(f"Failed to parse YAML in {sub}: {e}")
                         continue
                 else:
@@ -142,7 +142,7 @@ def generate_tools_data() -> List[Dict[str, Any]]:
                             if isinstance(tools, list):
                                 tool_entry["allowed_tools"] = tools
                                 break
-                    except Exception as e:  # pylint: disable=broad-except
+                    except Exception as e:
                         print(f"Failed to parse PY from {file}: {e}")
                         continue
 
@@ -153,8 +153,8 @@ def generate_tools_data() -> List[Dict[str, Any]]:
 
 
 def build_tools_metadata(tools_data: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Build metadata for the tools."""
-    result = METADATA_TEMPLATE
+    """Builds the metadata.json from the tools data"""
+    result: dict[str, Any] = METADATA_TEMPLATE
 
     for entry in tools_data:
         author = entry.get("author", "")
@@ -162,14 +162,14 @@ def build_tools_metadata(tools_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         allowed_tools = entry.get("allowed_tools", [])
         if not allowed_tools:
             print(
-                f"Warning: {tool_name!r} by {author!r} has no allowed tools/invalid format!"
+                f"Warning: '{tool_name!r}' by '{author!r}' has no allowed tools/invalid format!"
             )
 
         for tool in entry.get("allowed_tools", []):
             if tool not in result["tools"]:
-                result["tools"].append(tool)  # type: ignore
+                result["tools"].append(tool)
 
-            result["toolMetadata"][tool] = {  # type: ignore
+            result["toolMetadata"][tool] = {
                 "name": entry.get("tool_name", ""),
                 "description": entry.get("description", ""),
                 "input": INPUT_SCHEMA,
@@ -180,7 +180,7 @@ def build_tools_metadata(tools_data: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def main() -> None:
-    """Main function to generate metadata."""
+    """Run the generate_metadata script."""
     tools_data = generate_tools_data()
     metadata = build_tools_metadata(tools_data)
 
