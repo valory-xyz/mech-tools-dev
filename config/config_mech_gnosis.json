@@ -68,6 +68,12 @@
             "value": "",
             "provision_type": "computed"
         },
+        "MECH_TO_MAX_DELIVERY_RATE": {
+            "name": "Mech to Max delivery rate",
+            "description": "",
+            "value": "",
+            "provision_type": "computed"
+        },
         "ON_CHAIN_SERVICE_ID": {
             "name": "On-chain service ID",
             "description": "",
@@ -79,6 +85,12 @@
             "description": "Tools to package hash tracks services for each tool packages.",
             "value": "{\"dummy_tool_name\":\"bafybei\"}",
             "provision_type": "fixed"
+        },
+        "ETHEREUM_LEDGER_RPC_0": {
+            "name": "Gnosis ledger RPC 0",
+            "description": "",
+            "value": "",
+            "provision_type": "computed"
         },
         "GNOSIS_LEDGER_RPC_0": {
             "name": "Gnosis ledger RPC 0",
