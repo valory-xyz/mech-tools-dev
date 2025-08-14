@@ -7,6 +7,8 @@ BASE_DIR = CURR_DIR.parent
 GNOSIS_TEMPLATE_CONFIG_PATH = BASE_DIR / "config" / "config_mech_gnosis.json"
 OPERATE_DIR = BASE_DIR / ".operate"
 OPERATE_CONFIG_PATH = "services/sc-*/config.json"
+AGENT_KEY = "ethereum_private_key.txt"
+SERVICE_KEY = "keys.json"
 
 
 def read_and_update_env(data: dict) -> None:
@@ -39,6 +41,37 @@ def setup_env() -> None:
     return
 
 
+def create_private_key_files(data: dict) -> None:
+    agent_key_path = BASE_DIR / AGENT_KEY
+    if agent_key_path.exists():
+        print(f"Agent key found at: {agent_key_path}. Skipping creation")
+    else:
+        agent_key_path.write_text(data["private_key"])
+
+    service_key_path = BASE_DIR / SERVICE_KEY
+    if service_key_path.exists():
+        print(f"Service key found at: {service_key_path}. Skipping creation")
+    else:
+        service_key_path.write_text(json.dumps([data], indent=2))
+
+    return
+
+
+def setup_private_keys() -> None:
+    keys_dir = OPERATE_DIR / "keys"
+    if keys_dir.is_dir():
+        key_file = next(keys_dir.glob("*"), None)
+        if key_file and key_file.is_file():
+            print(f"Key file found at: {key_file}")
+            with open(key_file, "r") as f:
+                content = f.read()
+                data = json.loads(content)
+
+        create_private_key_files(data)
+
+    return
+
+
 def setup_operate() -> None:
     operate = OperateApp()
     operate.setup()
@@ -58,6 +91,9 @@ def main() -> None:
 
     print("Setting up env...")
     setup_env()
+
+    print("Setting up private keys...")
+    setup_private_keys()
 
 
 if __name__ == "__main__":
