@@ -25,7 +25,7 @@ from aea_cli_ipfs.ipfs_utils import IPFSTool
 from multibase import multibase
 from multicodec import multicodec
 
-from scripts.generate_metadata import METADATA_FILE_PATH
+from utils.generate_metadata import METADATA_FILE_PATH
 
 
 PREFIX = "f01701220"
