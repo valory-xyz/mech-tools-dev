@@ -25,10 +25,18 @@ def read_and_update_env(data: dict) -> None:
             elif key == "ALL_PARTICIPANTS":
                 value = json.dumps(data["agent_addresses"])
 
+            elif key == "MECH_TO_MAX_DELIVERY_RATE":
+                original_value = data["env_variables"].get(key, {}).get("value", "")
+                parsed = json.loads(original_value)
+                parsed_dict = {k: int(v) for k, v in parsed.items()}
+                value = json.dumps(parsed_dict, separators=(",", ":"))
+
             else:
                 value = data["env_variables"].get(key, {}).get("value", "")
 
-            filled_lines.append(f"{key}={value!r}\n")
+            # remove vars that are not used. Creates issues during run_service
+            if value not in ("", None, {}, []):
+                filled_lines.append(f"{key}={value!r}\n")
         else:
             filled_lines.append(line)
 
