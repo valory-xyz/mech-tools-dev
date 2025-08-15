@@ -1,5 +1,6 @@
 {
     "dev": {
+        "custom/valory/echo/0.1.0": "bafybeidpvf2grbylmmehj25nwh3v2tkeryu43nb7ufreiaw6pteqadkogi",
         "agent/valory/mech/0.1.0": "bafybeig4vwpljgvrwaod5t6jrrs2o7twdidgt3t5tnmuniabfm5h53soiq",
         "service/valory/mech/0.1.0": "bafybeiftcn7r6o22rl7lymkjdvilbgyqi3up3pzcjsyughspl3qxi4pssu"
     },
