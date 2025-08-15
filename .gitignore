@@ -33,3 +33,5 @@ mech/
 mech_service/
 
 metadata.json
+
+.operate/
