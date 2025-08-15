@@ -34,9 +34,8 @@ AGENT_NAME = "agent"
 
 PATH_TO_VAR = {
     # Ledgers
-    "config/ledger_apis/ethereum/address": "ETHEREUM_LEDGER_RPC_0",
-    "config/ledger_apis/ethereum/chain_id": "ETHEREUM_LEDGER_CHAIN_ID",
-    "config/ledger_apis/gnosis/address": "GNOSIS_RPC_0",
+    "config/ledger_apis/gnosis/address": "GNOSIS_LEDGER_RPC_0",
+    "config/ledger_apis/gnosis/chain_id": "GNOSIS_LEDGER_CHAIN_ID",
     # Agent
     "models/params/args/setup/all_participants": "ALL_PARTICIPANTS",
     "models/params/args/setup/safe_contract_address": "SAFE_CONTRACT_ADDRESS",
@@ -48,9 +47,12 @@ PATH_TO_VAR = {
     "models/params/args/api_keys": "API_KEYS",
     # Mech
     "models/params/args/mech_to_config": "MECH_TO_CONFIG",
+    "models/params/args/mech_to_max_delivery_rate": "MECH_TO_MAX_DELIVERY_RATE",
     "models/params/args/mech_marketplace_address": "MECH_MARKETPLACE_ADDRESS",
     "models/params/args/hash_checkpoint_address": "CHECKPOINT_ADDRESS",
-    "models/params/args/agent_registry_address": "AGENT_REGISTRY_ADDRESS",
+    "models/params/args/complementary_service_metadata_address": "COMPLEMENTARY_SERVICE_METADATA_ADDRESS",
+    "models/params/args/metadata_hash": "METADATA_HASH",
+    "models/params/args/service_registry_address": "SERVICE_REGISTRY_ADDRESS",
 }
 
 CONFIG_REGEX = r"\${.*?:(.*)}"
