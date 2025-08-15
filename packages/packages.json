@@ -1,8 +1,8 @@
 {
     "dev": {
-        "custom/valory/echo/0.1.0": "bafybeidpvf2grbylmmehj25nwh3v2tkeryu43nb7ufreiaw6pteqadkogi",
-        "agent/valory/mech/0.1.0": "bafybeig4vwpljgvrwaod5t6jrrs2o7twdidgt3t5tnmuniabfm5h53soiq",
-        "service/valory/mech/0.1.0": "bafybeiftcn7r6o22rl7lymkjdvilbgyqi3up3pzcjsyughspl3qxi4pssu"
+        "custom/valory/echo/0.1.0": "bafybeihrxkqacmp2fgm6yg5uxgvz3dtuidlvimy4xdrxok24tbihyqpnxe",
+        "agent/valory/mech/0.1.0": "bafybeib2dds3dy3jc5pug7tfrccecdfnf2sg4zvdz2575i4zwck55azpb4",
+        "service/valory/mech/0.1.0": "bafybeigwdhecigggelm76t4bgzknpoemws2x573wfs7shpdfsjt2g65jhq"
     },
     "third_party": {
         "protocol/valory/acn_data_share/0.1.0": "bafybeih5ydonnvrwvy2ygfqgfabkr47s4yw3uqxztmwyfprulwfsoe7ipq",

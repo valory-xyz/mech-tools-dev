@@ -21,6 +21,8 @@
 
 from typing import Optional, Dict, Any, Tuple
 
+ALLOWED_TOOLS = ["echo"]
+
 
 def error_response(msg: str) -> Tuple[str, None, None, None]:
     """Return an error mech response."""

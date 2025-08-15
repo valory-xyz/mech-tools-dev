@@ -59,7 +59,7 @@
         "METADATA_HASH": {
             "name": "Metadata hash",
             "description": "The IPFS hash of the Mech metadata JSON",
-            "value": "f01701220",
+            "value": "f01701220d781cbc6a7f5d460ceb237c9c09e5ee5d4a3722bd3c62d9ff3677ad228049f90",
             "provision_type": "fixed"
         },
         "MECH_TO_CONFIG": {
@@ -83,7 +83,7 @@
         "TOOLS_TO_PACKAGE_HASH": {
             "name": "Tools to package mapping",
             "description": "Tools to package hash tracks services for each tool packages.",
-            "value": "{\"echo\":\"bafybeidpvf2grbylmmehj25nwh3v2tkeryu43nb7ufreiaw6pteqadkogi\"}",
+            "value": "{\"echo\":\"bafybeihrxkqacmp2fgm6yg5uxgvz3dtuidlvimy4xdrxok24tbihyqpnxe\"}",
             "provision_type": "fixed"
         },
         "ETHEREUM_LEDGER_RPC_0": {
