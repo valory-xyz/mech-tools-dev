@@ -1,6 +1,28 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2025 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+"""The script allows the user to setup onchain requirements for running mechs"""
+
 import json
 from pathlib import Path
+
 from operate.cli import OperateApp, run_service
+
 
 CURR_DIR = Path(__file__).resolve().parent
 BASE_DIR = CURR_DIR.parent
@@ -12,6 +34,7 @@ SERVICE_KEY = "keys.json"
 
 
 def read_and_update_env(data: dict) -> None:
+    """Reads the generated env from operate and creates the required .1env"""
     with open(".example.env", "r") as f:
         lines = f.readlines()
 
@@ -45,6 +68,7 @@ def read_and_update_env(data: dict) -> None:
 
 
 def setup_env() -> None:
+    """Setups the env"""
     matching_paths = OPERATE_DIR.glob(OPERATE_CONFIG_PATH)
     data = {}
     for file_path in matching_paths:
@@ -58,6 +82,7 @@ def setup_env() -> None:
 
 
 def create_private_key_files(data: dict) -> None:
+    """Reads the generated env from operate and creates the required keys.json and ethereum_private_key.txt. Skips if files already exists"""
     agent_key_path = BASE_DIR / AGENT_KEY
     if agent_key_path.exists():
         print(f"Agent key found at: {agent_key_path}. Skipping creation")
@@ -74,6 +99,7 @@ def create_private_key_files(data: dict) -> None:
 
 
 def setup_private_keys() -> None:
+    """Setups the private keys"""
     keys_dir = OPERATE_DIR / "keys"
     if keys_dir.is_dir():
         key_file = next(keys_dir.glob("*"), None)
@@ -89,6 +115,7 @@ def setup_private_keys() -> None:
 
 
 def setup_operate() -> None:
+    """Setups the operate"""
     operate = OperateApp()
     operate.setup()
 
@@ -101,6 +128,7 @@ def setup_operate() -> None:
 
 
 def main() -> None:
+    """Runs the script"""
     if not OPERATE_DIR.is_dir():
         print("Setting up operate...")
         setup_operate()
