@@ -62,35 +62,36 @@ def find_and_replace(config: list, path: list, new_value: Any) -> list[Any]:
     """Find and replace a variable"""
 
     # Find the correct section where this variable fits
-    section_index = None
+    matching_section_indices = []
     for i, section in enumerate(config):
         value = section
         try:
             for part in path:
                 value = value[part]
-            section_index = i
+            matching_section_indices.append(i)
         except KeyError:
             continue
 
-    if section_index is None:
+    if not matching_section_indices:
         raise KeyError(f"Path {path} not found in the config.")
 
-    # To persist the changes in the config variable,
-    # access iterating the path parts but the last part
-    sub_dic = config[section_index]
-    for part in path[:-1]:
-        sub_dic = sub_dic[part]
+    for section_index in matching_section_indices:
+        # To persist the changes in the config variable,
+        # access iterating the path parts but the last part
+        sub_dic = config[section_index]
+        for part in path[:-1]:
+            sub_dic = sub_dic[part]
 
-    # Now, get the whole string value
-    old_str_value = sub_dic[path[-1]]
+        # Now, get the whole string value
+        old_str_value = sub_dic[path[-1]]
 
-    # Extract the old variable value
-    match = re.match(CONFIG_REGEX, old_str_value)
-    old_var_value = match.groups()[0]  # type: ignore
+        # Extract the old variable value
+        match = re.match(CONFIG_REGEX, old_str_value)
+        old_var_value = match.groups()[0]  # type: ignore
 
-    # Replace the old variable with the secret value in the complete string
-    new_str_value = old_str_value.replace(old_var_value, new_value)
-    sub_dic[path[-1]] = new_str_value
+        # Replace the old variable with the secret value in the complete string
+        new_str_value = old_str_value.replace(old_var_value, new_value)
+        sub_dic[path[-1]] = new_str_value
 
     return config
 
