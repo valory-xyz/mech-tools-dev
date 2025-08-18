@@ -35,7 +35,7 @@ SERVICE_KEY = "keys.json"
 
 def read_and_update_env(data: dict) -> None:
     """Reads the generated env from operate and creates the required .1env"""
-    with open(".example.env", "r") as f:
+    with open(".example.env", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     filled_lines = []
@@ -63,7 +63,7 @@ def read_and_update_env(data: dict) -> None:
         else:
             filled_lines.append(line)
 
-    with open(".1env", "w") as f:
+    with open(".1env", "w", encoding="utf-8") as f:
         f.writelines(filled_lines)
 
 
@@ -73,12 +73,11 @@ def setup_env() -> None:
     data = {}
     for file_path in matching_paths:
         print(f"Reading from: {file_path}")
-        with open(file_path, "r") as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
             data = json.loads(content)
 
     read_and_update_env(data)
-    return
 
 
 def create_private_key_files(data: dict) -> None:
@@ -95,8 +94,6 @@ def create_private_key_files(data: dict) -> None:
     else:
         service_key_path.write_text(json.dumps([data], indent=2))
 
-    return
-
 
 def setup_private_keys() -> None:
     """Setups the private keys"""
@@ -105,13 +102,11 @@ def setup_private_keys() -> None:
         key_file = next(keys_dir.glob("*"), None)
         if key_file and key_file.is_file():
             print(f"Key file found at: {key_file}")
-            with open(key_file, "r") as f:
+            with open(key_file, "r", encoding="utf-8") as f:
                 content = f.read()
                 data = json.loads(content)
 
         create_private_key_files(data)
-
-    return
 
 
 def setup_operate() -> None:
