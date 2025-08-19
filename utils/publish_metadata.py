@@ -122,14 +122,14 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
 
     for key, expected_type in metadata_schema.items():
         if key not in metadata:
-            return (status, f"Missing key in metadata json: '{key}'")
+            return (status, f"Missing key in metadata json: {key!r}")
 
         if not isinstance(metadata[key], expected_type):
             expected = expected_type.__name__
             actual = type(metadata[key]).__name__
             return (
                 status,
-                f"Invalid type for key in metadata json. Expected '{expected}', but got '{actual}'",
+                f"Invalid type for key in metadata json. Expected {expected!r}, but got {actual!r}",
             )
 
     tools = metadata["tools"]
@@ -145,19 +145,19 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
 
     for tool in tools:
         if tool not in tools_metadata:
-            return (status, f"Missing toolsMetadata for tool: '{tool}'")
+            return (status, f"Missing toolsMetadata for tool: {tool!r}")
 
         for key, expected_type in tool_schema.items():
             data = tools_metadata[tool]
             if key not in data:
-                return (status, f"Missing key in toolsMetadata: '{key}'")
+                return (status, f"Missing key in toolsMetadata: {key!r}")
 
             if not isinstance(data[key], expected_type):
                 expected = expected_type.__name__
                 actual = type(data[key]).__name__
                 return (
                     status,
-                    f"Invalid type for key in toolsMetadata. Expected '{expected}', but got '{actual}'",
+                    f"Invalid type for key in toolsMetadata. Expected {expected!r}, but got {actual!r}",
                 )
 
             if key == "input":
@@ -166,7 +166,7 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
                     if i_key not in input_data:
                         return (
                             status,
-                            f"Missing key for {tool} -> input: '{i_key}'",
+                            f"Missing key for {tool} -> input: {i_key!r}",
                         )
 
                     if not isinstance(input_data[i_key], i_expected_type):
@@ -174,7 +174,7 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
                         i_actual = type(input_data[i_key]).__name__
                         return (
                             status,
-                            f"Invalid type for '{i_key}' in {tool} -> input. Expected '{i_expected}', but got '{i_actual}'.",
+                            f"Invalid type for {i_key!r} in {tool} -> input. Expected {i_expected!r}, but got {i_actual!r}.",
                         )
 
             elif key == "output":
@@ -183,7 +183,7 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
                     if o_key not in output_data:
                         return (
                             status,
-                            f"Missing key for {tool} -> output: '{o_key}'",
+                            f"Missing key for {tool} -> output: {o_key!r}",
                         )
 
                     if not isinstance(output_data[o_key], o_expected_type):
@@ -191,7 +191,7 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
                         o_actual = type(output_data[o_key]).__name__
                         return (
                             status,
-                            f"Invalid type for '{o_key}' in {tool} -> output. Expected '{o_expected}', but got '{o_actual}'.",
+                            f"Invalid type for {o_key!r} in {tool} -> output. Expected {o_expected!r}, but got {o_actual!r}.",
                         )
 
                     if o_key == "schema":
@@ -203,7 +203,7 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
                             if s_key not in output_schema_data:
                                 return (
                                     status,
-                                    f"Missing key for {tool} -> output -> schema: '{s_key}'",
+                                    f"Missing key for {tool} -> output -> schema: {s_key!r}",
                                 )
 
                             if not isinstance(
@@ -213,7 +213,7 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
                                 s_actual = type(output_schema_data[s_key]).__name__
                                 return (
                                     status,
-                                    f"Invalid type for '{s_key}' in {tool} -> output -> schema. Expected '{s_expected}', but got '{s_actual}'.",
+                                    f"Invalid type for {s_key!r} in {tool} -> output -> schema. Expected {s_expected!r}, but got {s_actual!r}.",
                                 )
 
                             if (
@@ -228,7 +228,7 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
                                     if p_key not in properties_data:
                                         return (
                                             status,
-                                            f"Missing key for {tool} -> output -> schema -> properties: '{p_key}'",
+                                            f"Missing key for {tool} -> output -> schema -> properties: {p_key!r}",
                                         )
 
                                     if not isinstance(
@@ -238,7 +238,7 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
                                         p_actual = type(properties_data[p_key]).__name__
                                         return (
                                             status,
-                                            f"Invalid type for '{p_key}' in {tool} -> output -> schema -> properties. Expected '{p_expected}', but got '{p_actual}'.",
+                                            f"Invalid type for {p_key!r} in {tool} -> output -> schema -> properties. Expected {p_expected!r}, but got {p_actual!r}.",
                                         )
 
                                     required = output_schema_data["required"]
@@ -259,7 +259,7 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
                                         if key not in data:
                                             return (
                                                 status,
-                                                f"Missing key in properties -> {p_key}: '{key}'",
+                                                f"Missing key in properties -> {p_key}: {key!r}",
                                             )
 
                                         if not isinstance(data[key], expected_type):
@@ -267,7 +267,7 @@ def __validate_metadata_file(file_path) -> Tuple[bool, str]:
                                             actual = type(data[key]).__name__
                                             return (
                                                 status,
-                                                f"Invalid type for key in properties. Expected '{expected}', but got '{actual}'",
+                                                f"Invalid type for key in properties. Expected {expected!r}, but got {actual!r}",
                                             )
 
     return (True, "")
