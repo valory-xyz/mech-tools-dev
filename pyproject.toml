@@ -53,6 +53,7 @@ openapi-spec-validator = "<0.5.0,>=0.4.0"
 click = "^8.1.8"
 mech-client = "^0.10.0"
 olas-operate-middleware = "^0.10.6"
+safe-eth-py = "v6.4.0"
 
 [tool.poetry.group.dev.dependencies]
 setuptools = "^77.0.3"

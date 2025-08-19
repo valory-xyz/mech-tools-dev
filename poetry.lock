@@ -1358,6 +1358,25 @@ lint = ["black (>=22,<23)", "flake8 (==3.7.9)", "isort (>=4.2.15,<5)", "mypy (==
 test = ["coverage", "hypothesis (>=4.18.0,<5)", "pytest (>=6.2.5,<7)", "pytest-xdist", "tox (==3.25.0)"]
 
 [[package]]
+name = "eth-bloom"
+version = "3.1.0"
+description = "A python implementation of the bloom filter used by Ethereum"
+optional = false
+python-versions = "<4,>=3.8"
+files = [
+    {file = "eth_bloom-3.1.0-py3-none-any.whl", hash = "sha256:c96b2dd6cafa407373bca1a9d74b650378ba672d5b17f2771bf7d3c3aaa7651c"},
+    {file = "eth_bloom-3.1.0.tar.gz", hash = "sha256:4bc918f6fde44334e92b23cfb345db961e2e3af620535cbc872444f7a143cb88"},
+]
+
+[package.dependencies]
+eth-hash = {version = ">=0.4.0", extras = ["pycryptodome"]}
+
+[package.extras]
+dev = ["build (>=0.9.0)", "bump_my_version (>=0.19.0)", "hypothesis (>=3.31.2)", "ipython", "mypy (==1.10.0)", "pre-commit (>=3.4.0)", "pytest (>=7.0.0)", "pytest-xdist (>=2.4.0)", "towncrier (>=24,<25)", "tox (>=4.0.0)", "twine", "wheel"]
+docs = ["towncrier (>=24,<25)"]
+test = ["hypothesis (>=3.31.2)", "pytest (>=7.0.0)", "pytest-xdist (>=2.4.0)"]
+
+[[package]]
 name = "eth-hash"
 version = "0.7.0"
 description = "eth-hash: The Ethereum hashing function, keccak256, sometimes (erroneously) called sha3"
@@ -3112,6 +3131,37 @@ lint = ["flake8 (==3.5.0)", "mypy (==0.641)", "mypy-extensions (>=0.4.1)"]
 test = ["pytest (==6.2.5)", "pytest-xdist (==1.26.0)"]
 
 [[package]]
+name = "py-evm"
+version = "0.10.1b1"
+description = "Python implementation of the Ethereum Virtual Machine"
+optional = false
+python-versions = "<4,>=3.8"
+files = [
+    {file = "py_evm-0.10.1b1-py3-none-any.whl", hash = "sha256:f0fc4a4b904917b40e6a06f87925017dc48ea6582e95f88d28be38f3566e2bae"},
+    {file = "py_evm-0.10.1b1.tar.gz", hash = "sha256:aeb889514af12b6a8cb5091fe93008642eadf7c19999859dad3191eaf451647c"},
+]
+
+[package.dependencies]
+cached-property = ">=1.5.1"
+ckzg = ">=0.4.3"
+eth-bloom = ">=1.0.3"
+eth-keys = ">=0.4.0"
+eth-typing = ">=3.3.0"
+eth-utils = ">=2.0.0"
+lru-dict = ">=1.1.6"
+py-ecc = ">=1.4.7"
+rlp = ">=3.0.0"
+trie = ">=2.0.0"
+
+[package.extras]
+benchmark = ["termcolor (>=1.1.0)", "web3 (>=6.0.0)"]
+dev = ["build (>=0.9.0)", "bumpversion (>=0.5.3)", "cached-property (>=1.5.1)", "ckzg (>=0.4.3)", "eth-bloom (>=1.0.3)", "eth-keys (>=0.4.0)", "eth-typing (>=3.3.0)", "eth-utils (>=2.0.0)", "factory-boy (>=3.0.0)", "hypothesis (>=6,<7)", "ipython", "lru-dict (>=1.1.6)", "pre-commit (>=3.4.0)", "py-ecc (>=1.4.7)", "py-evm (>=0.8.0b1)", "pytest (>=7.0.0)", "pytest-asyncio (>=0.20.0)", "pytest-cov (>=4.0.0)", "pytest-timeout (>=2.0.0)", "pytest-xdist (>=3.0)", "rlp (>=3.0.0)", "sphinx (>=6.0.0)", "sphinx-rtd-theme (>=1.0.0)", "sphinxcontrib-asyncio (>=0.2.0)", "towncrier (>=21,<22)", "tox (>=4.0.0)", "trie (>=2.0.0)", "twine", "wheel"]
+docs = ["py-evm (>=0.8.0b1)", "sphinx (>=6.0.0)", "sphinx-rtd-theme (>=1.0.0)", "sphinxcontrib-asyncio (>=0.2.0)", "towncrier (>=21,<22)"]
+eth = ["cached-property (>=1.5.1)", "ckzg (>=0.4.3)", "eth-bloom (>=1.0.3)", "eth-keys (>=0.4.0)", "eth-typing (>=3.3.0)", "eth-utils (>=2.0.0)", "lru-dict (>=1.1.6)", "py-ecc (>=1.4.7)", "rlp (>=3.0.0)", "trie (>=2.0.0)"]
+eth-extra = ["blake2b-py (>=0.2.0)", "coincurve (>=18.0.0)"]
+test = ["factory-boy (>=3.0.0)", "hypothesis (>=6,<7)", "pytest (>=7.0.0)", "pytest-asyncio (>=0.20.0)", "pytest-cov (>=4.0.0)", "pytest-timeout (>=2.0.0)", "pytest-xdist (>=3.0)"]
+
+[[package]]
 name = "py-multibase"
 version = "1.0.3"
 description = "Multibase implementation for Python"
@@ -3873,6 +3923,47 @@ rust-backend = ["rusty-rlp (>=0.2.1,<0.3)"]
 test = ["hypothesis (==5.19.0)", "pytest (>=6.2.5,<7)", "tox (>=2.9.1,<3)"]
 
 [[package]]
+name = "safe-eth-py"
+version = "6.4.0"
+description = "Safe Ecosystem Foundation utilities for Ethereum projects"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "safe_eth_py-6.4.0-py3-none-any.whl", hash = "sha256:a667e318c9cac7ba10747a9f372403a8800a06d67c0c9551972c9976253ae518"},
+    {file = "safe_eth_py-6.4.0.tar.gz", hash = "sha256:75363d171341e50abe7a55ca03e86382f6e70c8b50c492943985799ffcfa1c82"},
+]
+
+[package.dependencies]
+packaging = "*"
+py-evm = ">=0.7.0a1"
+requests = ">=2"
+safe-pysha3 = ">=1.0.0"
+web3 = ">=6.2.0,<7.0.0"
+
+[package.extras]
+django = ["django (>=2)", "django-filter (>=2)", "djangorestframework (>=2)"]
+
+[[package]]
+name = "safe-pysha3"
+version = "1.0.5"
+description = "SHA-3 (Keccak) for Python 3.9 - 3.13"
+optional = false
+python-versions = "*"
+files = [
+    {file = "safe_pysha3-1.0.5-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3d15b9b8e25c47dcf68857660b48c7bfb540b8aaaa4158651402f19ef047dff7"},
+    {file = "safe_pysha3-1.0.5-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:dbdc2f048fa48b660d26eb6eb897eec4e250d01219ae20cf5b1f8f8682194a41"},
+    {file = "safe_pysha3-1.0.5-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:4505f4b3ce327a8b02299e48b55c32094ed15c63f83e8d9477ebe91e8777fc8f"},
+    {file = "safe_pysha3-1.0.5-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:4048005b764861f36eed98a83fb04268c972b6100fe530303999ff6fce744e64"},
+    {file = "safe_pysha3-1.0.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d137a73029c6c5a1db5791ae9fa62373827eee5226d19b79b836a6cf48b6b197"},
+    {file = "safe_pysha3-1.0.5-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:9a0cb37252a8767992f354d7d2af2ef04730032927eb6af2057e71744c741287"},
+    {file = "safe_pysha3-1.0.5-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:2019065f1b7d3db37cc52d091c9d5526d5d36a3e1b9efcf0b345c24e03755bff"},
+    {file = "safe_pysha3-1.0.5-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:fa37d5d6138d5dd01d1035dba019b7525ad7c55669ded4524f589cddd13ea13b"},
+    {file = "safe_pysha3-1.0.5-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:457ac10024e74aaaeeb373a6601ed06dff2b28ea66061ee8029a2a496703c6f7"},
+    {file = "safe_pysha3-1.0.5-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:c8659d086c981eab422fe957bc6476cefdf6e93efed5599a3826d78f1a60f789"},
+    {file = "safe_pysha3-1.0.5.tar.gz", hash = "sha256:88ceaad6af4b6bdecd2f54b31ad0e5e5e210d4f5ecabb1bd1fd3539ad61b7bf1"},
+]
+
+[[package]]
 name = "semver"
 version = "2.13.0"
 description = "Python helper for Semantic Versioning (http://semver.org/)"
@@ -4170,6 +4261,29 @@ discord = ["requests"]
 notebook = ["ipywidgets (>=6)"]
 slack = ["slack-sdk"]
 telegram = ["requests"]
+
+[[package]]
+name = "trie"
+version = "3.1.0"
+description = "Python implementation of the Ethereum Trie structure"
+optional = false
+python-versions = "<4,>=3.8"
+files = [
+    {file = "trie-3.1.0-py3-none-any.whl", hash = "sha256:dfc3e6ac0e76f0efa900ec1bfd082f0f1ba87f95cbfd81cc12338b03f4c679c4"},
+    {file = "trie-3.1.0.tar.gz", hash = "sha256:b31fd3376d6dccfe8ad13b525e233f2c268d5c48afb90a4de09672423d4b1026"},
+]
+
+[package.dependencies]
+eth-hash = ">=0.1.0"
+eth-utils = ">=2.0.0"
+hexbytes = ">=0.2.3"
+rlp = ">=3"
+sortedcontainers = ">=2.1.0"
+
+[package.extras]
+dev = ["build (>=0.9.0)", "bump_my_version (>=0.19.0)", "eth-hash (>=0.1.0,<1.0.0)", "hypothesis (>=6.56.4,<7)", "ipython", "pre-commit (>=3.4.0)", "pycryptodome", "pytest (>=7.0.0)", "pytest-xdist (>=2.4.0)", "towncrier (>=24,<25)", "tox (>=4.0.0)", "twine", "wheel"]
+docs = ["towncrier (>=24,<25)"]
+test = ["hypothesis (>=6.56.4,<7)", "pycryptodome", "pytest (>=7.0.0)", "pytest-xdist (>=2.4.0)"]
 
 [[package]]
 name = "twikit"
@@ -4629,4 +4743,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "d26b15959998855c0eb5f24bbf8f096caebb2a388b4943c9902ccd8bf6bc3451"
+content-hash = "865adb79c85be9981bf928bde4c646db3da8d2c7dc6a6d94c1b21f98b01d2d59"
