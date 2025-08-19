@@ -1,3 +1,23 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2025 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+"""The script allows the user to update mech's metadata hash onchain"""
+
 import json
 import os
 from pathlib import Path
@@ -6,8 +26,8 @@ from typing import Tuple
 import dotenv
 from multibase import multibase
 from multicodec import multicodec
-from safe_eth.eth import EthereumClient
-from safe_eth.safe import Safe
+from safe_eth.eth import EthereumClient  # pylint:disable=import-error
+from safe_eth.safe import Safe  # pylint:disable=import-error
 from web3 import Web3
 from web3.contract import Contract
 from web3.types import TxReceipt
@@ -15,14 +35,14 @@ from web3.types import TxReceipt
 
 dotenv.load_dotenv(dotenv_path=".1env", override=True)
 
-GNOSIS_RPC = os.getenv("GNOSIS_LEDGER_RPC_0")
-GNOSIS_CHAIN_ID = os.getenv("GNOSIS_LEDGER_CHAIN_ID")
-COMPLEMENTARY_SERVICE_METADATA_ADDRESS = os.getenv(
+GNOSIS_RPC = os.environ["GNOSIS_LEDGER_RPC_0"]
+GNOSIS_CHAIN_ID = os.environ["GNOSIS_LEDGER_CHAIN_ID"]
+COMPLEMENTARY_SERVICE_METADATA_ADDRESS = os.environ[
     "COMPLEMENTARY_SERVICE_METADATA_ADDRESS"
-)
-METADATA_HASH = os.getenv("METADATA_HASH")
-ON_CHAIN_SERVICE_ID = os.getenv("ON_CHAIN_SERVICE_ID")
-SAFE_CONTRACT_ADDRESS = os.getenv("SAFE_CONTRACT_ADDRESS")
+]
+METADATA_HASH = os.environ["METADATA_HASH"]
+ON_CHAIN_SERVICE_ID = os.environ["ON_CHAIN_SERVICE_ID"]
+SAFE_CONTRACT_ADDRESS = os.environ["SAFE_CONTRACT_ADDRESS"]
 
 
 CURR_DIR = Path(__file__).resolve().parent
@@ -39,8 +59,8 @@ def load_contract(
 ) -> Contract:
     """Load a smart contract"""
     abi_path = CURR_DIR / "abis" / f"{abi_file}.json"
-    with open(abi_path, "r", encoding="utf-8") as abi_file:
-        contract_abi = json.load(abi_file)
+    with open(abi_path, "r", encoding="utf-8") as abi:
+        contract_abi = json.load(abi)
         if has_abi_key:
             contract_abi = contract_abi["abi"]
 
@@ -48,12 +68,12 @@ def load_contract(
     return contract
 
 
-def fetch_metadata_hash() -> str:
+def fetch_metadata_hash() -> bytes:
     """To multihash string."""
     # Decode the Base32 CID to bytes
     cid_bytes = multibase.decode(METADATA_HASH)
     if not cid_bytes:
-        return ""
+        return b""
     # Remove the multicodec prefix (0x01) from the bytes
     multihash_bytes = multicodec.remove_prefix(cid_bytes)
     # Convert the multihash bytes to a hexadecimal string
@@ -97,7 +117,7 @@ def send_safe_tx(
         return False
 
 
-def get_safe_nonce(safe_address: str):
+def get_safe_nonce(safe_address: str) -> int:
     """Get the Safe nonce"""
     safe = Safe(safe_address, ethereum_client)
     return safe.retrieve_nonce()
@@ -106,13 +126,15 @@ def get_safe_nonce(safe_address: str):
 def update_metadata_hash_from_safe(
     safe_address: str,
     signer_pkey: str,
-) -> Tuple[bool, str]:
+) -> Tuple[bool, bytes]:
     """Update metadata hash"""
 
     safe_address = web3.to_checksum_address(safe_address)
 
     metadata_hash_contract = load_contract(
-        COMPLEMENTARY_SERVICE_METADATA_ADDRESS, "ComplementaryServiceMetadata", True
+        COMPLEMENTARY_SERVICE_METADATA_ADDRESS,
+        "ComplementaryServiceMetadata",
+        True,
     )
     metadata = fetch_metadata_hash()
 
