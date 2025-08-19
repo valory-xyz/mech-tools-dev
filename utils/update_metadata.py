@@ -29,6 +29,7 @@ from multicodec import multicodec
 from safe_eth.eth import EthereumClient  # pylint:disable=import-error
 from safe_eth.safe import Safe  # pylint:disable=import-error
 from web3 import Web3
+from web3.constants import ADDRESS_ZERO
 from web3.contract import Contract
 from web3.types import TxReceipt
 
@@ -104,8 +105,8 @@ def send_safe_tx(
         safe_tx_gas=gas,
         base_gas=0,
         gas_price=0,
-        gas_token="0x0000000000000000000000000000000000000000",
-        refund_receiver="0x0000000000000000000000000000000000000000",
+        gas_token=ADDRESS_ZERO,
+        refund_receiver=ADDRESS_ZERO,
     )
     safe_tx.sign(signer_pkey)
     try:
