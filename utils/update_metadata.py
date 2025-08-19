@@ -94,9 +94,9 @@ def send_safe_tx(
 ) -> TxReceipt:
     """Send a Safe transaction"""
     # Get the safe
-    safe = Safe(
+    safe = Safe(  # pylint:disable=abstract-class-instantiated
         safe_address, ethereum_client
-    )  # pylint:disable=abstract-class-instantiated
+    )
 
     # Build, sign and send the safe transaction
     safe_tx = safe.build_multisig_tx(
@@ -122,9 +122,9 @@ def send_safe_tx(
 
 def get_safe_nonce(safe_address: str) -> int:
     """Get the Safe nonce"""
-    safe = Safe(
+    safe = Safe(  # pylint:disable=abstract-class-instantiated
         safe_address, ethereum_client
-    )  # pylint:disable=abstract-class-instantiated
+    )
     return safe.retrieve_nonce()
 
 
