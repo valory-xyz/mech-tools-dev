@@ -108,11 +108,13 @@ def push_metadata_to_ipfs() -> None:
     print(f"Metadata successfully pushed to ipfs. The metadata hash is: {ipfs_hash}")
 
 
-def __validate_metadata_file(file_path: str) -> Tuple[bool, str]:
+def __validate_metadata_file(  # pylint: disable=too-many-return-statements,too-many-statements
+    file_path: str,
+) -> Tuple[bool, str]:
     status = False
     try:
         path = file_path
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             metadata: Dict = json.load(f)
 
     except FileNotFoundError:
@@ -252,19 +254,21 @@ def __validate_metadata_file(file_path: str) -> Tuple[bool, str]:
                                         )
 
                                     for (
-                                        key,
-                                        expected_type,
+                                        pd_key,
+                                        pd_expected_type,
                                     ) in properties_data_schema.items():
                                         data = properties_data[p_key]
-                                        if key not in data:
+                                        if pd_key not in data:
                                             return (
                                                 status,
                                                 f"Missing key in properties -> {p_key}: {key!r}",
                                             )
 
-                                        if not isinstance(data[key], expected_type):
-                                            expected = expected_type.__name__
-                                            actual = type(data[key]).__name__
+                                        if not isinstance(
+                                            data[pd_key], pd_expected_type
+                                        ):
+                                            expected = pd_expected_type.__name__
+                                            actual = type(data[pd_key]).__name__
                                             return (
                                                 status,
                                                 f"Invalid type for key in properties. Expected {expected!r}, but got {actual!r}",
