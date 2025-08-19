@@ -108,7 +108,7 @@ def push_metadata_to_ipfs() -> None:
     print(f"Metadata successfully pushed to ipfs. The metadata hash is: {ipfs_hash}")
 
 
-def __validate_metadata_file(file_path) -> Tuple[bool, str]:
+def __validate_metadata_file(file_path: str) -> Tuple[bool, str]:
     status = False
     try:
         path = file_path
