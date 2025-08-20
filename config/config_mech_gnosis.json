@@ -99,8 +99,8 @@
             "provision_type": "computed"
         },
         "MECHX_WSS_ENDPOINT": {
-            "name": "",
-            "description": "",
+            "name": "Mechx WSS endpoint",
+            "description": "Mechx uses wss to listen to onchain deliveries",
             "value": "",
             "provision_type": "user"
         },

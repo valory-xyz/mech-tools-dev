@@ -38,23 +38,35 @@ def read_and_update_env(data: dict) -> None:
     with open(".example.env", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
+    safe_contract_address = data["chain_configs"]["gnosis"]["chain_data"]["multisig"]
+    all_participants = json.dumps(data["agent_addresses"])
+
+    var_data = (
+        data["env_variables"].get("MECH_TO_MAX_DELIVERY_RATE", {}).get("value", "")
+    )
+    parsed = json.loads(var_data)
+    parsed_dict = {k: int(v) for k, v in parsed.items()}
+    mech_to_max_delivery_rate = json.dumps(parsed_dict, separators=(",", ":"))
+
+    computed_env_data = {
+        "SAFE_CONTRACT_ADDRESS": safe_contract_address,
+        "ALL_PARTICIPANTS": all_participants,
+        "MECH_TO_MAX_DELIVERY_RATE": mech_to_max_delivery_rate,
+        "MECHX_RPC_URL": data["env_variables"]
+        .get("GNOSIS_LEDGER_RPC_0", {})
+        .get("value", ""),
+        "MECHX_LEDGER_ADDRESS": data["env_variables"]
+        .get("GNOSIS_LEDGER_RPC_0", {})
+        .get("value", ""),
+    }
+
     filled_lines = []
     for line in lines:
         if "=" in line:
             key = line.split("=")[0].strip()
-            if key == "SAFE_CONTRACT_ADDRESS":
-                value = data["chain_configs"]["gnosis"]["chain_data"]["multisig"]
+            value = computed_env_data.get(key)
 
-            elif key == "ALL_PARTICIPANTS":
-                value = json.dumps(data["agent_addresses"])
-
-            elif key == "MECH_TO_MAX_DELIVERY_RATE":
-                original_value = data["env_variables"].get(key, {}).get("value", "")
-                parsed = json.loads(original_value)
-                parsed_dict = {k: int(v) for k, v in parsed.items()}
-                value = json.dumps(parsed_dict, separators=(",", ":"))
-
-            else:
+            if value is None:
                 value = data["env_variables"].get(key, {}).get("value", "")
 
             # remove vars that are not used. Creates issues during run_service
