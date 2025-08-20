@@ -58,4 +58,4 @@ fi
 echo "Found deployment build directory: $build_dir"
 
 # Run the deployment using the found build directory
-autonomy deploy run --build-dir "$build_dir"
+autonomy deploy run --detach --build-dir "$build_dir"
