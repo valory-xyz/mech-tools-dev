@@ -13,7 +13,7 @@ echo "Removing previous mech directory..."
 rm -rf mech
 
 # Load env vars
-set -o allexport; source .1env; set +o allexport
+set -o allexport; source .env; set +o allexport
 
 # Remove previous builds
 # if [ -d "mech" ]; then

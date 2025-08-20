@@ -34,7 +34,7 @@ from web3.contract import Contract
 from web3.types import TxReceipt
 
 
-dotenv.load_dotenv(dotenv_path=".1env", override=True)
+dotenv.load_dotenv(dotenv_path=".env", override=True)
 
 GNOSIS_RPC = os.environ["GNOSIS_LEDGER_RPC_0"]
 GNOSIS_CHAIN_ID = os.environ["GNOSIS_LEDGER_CHAIN_ID"]

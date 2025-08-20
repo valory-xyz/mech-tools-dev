@@ -34,7 +34,7 @@ SERVICE_KEY = "keys.json"
 
 
 def read_and_update_env(data: dict) -> None:
-    """Reads the generated env from operate and creates the required .1env"""
+    """Reads the generated env from operate and creates the required .env"""
     with open(".example.env", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
@@ -63,7 +63,7 @@ def read_and_update_env(data: dict) -> None:
         else:
             filled_lines.append(line)
 
-    with open(".1env", "w", encoding="utf-8") as f:
+    with open(".env", "w", encoding="utf-8") as f:
         f.writelines(filled_lines)
 
 
