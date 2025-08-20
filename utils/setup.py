@@ -52,12 +52,6 @@ def read_and_update_env(data: dict) -> None:
         "SAFE_CONTRACT_ADDRESS": safe_contract_address,
         "ALL_PARTICIPANTS": all_participants,
         "MECH_TO_MAX_DELIVERY_RATE": mech_to_max_delivery_rate,
-        "MECHX_RPC_URL": data["env_variables"]
-        .get("GNOSIS_LEDGER_RPC_0", {})
-        .get("value", ""),
-        "MECHX_LEDGER_ADDRESS": data["env_variables"]
-        .get("GNOSIS_LEDGER_RPC_0", {})
-        .get("value", ""),
     }
 
     filled_lines = []
