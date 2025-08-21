@@ -52,6 +52,9 @@ def read_and_update_env(data: dict) -> None:
         "SAFE_CONTRACT_ADDRESS": safe_contract_address,
         "ALL_PARTICIPANTS": all_participants,
         "MECH_TO_MAX_DELIVERY_RATE": mech_to_max_delivery_rate,
+    }
+
+    mechx_env_data = {
         "MECHX_RPC_URL": data["env_variables"]
         .get("GNOSIS_LEDGER_RPC_0", {})
         .get("value", ""),
@@ -78,9 +81,8 @@ def read_and_update_env(data: dict) -> None:
         else:
             filled_lines.append(line)
 
-    export_keys = ["MECHX_RPC_URL", "MECHX_LEDGER_ADDRESS", "MECHX_WSS_ENDPOINT"]
-    for key in export_keys:
-        value = computed_env_data.get(key)
+    for key in mechx_env_data.keys():
+        value = mechx_env_data.get(key)
         if value not in ("", None, {}, []):
             filled_lines.append(f"export {key}={value!r}\n")
 
