@@ -26,7 +26,7 @@ ALLOWED_TOOLS = ["echo"]
 
 def error_response(msg: str) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
     """Return an error mech response."""
-    return msg, None, None, None
+    return msg, None, None, None, None
 
 
 def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
