@@ -1,0 +1,14 @@
+name: echo
+author: valory
+version: 0.1.0
+type: custom
+description: A dummy mech tool.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibjxc67rw3olmd3pdai3jqihxaapaewfgdfatzvm4pmxyh3dr7ywu
+  echo.py: bafybeig5yh5fhfq3xfmnjocfcli5q22s7zrgalrw34jdzpfwaeuvtf7fzy
+fingerprint_ignore_patterns: []
+entry_point: echo.py
+callable: run
+dependencies: {}

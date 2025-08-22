@@ -13,7 +13,7 @@ echo "Removing previous mech directory..."
 rm -rf mech
 
 # Load env vars
-set -o allexport; source .1env; set +o allexport
+set -o allexport; source .env; set +o allexport
 
 # Remove previous builds
 # if [ -d "mech" ]; then
@@ -58,4 +58,4 @@ fi
 echo "Found deployment build directory: $build_dir"
 
 # Run the deployment using the found build directory
-autonomy deploy run --build-dir "$build_dir"
+autonomy deploy run --detach --build-dir "$build_dir"
