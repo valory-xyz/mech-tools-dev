@@ -24,12 +24,15 @@ from typing import Optional, Dict, Any, Tuple
 ALLOWED_TOOLS = ["echo"]
 
 
-def error_response(msg: str) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
+MechResponse = Tuple[str, Optional[str], Optional[Dict[str, Any]], Any, Any]
+
+
+def error_response(msg: str) -> MechResponse:
     """Return an error mech response."""
     return msg, None, None, None, None
 
 
-def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
+def run(**kwargs) -> MechResponse:
     """Run the task"""
 
     # Get all the required parameters
