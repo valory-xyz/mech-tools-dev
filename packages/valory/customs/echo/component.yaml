@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeibjxc67rw3olmd3pdai3jqihxaapaewfgdfatzvm4pmxyh3dr7ywu
-  echo.py: bafybeig5yh5fhfq3xfmnjocfcli5q22s7zrgalrw34jdzpfwaeuvtf7fzy
+  echo.py: bafybeihs4mkv3b7x2u3ybu4ht7ur3yyebtadlyi4yqmt5iqx5j3fa5hyeq
 fingerprint_ignore_patterns: []
 entry_point: echo.py
 callable: run
