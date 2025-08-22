@@ -64,6 +64,7 @@ def read_and_update_env(data: dict) -> None:
         "MECHX_WSS_ENDPOINT": data["env_variables"]
         .get("MECHX_WSS_ENDPOINT", {})
         .get("value", ""),
+        "MECHX_MECH_OFFCHAIN_URL": "http://localhost:8000/",
     }
 
     filled_lines = []
