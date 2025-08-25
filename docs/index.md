@@ -331,18 +331,20 @@ In order to test a tool you developed, let's update the Mech you created in the 
     python utils/publish_metadata.py
     ```
 
-3. Update the tool metadata hash onchain:
+3. Update the `METADATA_HASH` variable in your `.env` file with the hash you got in the previous step.
+
+4. Update the tool metadata hash onchain:
     ```bash
     python utils/update_metadata.py
     ```
 
 
-4. Copy your tool hash from `packages/packages.json` and add it to the `TOOLS_TO_PACKAGE_HASH` variable in your `.env`.
+5. Copy your tool hash from `packages/packages.json` and add it to the `TOOLS_TO_PACKAGE_HASH` variable in your `.env`.
    This variable is a dictionary, so you need to add a new entry with your tool name as key and the tool hash as value.
    Also update the `METADATA_HASH` in the `.env` file with the one you got from step 2.
 
 
-5. Run your mech using `run_agent.sh` or `run_service.sh` as seen in the previous sections.
+6. Run your mech using `run_agent.sh` or `run_service.sh` as seen in the previous sections.
 
 
 ## Sending a request to your custom Mech
