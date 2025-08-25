@@ -334,6 +334,7 @@ In order to test a tool you developed, let's update the Mech you created in the 
 3. Update the tool metadata hash onchain:
     ```bash
     python utils/update_metadata.py
+    ```
 
 
 4. Copy your tool hash from `packages/packages.json` and add it to the `TOOLS_TO_PACKAGE_HASH` variable in your `.env`.
