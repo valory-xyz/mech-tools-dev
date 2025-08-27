@@ -29,4 +29,4 @@ You need the following requirements installed in your system:
 ## Instructions
 
 Find more information on how to create, publish, and run your own mech tools in
-[our documentation](https://docs.olas.network/mech-tool/).
+[our documentation](https://open-autonomy.docs.autonolas.tech/).
