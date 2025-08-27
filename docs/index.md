@@ -101,7 +101,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
 
 1. First, clone the following repository:
     ```bash
-    git clone git@github.com:valory-xyz/mech-tools-dev.git
+    git clone https://github.com/valory-xyz/mech-tools-dev.git
     cd mech-tools-dev/
     ```
 
