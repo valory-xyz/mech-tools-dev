@@ -395,10 +395,10 @@ So for example, for 1 agent system
     ```txt
     Wrong:
     ETHEREUM_LEDGER_RPC_0 = (
-        "https://rpc.gnosischain.com/"
+        "https://1rpc.io/gnosis"
     )
 
-    Right: ETHEREUM_LEDGER_RPC_0="https://rpc.gnosischain.com/"
+    Right: ETHEREUM_LEDGER_RPC_0="https://1rpc.io/gnosis"
     ```
 
 8. **Issue**: Client.__init__() got an unexpected keyword argument 'proxies'"

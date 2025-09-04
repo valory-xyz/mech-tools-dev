@@ -109,7 +109,7 @@ def update_tox_ini(
     """Update the tox.ini file with the new package dependencies."""
     new_package_dependencies.pop("python", None)
     for key, value in new_package_dependencies.items():
-        if len(value) > 0 and "^" == value[0]:
+        if len(value) > 0 and value[0] in ("^", "v"):
             new_package_dependencies[key] = "==" + value[1:]
     with open(tox_ini_path, "r", encoding="utf-8") as file:
         lines = file.readlines()
