@@ -18,8 +18,8 @@
 # ------------------------------------------------------------------------------
 """The script combines the setup scripts for ease of use"""
 
-from .setup import main as setup_main
-from .update_metadata import main as update_metadata_main
+from utils.setup import main as setup_main
+from utils.update_metadata import main as update_metadata_main
 
 
 def main() -> None:
