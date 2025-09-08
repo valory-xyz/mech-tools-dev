@@ -29,5 +29,6 @@
 import subprocess  # nosec B404
 import sys
 
+
 subprocess.run([sys.executable, "utils/setup.py"], check=True)  # nosec B603
 subprocess.run([sys.executable, "utils/update_metadata.py"], check=True)  # nosec B603
