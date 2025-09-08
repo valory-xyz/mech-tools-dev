@@ -33,9 +33,9 @@ import sys
 def main() -> None:
     """Runs the script"""
     subprocess.run([sys.executable, "utils/setup.py"], check=True)  # nosec B603
-    subprocess.run(
+    subprocess.run(  # nosec B603
         [sys.executable, "utils/update_metadata.py"], check=True
-    )  # nosec B603
+    )
 
 
 if __name__ == "__main__":
