@@ -18,24 +18,14 @@
 # ------------------------------------------------------------------------------
 """The script combines the setup scripts for ease of use"""
 
-# Silence checks for
-# B404: Consider possible security implications associated with the subprocess module.
-#       - The scripts combines the 2 startup scripts
-# B603: subprocess call - check for execution of untrusted input.
-#       - sys.executable will be the virtual env
-#       - utils/setup.py or utils/update_metadata.py is static
-
-
-import subprocess  # nosec B404
-import sys
+from .setup import main as setup_main
+from .update_metadata import main as update_metadata_main
 
 
 def main() -> None:
     """Runs the script"""
-    subprocess.run([sys.executable, "utils/setup.py"], check=True)  # nosec B603
-    subprocess.run(  # nosec B603
-        [sys.executable, "utils/update_metadata.py"], check=True
-    )
+    setup_main()
+    update_metadata_main()
 
 
 if __name__ == "__main__":
