@@ -61,9 +61,6 @@ def read_and_update_env(data: dict) -> None:
         "MECHX_LEDGER_ADDRESS": data["env_variables"]
         .get("GNOSIS_LEDGER_RPC_0", {})
         .get("value", ""),
-        "MECHX_WSS_ENDPOINT": data["env_variables"]
-        .get("MECHX_WSS_ENDPOINT", {})
-        .get("value", ""),
         "MECHX_MECH_OFFCHAIN_URL": "http://localhost:8000/",
     }
 
