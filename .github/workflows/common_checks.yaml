@@ -69,7 +69,7 @@ jobs:
     - name: Check dependencies
       run: tox -e check-dependencies
     - name: Check doc links
-      run: tomte check-doc-links
+      run: tomte check-doc-links -n https://1rpc.io/gnosis
     - name: Check doc IPFS hashes
       run: tox -e check-doc-hashes
 

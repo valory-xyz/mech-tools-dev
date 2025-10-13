@@ -7,7 +7,7 @@ license: Apache-2.0
 fingerprint:
   README.md: bafybeif7ia4jdlazy6745ke2k2x5yoqlwsgwr6sbztbgqtwvs3ndm2p7ba
 fingerprint_ignore_patterns: []
-agent: valory/mech:0.1.0:bafybeighrxwxunpydndqasduuurxnbjopsqpnpbvwdytoafm5l47bibumq
+agent: valory/mech:0.1.0:bafybeicsmugyyvx54ncag2peyjtsiooi7wazwjekxbpviiszzfymmqdjay
 number_of_agents: 4
 deployment:
   agent:
@@ -56,14 +56,14 @@ type: skill
         serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
         complementary_service_metadata_address: ${COMPLEMENTARY_SERVICE_METADATA_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
         metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
-        profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
+        profit_split_balance: ${PROFIT_SPLIT_BALANCE:int:100}
         hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
         mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
         minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
         mech_staking_instance_address: ${MECH_STAKING_INSTANCE_ADDRESS:str:0x0000000000000000000000000000000000000000}
-        service_owner_share: ${SERVICE_SHARE:float:0}
+        service_owner_share: ${SERVICE_SHARE:int:0}
         default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 1:
   models:
@@ -93,7 +93,7 @@ type: skill
         serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
         complementary_service_metadata_address: ${COMPLEMENTARY_SERVICE_METADATA_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
         metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
-        profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
+        profit_split_balance: ${PROFIT_SPLIT_BALANCE:int:100}
         hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
         service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
         mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
@@ -102,7 +102,7 @@ type: skill
         mech_marketplace_address: ${MECH_MARKETPLACE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
         mech_staking_instance_address: ${MECH_STAKING_INSTANCE_ADDRESS:str:0x0000000000000000000000000000000000000000}
-        service_owner_share: ${SERVICE_SHARE:float:0}
+        service_owner_share: ${SERVICE_SHARE:int:0}
         default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 2:
   models:
@@ -134,14 +134,14 @@ type: skill
         service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
         complementary_service_metadata_address: ${COMPLEMENTARY_SERVICE_METADATA_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
         metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
-        profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
+        profit_split_balance: ${PROFIT_SPLIT_BALANCE:int:100}
         hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
         mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
         minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
         mech_staking_instance_address: ${MECH_STAKING_INSTANCE_ADDRESS:str:0x0000000000000000000000000000000000000000}
-        service_owner_share: ${SERVICE_SHARE:float:0}
+        service_owner_share: ${SERVICE_SHARE:int:0}
         default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 3:
   models:
@@ -172,7 +172,7 @@ type: skill
         complementary_service_metadata_address: ${COMPLEMENTARY_SERVICE_METADATA_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
         mech_marketplace_address: ${MECH_MARKETPLACE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
-        profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
+        profit_split_balance: ${PROFIT_SPLIT_BALANCE:int:100}
         hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
         service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
         mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
@@ -180,7 +180,7 @@ type: skill
         agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
         minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
         mech_staking_instance_address: ${MECH_STAKING_INSTANCE_ADDRESS:str:0x0000000000000000000000000000000000000000}
-        service_owner_share: ${SERVICE_SHARE:float:0}
+        service_owner_share: ${SERVICE_SHARE:int:0}
         default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 ---
 public_id: valory/task_execution:0.1.0
@@ -199,6 +199,7 @@ type: skill
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+        mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 1:
   models:
@@ -214,6 +215,7 @@ type: skill
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+        mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 2:
   models:
@@ -229,6 +231,7 @@ type: skill
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+        mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 3:
   models:
@@ -244,6 +247,7 @@ type: skill
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+        mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
 ---
 public_id: valory/ledger:0.19.0
