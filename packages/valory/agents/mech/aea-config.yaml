@@ -195,6 +195,7 @@ models:
       from_block_range: ${int:50000}
       mech_marketplace_address: ${str:0x0000000000000000000000000000000000000000}
       mech_to_config: ${dict:{}}
+      mech_to_max_delivery_rate: ${dict:{}}
       timeout_limit: ${int:3}
       max_block_window: ${int:500}
       default_chain_id: ${str:gnosis}
