@@ -1,6 +1,6 @@
 ## **Mechs**
 
-Mechs are Olas agents that provide on-chain services to other agents in exchange for small payments.
+Mechs are Olas AI agents that provide on-chain services to other AI agents in exchange for small payments.
 They allow agents to access a wide range of tools—such as LLM subscriptions or prediction services—without the need to implement ad-hoc integrations.
 All interactions with Mechs happen through a common API using on-chain requests and responses, enabling agents to access multiple tools via a unified interface.
 
@@ -15,7 +15,7 @@ It acts as a relay, ensuring secure payments and efficient task execution.
 Specifically, the Mech Marketplace enables:
 
 - **Effortless Mech Deployment**
-Any agent registered in the Olas Service Registry can deploy a Mech contract with minimal inputs, allowing rapid service offering and on-chain payment collection.
+Any AI agent registered in the Olas Service Registry can deploy a Mech contract with minimal inputs, allowing rapid service offering and on-chain payment collection.
 
 - **Seamless Task Requests**
 Requesters can submit service requests directly through the Mech Marketplace. On-chain contracts handle payments and service delivery transparently between requesters and Mechs.
@@ -65,7 +65,7 @@ Here's a simplified version of the mech request-response:
 
 3. The application writes the request's IPFS hash to the Mech Marketplace contract, including a small payment. Alternatively, the payment could be done separately through a Nevermined subscription.
 
-4. The Mech service is constantly monitoring request events, and therefore gets the request hash.
+4. The Mech AI agent is constantly monitoring request events, and therefore gets the request hash.
 
 5. The Mech reads the request data from IPFS using its hash.
 
@@ -128,14 +128,14 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     python utils/update_metadata.py
     ```
 
-6. And just run your agent:
+6. And just run your agent instance:
     ```bash
     ./run_agent.sh
     ```
     This option is recommended to quickly test or debug agents, so it's the one we recommend the first time you run this tutorial.
     The next time you use this command, it will ask you for your sudo password to remove the previous build.
 
-7. Alternatively, you can also run the full dockerized service with:
+7. Alternatively, you can also run the full dockerized AI agent with:
     ```bash
     ./run_service.sh
     ```
@@ -146,9 +146,9 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     ```
 
     Replace the Mech name with the one that appears after the `run_service.sh` script has finished.
-    This option is recommended when your service is ready to be deployed.
+    This option is recommended when your AI agent is ready to be deployed.
 
-8. Once your agent is running, and from another terminal (within the same virtual environment), send a request to it. First, load all the RPCs required for the mech client to work:
+8. Once your agent instance is running, and from another terminal (within the same virtual environment), send a request to it. First, load all the RPCs required for the mech client to work:
     ```bash
     source .env
     ```
@@ -174,7 +174,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     - Created on-chain request with ID 63113231565093422774445497789782682647110838977840831205387629469951062204223
     ```
 
-    In your agent logs, you will see something like:
+    In your agent instance logs, you will see something like:
     ```bash
     [2025-07-24 16:41:58,679][INFO] [agent] Task result for request 63113231565093422774445497789782682647110838977840831205387629469951062204223: ('Echo: hello, mech!', 'hello, mech!', None, None)
     ```
@@ -198,7 +198,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     }
     ```
 
-9. Stop your agent. If you have run the `run_agent.sh` script, just hit `ctrl+c`. If you are using `run_service.sh`, run:
+9. Stop your agent instance. If you have run the `run_agent.sh` script, just hit `ctrl+c`. If you are using `run_service.sh`, run:
     ```bash
     ./stop_service.sh
     ```
@@ -298,7 +298,7 @@ The [component.yaml](https://github.com/valory-xyz/mech-tools-dev/blob/main/mtd/
     autonomy push-all
     ```
 
-4.  Mint the tool [here](https://registry.olas.network/ethereum/components/mint) as a component on the Olas Registry;
+4.  Mint the tool [here](https://marketplace.olas.network/ethereum/components/mint) as a component on the Olas Registry;
     For this is needed: an address (EOA) and the hash of the meta-data file.
     In order to generate this hash, click on “Generate Hash & File” and provide the following information:
     - name (name of the tool)
@@ -387,10 +387,10 @@ In order to test a tool you developed, let's update the Mech you created in the 
 
     **Solution**: Make sure to add proper key names inside API_KEYS env
 
-7. **Issue**: Error: Number of agents cannot be greater than available keys.
+7. **Issue**: Error: Number of agent instances cannot be greater than available keys.
 
     **Solution**: It's possible the code editor is formatting env files so double check the format of the keys and values.
-So for example, for 1 agent system
+So for example, for 1 agent instance system
 
     ```txt
     Wrong:
@@ -415,7 +415,7 @@ So for example, for 1 agent system
 
 11. **Issue**: Port already in use. <br>
 
-    **Solution**: When running locally the mech agent if you face an error of the type
+    **Solution**: When running locally the mech agent instance if you face an error of the type
 `ERROR: failed to start node: failed to listen on 127.0.0.1:26658: listen tcp 127.0.0.1:26658: bind: address already in use` <br>
 Then check at the CLI which process is using the port:
     ```bash
