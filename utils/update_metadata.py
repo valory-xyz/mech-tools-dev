@@ -24,7 +24,6 @@ from pathlib import Path
 from typing import Tuple
 
 import dotenv
-from aea_ledger_ethereum import EthereumCrypto
 from multibase import multibase
 from multicodec import multicodec
 from safe_eth.eth import EthereumClient  # pylint:disable=import-error
@@ -177,14 +176,13 @@ def update_metadata_hash_from_safe(
 def main() -> None:
     """Run the publish_metadata script."""
     agent_key_path = BASE_DIR / "ethereum_private_key.txt"
-    password = os.environ.get("OPERATE_PASSWORD", "")
-    crypto = EthereumCrypto(private_key_path=str(agent_key_path), password=password)
-    signer_pkey = crypto.private_key
-    success, tx_hash = update_metadata_hash_from_safe(
-        SAFE_CONTRACT_ADDRESS, signer_pkey
-    )
-    print(f"Success: {success}")
-    print(f"Tx Hash: {tx_hash.hex()}")
+    with open(agent_key_path, "r", encoding="utf-8") as data:
+        signer_pkey = data.read()
+        success, tx_hash = update_metadata_hash_from_safe(
+            SAFE_CONTRACT_ADDRESS, signer_pkey
+        )
+        print(f"Success: {success}")
+        print(f"Tx Hash: {tx_hash.hex()}")
 
 
 if __name__ == "__main__":
