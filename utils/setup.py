@@ -19,9 +19,12 @@
 """The script allows the user to setup onchain requirements for running mechs"""
 
 import json
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv, set_key
 from operate.cli import OperateApp, run_service
+from operate.quickstart.run_service import ask_password_if_needed
 
 
 CURR_DIR = Path(__file__).resolve().parent
@@ -31,6 +34,7 @@ OPERATE_DIR = BASE_DIR / ".operate"
 OPERATE_CONFIG_PATH = "services/sc-*/config.json"
 AGENT_KEY = "ethereum_private_key.txt"
 SERVICE_KEY = "keys.json"
+
 
 
 def read_and_update_env(data: dict) -> None:
@@ -130,6 +134,36 @@ def setup_private_keys() -> None:
         create_private_key_files(data)
 
 
+def get_password(operate: OperateApp) -> str:
+    """Load password from .env if present, otherwise prompt and persist.
+
+    :param operate: The OperateApp instance.
+    :return: Operate password
+    :raises Exception: If password could not be set
+    """
+    env_path = BASE_DIR / ".env"
+    # Try loading from environment file
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path, override=False)
+        password = os.environ.get("OPERATE_PASSWORD", "")
+        if password:
+            os.environ["OPERATE_PASSWORD"] = password
+            os.environ["ATTENDED"] = "false"
+            return password
+
+    # Prompt for password
+    ask_password_if_needed(operate)
+    if not operate.password:
+        raise Exception("Password could not be set for Operate.")
+
+    # Persist password
+    os.environ["OPERATE_PASSWORD"] = operate.password
+    env_path.parent.mkdir(parents=True, exist_ok=True)
+    set_key(str(env_path), "OPERATE_PASSWORD", os.environ["OPERATE_PASSWORD"])
+    os.environ["ATTENDED"] = "false"
+    return os.environ["OPERATE_PASSWORD"]
+
+
 def setup_operate(operate: OperateApp) -> None:
     """Setups the operate"""
     run_service(
@@ -156,6 +190,9 @@ def main() -> None:
 
     print("Setting up env...")
     setup_env()
+
+    # Persist password to .env
+    get_password(operate)
 
     print("Setting up private keys...")
     setup_private_keys()
