@@ -146,5 +146,13 @@
             "value": 10,
             "provision_type": "fixed"
         }
+    },
+    "agent_release": {
+        "is_aea": true,
+        "repository": {
+            "owner": "valory-xyz",
+            "name": "mech-predict",
+            "version": "v0.1.0"
+        }
     }
 }
