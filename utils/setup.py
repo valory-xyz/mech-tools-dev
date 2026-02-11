@@ -130,11 +130,8 @@ def setup_private_keys() -> None:
         create_private_key_files(data)
 
 
-def setup_operate() -> None:
+def setup_operate(operate: OperateApp) -> None:
     """Setups the operate"""
-    operate = OperateApp()
-    operate.setup()
-
     run_service(
         operate=operate,
         config_path=GNOSIS_TEMPLATE_CONFIG_PATH,
@@ -145,9 +142,17 @@ def setup_operate() -> None:
 
 def main() -> None:
     """Runs the script"""
-    if not OPERATE_DIR.is_dir():
+    operate = OperateApp()
+    operate.setup()
+
+    services, _ = operate.service_manager().get_all_services()
+    if (
+        not services
+        or services[0].chain_configs.get(services[0].home_chain, {}).chain_data.multisig
+        is None
+    ):
         print("Setting up operate...")
-        setup_operate()
+        setup_operate(operate)
 
     print("Setting up env...")
     setup_env()
