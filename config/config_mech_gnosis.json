@@ -151,8 +151,8 @@
         "is_aea": true,
         "repository": {
             "owner": "valory-xyz",
-            "name": "mech-predict",
-            "version": "v0.1.0"
+            "name": "mech",
+            "version": "v0.29.5"
         }
     }
 }
