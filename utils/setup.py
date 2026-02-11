@@ -19,11 +19,13 @@
 """The script allows the user to setup onchain requirements for running mechs"""
 
 import json
+import logging
 import os
 from pathlib import Path
 
 from dotenv import dotenv_values, load_dotenv, set_key
 from operate.cli import OperateApp, run_service
+from operate.keys import KeysManager
 from operate.quickstart.run_service import ask_password_if_needed
 
 
@@ -123,13 +125,13 @@ def create_private_key_files(data: dict) -> None:
     if agent_key_path.exists():
         print(f"Agent key found at: {agent_key_path}. Skipping creation")
     else:
-        agent_key_path.write_text(data["private_key"])
+        agent_key_path.write_text(data["private_key"], encoding="utf-8")
 
     service_key_path = BASE_DIR / SERVICE_KEY
     if service_key_path.exists():
         print(f"Service key found at: {service_key_path}. Skipping creation")
     else:
-        service_key_path.write_text(json.dumps([data], indent=2))
+        service_key_path.write_text(json.dumps([data], indent=2), encoding="utf-8")
 
 
 def setup_private_keys() -> None:
@@ -139,11 +141,20 @@ def setup_private_keys() -> None:
         key_file = next(keys_dir.glob("*"), None)
         if key_file and key_file.is_file():
             print(f"Key file found at: {key_file}")
-            with open(key_file, "r", encoding="utf-8") as f:
-                content = f.read()
-                data = json.loads(content)
+            password = os.environ.get("OPERATE_PASSWORD", "")
+            if not password:
+                raise ValueError("OPERATE_PASSWORD is required to decrypt keys.")
 
-        create_private_key_files(data)
+            try:
+                manager = KeysManager(
+                    path=keys_dir,
+                    logger=logging.getLogger(__name__),
+                    password=password,
+                )
+                data = manager.get_decrypted(key_file.name)
+                create_private_key_files(data)
+            except Exception as e:
+                raise RuntimeError(f"Failed to setup private keys from {key_file}") from e
 
 
 def get_password(operate: OperateApp) -> str:
