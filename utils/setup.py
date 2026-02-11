@@ -22,7 +22,7 @@ import json
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv, set_key
+from dotenv import dotenv_values, load_dotenv, set_key
 from operate.cli import OperateApp, run_service
 from operate.quickstart.run_service import ask_password_if_needed
 
@@ -36,11 +36,15 @@ AGENT_KEY = "ethereum_private_key.txt"
 SERVICE_KEY = "keys.json"
 
 
-
 def read_and_update_env(data: dict) -> None:
     """Reads the generated env from operate and creates the required .env"""
     with open(".example.env", "r", encoding="utf-8") as f:
         lines = f.readlines()
+
+    existing_env = dotenv_values(".env")
+    existing_operate_password = existing_env.get("OPERATE_PASSWORD") or os.environ.get(
+        "OPERATE_PASSWORD", ""
+    )
 
     safe_contract_address = data["chain_configs"]["gnosis"]["chain_data"]["multisig"]
     all_participants = json.dumps(data["agent_addresses"])
@@ -69,6 +73,7 @@ def read_and_update_env(data: dict) -> None:
     }
 
     filled_lines = []
+    written_keys = set()
     for line in lines:
         if "=" in line:
             key = line.split("=")[0].strip()
@@ -80,6 +85,7 @@ def read_and_update_env(data: dict) -> None:
             # remove vars that are not used. Creates issues during run_service
             if value not in ("", None, {}, []):
                 filled_lines.append(f"{key}={value!r}\n")
+                written_keys.add(key)
         else:
             filled_lines.append(line)
 
@@ -87,6 +93,12 @@ def read_and_update_env(data: dict) -> None:
         value = mechx_env_data.get(key)
         if value not in ("", None, {}, []):
             filled_lines.append(f"export {key}={value!r}\n")
+
+    if (
+        existing_operate_password not in ("", None)
+        and "OPERATE_PASSWORD" not in written_keys
+    ):
+        filled_lines.append(f"OPERATE_PASSWORD={existing_operate_password!r}\n")
 
     with open(".env", "w", encoding="utf-8") as f:
         f.writelines(filled_lines)
