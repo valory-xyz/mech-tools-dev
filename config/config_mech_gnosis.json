@@ -145,6 +145,12 @@
             "description": "",
             "value": 10,
             "provision_type": "fixed"
+        },
+        "FROM_BLOCK_RANGE": {
+            "name": "",
+            "description": "",
+            "value": 2120,
+            "provision_type": "fixed"
         }
     },
     "agent_release": {
