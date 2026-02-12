@@ -1,8 +1,8 @@
 {
     "dev": {
-        "custom/valory/echo/0.1.0": "bafybeie6xgocwpadvznoq4my75lpybso5gellmvqp5x3dzraz7e2yx4kh4",
-        "agent/valory/mech/0.1.0": "bafybeigqrnxa2lhrlmgmrrkqeyqxcf553wxfpymh6wn43zbljhr7nlg6uq",
-        "service/valory/mech/0.1.0": "bafybeigbzveqdq6w4bdqnxxg37u4zf2pjta4fhyw3y224fxnv2egycv23i"
+        "custom/valory/echo/0.1.0": "bafybeiegesjxzmwzxyt5tzysm24pdgjcaaglxkugbomjpha76sigpthhee",
+        "agent/valory/mech/0.1.0": "bafybeicysosp4qjzldubwpebojoh7m2qrmfhfwts36reaptnkqdfwat7yq",
+        "service/valory/mech/0.1.0": "bafybeianohtzjwpyvwsiften3p6vbb2evxzhs5qwbbotvugy5fphfxxj4y"
     },
     "third_party": {
         "protocol/valory/acn_data_share/0.1.0": "bafybeic7infync56c4b5qzmgomcfkh3au5bpsd53rlfq4hzyjelb3w2u74",
@@ -33,9 +33,9 @@
         "connection/valory/p2p_libp2p_client/0.1.0": "bafybeihezztwiiismlbblbv67i4zibp7w6xzpqadt67mcdjaoauibjqii4",
         "connection/valory/http_server/0.22.0": "bafybeicmy3phyy3ckvlfumioiadwlmlt5dijkp3mhezkxgx7kigigwe3rm",
         "skill/valory/contract_subscription/0.1.0": "bafybeicrkrifwefmfd3d25cx7fwlq2ttqfhycrkply7dxrplhvoldgtdau",
-        "skill/valory/mech_abci/0.1.0": "bafybeif7yqc53z2yzvhlksz5w5bdiuvbjgj2gx6wod4nwp3lxhtcc7b3qi",
-        "skill/valory/task_submission_abci/0.1.0": "bafybeiac7b2mys6otnvvydj6qzb4ppm5nxgkp3x46zx7527qkvguagelhu",
-        "skill/valory/task_execution/0.1.0": "bafybeigwxj33gowki6c63infzejykhxorqdd4k6k4f5kpj4t6wy6cuilfy",
+        "skill/valory/mech_abci/0.1.0": "bafybeiawdpe7nmtyqwap3qqxq7jddvqixz6sbm3fgq74ubax3tzlke53oi",
+        "skill/valory/task_submission_abci/0.1.0": "bafybeif5gn7xfsclxjor6uei2ijes6wcjowj2ck7gkeoarhusdcqu7rnbi",
+        "skill/valory/task_execution/0.1.0": "bafybeihsyy5byxpu3rdf3devix435bcynegvxj26csi3n7gveh2aqeitrq",
         "skill/valory/websocket_client/0.1.0": "bafybeidbcdcvyy2svob6p52akdx4ezsqpxdh4kphhqgf6hbageneu7unwi",
         "skill/valory/delivery_rate_abci/0.1.0": "bafybeib3y46tseqlty5ux3bmweoajmcl4eeyiwnofiidushnmqms7fjsl4",
         "skill/valory/transaction_settlement_abci/0.1.0": "bafybeids5bopaujr5bh2jfhvysl6fzf7zexsbdifaurf4nerp24hv5uqnm",

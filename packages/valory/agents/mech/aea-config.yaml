@@ -24,6 +24,7 @@ contracts:
 - valory/service_registry:0.1.0:bafybeieprxqowacuaqrhhzkv476i2zsnf4hs2ffusdgvlga3ruurrjdaqu
 - valory/mech_marketplace:0.1.0:bafybeicnl6sdhhw244hra52h5zxndzhq4ofe3jwgdnp4sw2jrcdcbm3vv4
 - valory/balance_tracker:0.1.0:bafybeihe3rgqcqtch365sevgprcgrubnfuedgzid5iluhs5mjqii7os5ny
+- valory/erc20:0.1.0:bafybeideeg2kkwtxt3fo36dtejmuy7fevuouyc6zji2zdpsobzmsnfougy
 protocols:
 - open_aea/signing:1.0.0:bafybeib7p5as3obcdzseiwg5umj2piiqaodkxkto7qh7b552l5emwsmdzm
 - valory/abci:0.1.0:bafybeigdi6wsbdn2nv7clzhnuhki3taywgiiajwawdaat57o5ntlgqj2qe
@@ -39,12 +40,12 @@ skills:
 - valory/abstract_abci:0.1.0:bafybeihbstfafzdk4ecb4nkuo3vz3incrvgibljaqf5khtm3yxqswklj5i
 - valory/abstract_round_abci:0.1.0:bafybeib4xpcpuiryyfnkuyhypdvqi5ebbl7ugavv6ig6yp4nzk3fxosntm
 - valory/contract_subscription:0.1.0:bafybeicrkrifwefmfd3d25cx7fwlq2ttqfhycrkply7dxrplhvoldgtdau
-- valory/mech_abci:0.1.0:bafybeif7yqc53z2yzvhlksz5w5bdiuvbjgj2gx6wod4nwp3lxhtcc7b3qi
+- valory/mech_abci:0.1.0:bafybeiawdpe7nmtyqwap3qqxq7jddvqixz6sbm3fgq74ubax3tzlke53oi
 - valory/registration_abci:0.1.0:bafybeibf5nhislatztx2q3u46v7d36vmm7dnxpmuhrbxqxkz4lvdgifwha
 - valory/reset_pause_abci:0.1.0:bafybeihuxdetmcyqoqr7iatqsddufolzoebdxsxb4lxd2uiyvuwhb52ttq
 - valory/delivery_rate_abci:0.1.0:bafybeib3y46tseqlty5ux3bmweoajmcl4eeyiwnofiidushnmqms7fjsl4
-- valory/task_execution:0.1.0:bafybeigwxj33gowki6c63infzejykhxorqdd4k6k4f5kpj4t6wy6cuilfy
-- valory/task_submission_abci:0.1.0:bafybeiac7b2mys6otnvvydj6qzb4ppm5nxgkp3x46zx7527qkvguagelhu
+- valory/task_execution:0.1.0:bafybeihsyy5byxpu3rdf3devix435bcynegvxj26csi3n7gveh2aqeitrq
+- valory/task_submission_abci:0.1.0:bafybeif5gn7xfsclxjor6uei2ijes6wcjowj2ck7gkeoarhusdcqu7rnbi
 - valory/termination_abci:0.1.0:bafybeigysvgr5m6zj5b6ofadeddzpxxlhxzn2hyxfilcybhcpp252vdft4
 - valory/transaction_settlement_abci:0.1.0:bafybeids5bopaujr5bh2jfhvysl6fzf7zexsbdifaurf4nerp24hv5uqnm
 - valory/websocket_client:0.1.0:bafybeidbcdcvyy2svob6p52akdx4ezsqpxdh4kphhqgf6hbageneu7unwi
@@ -85,6 +86,10 @@ dependencies:
     version: ==6.21.6
   open-aea-ledger-ethereum:
     version: ==2.0.6
+  typing_extensions:
+    version: ==4.12.2
+  pebble:
+    version: ==5.1.3
 default_connection: null
 ---
 public_id: valory/websocket_client:0.1.0:bafybeiexove4oqyhoae5xmk2hilskthosov5imdp65olpgj3cfrepbouyy
@@ -153,8 +158,6 @@ models:
       round_timeout_seconds: ${float:30.0}
       reset_period_count: ${int:1000}
       on_chain_service_id: ${int:1}
-      reset_pause_duration: ${int:10}
-      tools_to_package_hash: ${dict:{}}
       mech_staking_instance_address: ${str:0x0000000000000000000000000000000000000000}
       mech_marketplace_address: ${str:0x0000000000000000000000000000000000000000}
       complementary_service_metadata_address: ${str:0x0000000000000000000000000000000000000000}
@@ -167,7 +170,7 @@ models:
       init_fallback_gas: ${int:500000}
       manual_gas_limit: ${int:1000000}
       service_owner_share: ${int:1000}
-      profit_split_balance: ${int:1000}
+      profit_split_balance: ${int:1000000000000000000}
       agent_funding_amount: ${int:200000000000000000}
       minimum_agent_balance: ${int:100000000000000000}
       termination_from_block: ${int:0}
@@ -193,7 +196,9 @@ models:
       num_agents: ${int:4}
       from_block_range: ${int:50000}
       mech_marketplace_address: ${str:0x0000000000000000000000000000000000000000}
+      step_in_list_size: ${int:20}
       mech_to_config: ${dict:{}}
+      tools_to_pricing: ${dict:{}}
       mech_to_max_delivery_rate: ${dict:{}}
       timeout_limit: ${int:3}
       max_block_window: ${int:500}
@@ -213,6 +218,11 @@ config:
       chain_id: ${int:100}
       poa_chain: ${bool:false}
       default_gas_price_strategy: ${str:eip1559}
+    polygon:
+      address: ${str:http://localhost:8545}
+      chain_id: ${int:137}
+      poa_chain: ${bool:true}
+      default_gas_price_strategy: ${str:eip1559_polygon}
 ---
 public_id: valory/http_server:0.22.0:bafybeicblltx7ha3ulthg7bzfccuqqyjmihhrvfeztlgrlcoxhr7kf6nbq
 type: connection
