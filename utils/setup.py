@@ -154,7 +154,9 @@ def setup_private_keys() -> None:
                 data = manager.get_decrypted(key_file.name)
                 create_private_key_files(data)
             except Exception as e:
-                raise RuntimeError(f"Failed to setup private keys from {key_file}") from e
+                raise RuntimeError(
+                    f"Failed to setup private keys from {key_file}"
+                ) from e
 
 
 def get_password(operate: OperateApp) -> str:
