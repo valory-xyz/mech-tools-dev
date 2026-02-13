@@ -164,7 +164,7 @@ def get_password(operate: OperateApp) -> str:
 
     :param operate: The OperateApp instance.
     :return: Operate password
-    :raises Exception: If password could not be set
+    :raises RuntimeError: If password could not be set
     """
     env_path = BASE_DIR / ".env"
     # Try loading from environment file
@@ -179,7 +179,7 @@ def get_password(operate: OperateApp) -> str:
     # Prompt for password
     ask_password_if_needed(operate)
     if not operate.password:
-        raise Exception("Password could not be set for Operate.")
+        raise RuntimeError("Password could not be set for Operate.")
 
     # Persist password
     os.environ["OPERATE_PASSWORD"] = operate.password
