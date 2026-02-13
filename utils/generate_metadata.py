@@ -121,30 +121,52 @@ def generate_tools_data() -> List[Dict[str, Any]]:
             print(f"  └── Subfolder: {sub}")
             files = read_files_in_folder(sub)
             tool_entry: Dict[str, Any] = {}
-            for fname, content in files.items():
-                if fname == INIT_PY:
+            # Always parse component.yaml first; some dynamic tools derive metadata
+            # from PREFIX in python + default_model in component params.
+            component_content = files.get(COMPONENT_YAML)
+            if component_content is not None:
+                try:
+                    data = yaml.safe_load(component_content)
+                    tool_entry["author"] = data.get("author")
+                    tool_entry["tool_name"] = data.get("name")
+                    tool_entry["description"] = data.get("description")
+                    tool_entry["default_model"] = data.get("params", {}).get(
+                        "default_model"
+                    )
+                except Exception as e:
+                    print(f"Failed to parse YAML in {sub}: {e}")
+
+            for fname in sorted(files):
+                if fname in (INIT_PY, COMPONENT_YAML):
                     continue
-                if fname == COMPONENT_YAML:
-                    try:
-                        data = yaml.safe_load(content)
-                        tool_entry["author"] = data.get("author")
-                        tool_entry["tool_name"] = data.get("name")
-                        tool_entry["description"] = data.get("description")
-                    except Exception as e:
-                        print(f"Failed to parse YAML in {sub}: {e}")
-                        continue
-                else:
-                    file = str(Path(sub) / fname)
-                    try:
-                        mod = import_module_from_path(fname, file)
-                        for k in TOOLS_IDENTIFIERS:
-                            tools = getattr(mod, k, None)
-                            if isinstance(tools, list):
-                                tool_entry["allowed_tools"] = tools
-                                break
-                    except Exception as e:
-                        print(f"Failed to parse PY from {file}: {e}")
-                        continue
+                file = str(Path(sub) / fname)
+                try:
+                    mod = import_module_from_path(fname, file)
+                    for k in TOOLS_IDENTIFIERS:
+                        tools = getattr(mod, k, None)
+                        if isinstance(tools, list):
+                            tool_entry["allowed_tools"] = tools
+                            break
+                    if "allowed_tools" not in tool_entry:
+                        prefix = getattr(mod, "PREFIX", None)
+                        default_model = tool_entry.get("default_model")
+                        if (
+                            isinstance(prefix, str)
+                            and prefix
+                            and isinstance(default_model, str)
+                            and default_model
+                        ):
+                            # Dynamic wrappers expose a PREFIX and a default model.
+                            # Synthesize one canonical tool id for metadata.
+                            canonical_tool = (
+                                default_model
+                                if default_model.startswith(prefix)
+                                else f"{prefix}{default_model}"
+                            )
+                            tool_entry["allowed_tools"] = [canonical_tool]
+                except Exception as e:
+                    print(f"Failed to parse PY from {file}: {e}")
+                    continue
 
             if tool_entry:
                 tools_data.append(tool_entry)
