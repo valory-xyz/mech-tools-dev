@@ -320,7 +320,7 @@ To test the mech from another terminal:
 
 ```bash
 source .env
-poetry run mechx interact --prompts "hello, mech!" --priority-mech <your_mech_address> --tools <your_tool_name> --chain-config gnosis
+poetry run mechx request --prompts "hello, mech!" --priority-mech <your_mech_address> --tools <your_tool_name> --chain-config gnosis
 ```
 
 `<your_mech_address>` should match the address in `MECH_TO_CONFIG`.
