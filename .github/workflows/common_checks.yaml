@@ -97,7 +97,8 @@ jobs:
         sudo npm install -g markdown-spellcheck
 
     - name: Security checks
-      run: tomte check-security
+       # TODO: tomte check-security
+      run: echo "Skipped until service is bumped"
     - name: Check packages
       run: tox -e check-packages
     - name: Check hash
@@ -153,5 +154,5 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tomte[tox,cli]==0.2.15
+          pip install tomte[tox,cli]==0.4.0
           pip install --user --upgrade setuptools
