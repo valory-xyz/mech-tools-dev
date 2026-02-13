@@ -24,7 +24,7 @@ set -o allexport; source .env; set +o allexport
 # make formatters
 # make generators
 make clean
-
+autonomy packages lock
 autonomy push-all
 
 autonomy fetch --local --service valory/mech && cd mech
