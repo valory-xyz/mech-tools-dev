@@ -149,7 +149,7 @@
     "FROM_BLOCK_RANGE": {
       "name": "",
       "description": "",
-      "value": 2120,
+      "value": 5400,
       "provision_type": "fixed"
     }
   },
