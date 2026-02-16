@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """The script allows the user to setup onchain requirements for running mechs"""
 
-import argparse
 import json
 import logging
 import os
@@ -187,16 +186,14 @@ def setup_private_keys() -> None:
                 ) from e
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse command-line args."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--chain",
-        choices=SUPPORTED_CHAINS,
-        required=True,
-        help="The chain to configure for operate setup.",
-    )
-    return parser.parse_args()
+def ask_chain() -> str:
+    """Ask user for a target chain."""
+    options = ", ".join(SUPPORTED_CHAINS)
+    while True:
+        selected_chain = input(f"Select chain ({options}): ").strip().lower()
+        if selected_chain in SUPPORTED_CHAINS:
+            return selected_chain
+        print(f"Invalid chain `{selected_chain}`. Please choose one of: {options}.")
 
 
 def get_password(operate: OperateApp) -> str:
@@ -231,8 +228,8 @@ def get_password(operate: OperateApp) -> str:
 
 def setup_operate(operate: OperateApp) -> None:
     """Setups the operate"""
-    args = parse_args()
-    config_path = TEMPLATE_CONFIG_PATHS[args.chain]
+    selected_chain = ask_chain()
+    config_path = TEMPLATE_CONFIG_PATHS[selected_chain]
     if not config_path.exists():
         raise FileNotFoundError(f"Missing template config: {config_path}")
 

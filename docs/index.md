@@ -118,10 +118,10 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
 
 4. Run the `setup.py` script:
     ```bash
-    python utils/setup.py --chain <gnosis|base|polygon|optimism>
+    python utils/setup.py
     ```
 
-    You will be prompted to fill in some details, including the RPC for your selected chain. Here, you can get one from a provider like [Quiknode](https://www.quicknode.com/) but we encourage you to first test against a virtual network using [Tenderly](https://tenderly.co/). This way, you can also use the faucet to fund the required wallets.
+    You will be prompted to select a chain (`gnosis`, `base`, `polygon`, `optimism`) and fill in some details, including the RPC for that chain. Here, you can get one from a provider like [Quiknode](https://www.quicknode.com/) but we encourage you to first test against a virtual network using [Tenderly](https://tenderly.co/). This way, you can also use the faucet to fund the required wallets.
 
 5. Update the tool metadata hash onchain:
     ```bash
