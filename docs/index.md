@@ -298,8 +298,8 @@ The [component.yaml](https://github.com/valory-xyz/mech-tools-dev/blob/main/mtd/
     autonomy push-all
     ```
 
-4.  Mint the tool [here](https://marketplace.olas.network/ethereum/components/mint) as a component on the Olas Registry;
-    For this is needed: an address (EOA) and the hash of the meta-data file.
+4. Mint the tool [here](https://marketplace.olas.network/ethereum/components/mint) as a component on the Olas Registry.
+    You will need an address (EOA) and the hash of the metadata file.
     In order to generate this hash, click on “Generate Hash & File” and provide the following information:
     - name (name of the tool)
     - description (of the tool)
@@ -313,10 +313,10 @@ The [component.yaml](https://github.com/valory-xyz/mech-tools-dev/blob/main/mtd/
         mechx push-to-ipfs ./<file_name>
         ```
 
-After this, the tool can be deployed to be used by a Mech as shown in steps outlined below.
+After this, the tool can be deployed and used by a Mech, as shown in the next steps.
 
 
-## Deploying a Mech with custom tools
+### 3. Deploying a Mech with custom tools
 
 In order to test a tool you developed, let's update the Mech you created in the previous sections.
 
@@ -345,7 +345,7 @@ In order to test a tool you developed, let's update the Mech you created in the 
 6. Run your mech using `run_agent.sh` or `run_service.sh` as seen in the previous sections.
 
 
-## Sending a request to your custom Mech
+### 4. Sending a request to your custom Mech
 
 1. Copy your Mech's address from the `.env` file. There should be a variable called `MECH_TO_CONFIG` that includes it.
 
