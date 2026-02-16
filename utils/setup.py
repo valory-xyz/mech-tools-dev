@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """The script allows the user to setup onchain requirements for running mechs"""
 
+import argparse
 import json
 import logging
 import os
@@ -31,7 +32,10 @@ from operate.quickstart.run_service import ask_password_if_needed
 
 CURR_DIR = Path(__file__).resolve().parent
 BASE_DIR = CURR_DIR.parent
-GNOSIS_TEMPLATE_CONFIG_PATH = BASE_DIR / "config" / "config_mech_gnosis.json"
+SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
+TEMPLATE_CONFIG_PATHS = {
+    chain: BASE_DIR / "config" / f"config_mech_{chain}.json" for chain in SUPPORTED_CHAINS
+}
 OPERATE_DIR = BASE_DIR / ".operate"
 OPERATE_CONFIG_PATH = "services/sc-*/config.json"
 AGENT_KEY = "ethereum_private_key.txt"
@@ -48,13 +52,29 @@ def read_and_update_env(data: dict) -> None:
         "OPERATE_PASSWORD", ""
     )
 
-    safe_contract_address = data["chain_configs"]["gnosis"]["chain_data"]["multisig"]
+    home_chain = data.get("home_chain")
+    if not home_chain:
+        raise ValueError("Missing `home_chain` in operate service config.")
+    if home_chain not in SUPPORTED_CHAINS:
+        raise ValueError(
+            f"Unsupported home chain `{home_chain}`. Supported chains: {', '.join(SUPPORTED_CHAINS)}."
+        )
+
+    chain_configs = data.get("chain_configs", {})
+    safe_contract_address = (
+        chain_configs.get(home_chain, {}).get("chain_data", {}).get("multisig", "")
+    )
+    if not safe_contract_address:
+        raise ValueError(
+            f"Missing safe address for `{home_chain}` in operate chain config."
+        )
     all_participants = json.dumps(data["agent_addresses"])
 
-    var_data = (
-        data["env_variables"].get("MECH_TO_MAX_DELIVERY_RATE", {}).get("value", "")
-    )
-    parsed = json.loads(var_data)
+    var_data = data["env_variables"].get("MECH_TO_MAX_DELIVERY_RATE", {}).get("value", "")
+    try:
+        parsed = json.loads(var_data or "{}")
+    except json.JSONDecodeError as e:
+        raise ValueError("Invalid MECH_TO_MAX_DELIVERY_RATE JSON in operate config.") from e
     parsed_dict = {k: int(v) for k, v in parsed.items()}
     mech_to_max_delivery_rate = json.dumps(parsed_dict, separators=(",", ":"))
 
@@ -64,13 +84,16 @@ def read_and_update_env(data: dict) -> None:
         "MECH_TO_MAX_DELIVERY_RATE": mech_to_max_delivery_rate,
     }
 
+    chain_rpc_env_var = f"{home_chain.upper()}_LEDGER_RPC_0"
+    chain_rpc = data["env_variables"].get(chain_rpc_env_var, {}).get("value", "")
+    if not chain_rpc:
+        raise ValueError(
+            f"Missing `{chain_rpc_env_var}` in operate env variables for chain `{home_chain}`."
+        )
     mechx_env_data = {
-        "MECHX_RPC_URL": data["env_variables"]
-        .get("GNOSIS_LEDGER_RPC_0", {})
-        .get("value", ""),
-        "MECHX_LEDGER_ADDRESS": data["env_variables"]
-        .get("GNOSIS_LEDGER_RPC_0", {})
-        .get("value", ""),
+        "MECHX_RPC_URL": chain_rpc,
+        "MECHX_LEDGER_ADDRESS": chain_rpc,
+        "MECHX_CHAIN_CONFIG": home_chain,
         "MECHX_MECH_OFFCHAIN_URL": "http://localhost:8000/",
     }
 
@@ -116,6 +139,11 @@ def setup_env() -> None:
             content = f.read()
             data = json.loads(content)
 
+    if not data:
+        raise FileNotFoundError(
+            f"No operate config found under {OPERATE_DIR / 'services'} matching {OPERATE_CONFIG_PATH}."
+        )
+
     read_and_update_env(data)
 
 
@@ -159,6 +187,18 @@ def setup_private_keys() -> None:
                 ) from e
 
 
+def parse_args() -> argparse.Namespace:
+    """Parse command-line args."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--chain",
+        choices=SUPPORTED_CHAINS,
+        required=True,
+        help="The chain to configure for operate setup.",
+    )
+    return parser.parse_args()
+
+
 def get_password(operate: OperateApp) -> str:
     """Load password from .env if present, otherwise prompt and persist.
 
@@ -191,9 +231,14 @@ def get_password(operate: OperateApp) -> str:
 
 def setup_operate(operate: OperateApp) -> None:
     """Setups the operate"""
+    args = parse_args()
+    config_path = TEMPLATE_CONFIG_PATHS[args.chain]
+    if not config_path.exists():
+        raise FileNotFoundError(f"Missing template config: {config_path}")
+
     run_service(
         operate=operate,
-        config_path=GNOSIS_TEMPLATE_CONFIG_PATH,
+        config_path=config_path,
         build_only=True,
         skip_dependency_check=False,
     )
