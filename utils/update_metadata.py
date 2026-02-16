@@ -92,6 +92,7 @@ def send_safe_tx(
     gas: int,
     value: int = 0,
 ) -> TxReceipt:
+    # pylint: disable=too-many-positional-arguments
     """Send a Safe transaction"""
     # Get the safe
     safe = Safe(  # pylint:disable=abstract-class-instantiated

@@ -2,24 +2,28 @@ name: mech
 author: valory
 version: 0.1.0
 description: A decentralised task execution engine.
-aea_version: '>=1.0.0, <2.0.0'
+aea_version: '>=2.0.0, <3.0.0'
 license: Apache-2.0
 fingerprint:
   README.md: bafybeif7ia4jdlazy6745ke2k2x5yoqlwsgwr6sbztbgqtwvs3ndm2p7ba
 fingerprint_ignore_patterns: []
-agent: valory/mech:0.1.0:bafybeicsmugyyvx54ncag2peyjtsiooi7wazwjekxbpviiszzfymmqdjay
+agent: valory/mech:0.1.0:bafybeifrujtgyq47h5temdrzacyipunt7osrehrbixzeg55ihvp2uejayq
 number_of_agents: 4
 deployment:
   agent:
     ports:
       0:
         8000: 8000
+        9000: 9000
       1:
         8001: 8000
+        9001: 9000
       2:
         8002: 8000
+        9002: 9000
       3:
         8003: 8000
+        9003: 9000
 ---
 public_id: valory/mech_abci:0.1.0
 type: skill
@@ -197,7 +201,10 @@ type: skill
         num_agents: ${NUM_AGENTS:int:4}
         mech_marketplace_address: ${MECH_MARKETPLACE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
+        step_in_list_size: ${STEP_IN_LIST_SIZE:int:20}
+        from_block_range: ${FROM_BLOCK_RANGE:int:1000}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
+        tools_to_pricing: ${TOOLS_TO_PRICING:dict:{}}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
         mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
@@ -212,7 +219,10 @@ type: skill
         mech_marketplace_address: ${MECH_MARKETPLACE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         agent_index: ${AGENT_INDEX_1:int:1}
         num_agents: ${NUM_AGENTS:int:4}
+        step_in_list_size: ${STEP_IN_LIST_SIZE:int:20}
+        from_block_range: ${FROM_BLOCK_RANGE:int:1000}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
+        tools_to_pricing: ${TOOLS_TO_PRICING:dict:{}}
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
         mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
@@ -228,7 +238,10 @@ type: skill
         mech_marketplace_address: ${MECH_MARKETPLACE_ADDRESS:str:0x0000000000000000000000000000000000000000}
         agent_index: ${AGENT_INDEX_2:int:2}
         num_agents: ${NUM_AGENTS:int:4}
+        step_in_list_size: ${STEP_IN_LIST_SIZE:int:20}
+        from_block_range: ${FROM_BLOCK_RANGE:int:1000}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
+        tools_to_pricing: ${TOOLS_TO_PRICING:dict:{}}
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
         mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
@@ -244,8 +257,11 @@ type: skill
         polling_interval: ${POLLING_INTERVAL:float:30.0}
         agent_index: ${AGENT_INDEX_3:int:3}
         num_agents: ${NUM_AGENTS:int:4}
+        step_in_list_size: ${STEP_IN_LIST_SIZE:int:20}
+        from_block_range: ${FROM_BLOCK_RANGE:int:1000}
         timeout_limit: ${TIMEOUT_LIMIT:int:3}
         mech_to_config: ${MECH_TO_CONFIG:dict:{}}
+        tools_to_pricing: ${TOOLS_TO_PRICING:dict:{}}
         max_block_window: ${MAX_BLOCK_WINDOW:int:500}
         mech_to_max_delivery_rate: ${MECH_TO_MAX_DELIVERY_RATE:dict:{}}
         default_chain_id: ${DEFAULT_CHAIN_ID:str:gnosis}
@@ -265,6 +281,11 @@ type: connection
         chain_id: ${GNOSIS_LEDGER_CHAIN_ID:int:100}
         poa_chain: ${GNOSIS_LEDGER_IS_POA_CHAIN:bool:false}
         default_gas_price_strategy: ${GNOSIS_LEDGER_PRICING:str:eip1559}
+      polygon:
+        address: ${POLYGON_LEDGER_RPC_0:str:http://host.docker.internal:8545}
+        chain_id: ${POLYGON_LEDGER_CHAIN_ID:int:137}
+        poa_chain: ${POLYGON_LEDGER_IS_POA_CHAIN:bool:true}
+        default_gas_price_strategy: ${POLYGON_LEDGER_PRICING:str:eip1559_polygon}
 1:
   config:
     ledger_apis:
@@ -278,6 +299,11 @@ type: connection
         chain_id: ${GNOSIS_LEDGER_CHAIN_ID:int:100}
         poa_chain: ${GNOSIS_LEDGER_IS_POA_CHAIN:bool:false}
         default_gas_price_strategy: ${GNOSIS_LEDGER_PRICING:str:eip1559}
+      polygon:
+        address: ${POLYGON_LEDGER_RPC_1:str:http://host.docker.internal:8545}
+        chain_id: ${POLYGON_LEDGER_CHAIN_ID:int:137}
+        poa_chain: ${POLYGON_LEDGER_IS_POA_CHAIN:bool:true}
+        default_gas_price_strategy: ${POLYGON_LEDGER_PRICING:str:eip1559_polygon}
 2:
   config:
     ledger_apis:
@@ -291,6 +317,11 @@ type: connection
         chain_id: ${GNOSIS_LEDGER_CHAIN_ID:int:100}
         poa_chain: ${GNOSIS_LEDGER_IS_POA_CHAIN:bool:false}
         default_gas_price_strategy: ${GNOSIS_LEDGER_PRICING:str:eip1559}
+      polygon:
+        address: ${POLYGON_LEDGER_RPC_2:str:http://host.docker.internal:8545}
+        chain_id: ${POLYGON_LEDGER_CHAIN_ID:int:137}
+        poa_chain: ${POLYGON_LEDGER_IS_POA_CHAIN:bool:true}
+        default_gas_price_strategy: ${POLYGON_LEDGER_PRICING:str:eip1559_polygon}
 3:
   config:
     ledger_apis:
@@ -304,6 +335,11 @@ type: connection
         chain_id: ${GNOSIS_LEDGER_CHAIN_ID:int:100}
         poa_chain: ${GNOSIS_LEDGER_IS_POA_CHAIN:bool:false}
         default_gas_price_strategy: ${GNOSIS_LEDGER_PRICING:str:eip1559}
+      polygon:
+        address: ${POLYGON_LEDGER_RPC_3:str:http://host.docker.internal:8545}
+        chain_id: ${POLYGON_LEDGER_CHAIN_ID:int:137}
+        poa_chain: ${POLYGON_LEDGER_IS_POA_CHAIN:bool:true}
+        default_gas_price_strategy: ${POLYGON_LEDGER_PRICING:str:eip1559_polygon}
 ---
 public_id: valory/p2p_libp2p_client:0.1.0
 type: connection

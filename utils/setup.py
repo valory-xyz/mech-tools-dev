@@ -19,9 +19,14 @@
 """The script allows the user to setup onchain requirements for running mechs"""
 
 import json
+import logging
+import os
 from pathlib import Path
 
+from dotenv import dotenv_values, load_dotenv, set_key
 from operate.cli import OperateApp, run_service
+from operate.keys import KeysManager
+from operate.quickstart.run_service import ask_password_if_needed
 
 
 CURR_DIR = Path(__file__).resolve().parent
@@ -37,6 +42,11 @@ def read_and_update_env(data: dict) -> None:
     """Reads the generated env from operate and creates the required .env"""
     with open(".example.env", "r", encoding="utf-8") as f:
         lines = f.readlines()
+
+    existing_env = dotenv_values(".env")
+    existing_operate_password = existing_env.get("OPERATE_PASSWORD") or os.environ.get(
+        "OPERATE_PASSWORD", ""
+    )
 
     safe_contract_address = data["chain_configs"]["gnosis"]["chain_data"]["multisig"]
     all_participants = json.dumps(data["agent_addresses"])
@@ -65,6 +75,7 @@ def read_and_update_env(data: dict) -> None:
     }
 
     filled_lines = []
+    written_keys = set()
     for line in lines:
         if "=" in line:
             key = line.split("=")[0].strip()
@@ -76,6 +87,7 @@ def read_and_update_env(data: dict) -> None:
             # remove vars that are not used. Creates issues during run_service
             if value not in ("", None, {}, []):
                 filled_lines.append(f"{key}={value!r}\n")
+                written_keys.add(key)
         else:
             filled_lines.append(line)
 
@@ -83,6 +95,12 @@ def read_and_update_env(data: dict) -> None:
         value = mechx_env_data.get(key)
         if value not in ("", None, {}, []):
             filled_lines.append(f"export {key}={value!r}\n")
+
+    if (
+        existing_operate_password not in ("", None)
+        and "OPERATE_PASSWORD" not in written_keys
+    ):
+        filled_lines.append(f"OPERATE_PASSWORD={existing_operate_password!r}\n")
 
     with open(".env", "w", encoding="utf-8") as f:
         f.writelines(filled_lines)
@@ -107,13 +125,13 @@ def create_private_key_files(data: dict) -> None:
     if agent_key_path.exists():
         print(f"Agent key found at: {agent_key_path}. Skipping creation")
     else:
-        agent_key_path.write_text(data["private_key"])
+        agent_key_path.write_text(data["private_key"], encoding="utf-8")
 
     service_key_path = BASE_DIR / SERVICE_KEY
     if service_key_path.exists():
         print(f"Service key found at: {service_key_path}. Skipping creation")
     else:
-        service_key_path.write_text(json.dumps([data], indent=2))
+        service_key_path.write_text(json.dumps([data], indent=2), encoding="utf-8")
 
 
 def setup_private_keys() -> None:
@@ -123,18 +141,56 @@ def setup_private_keys() -> None:
         key_file = next(keys_dir.glob("*"), None)
         if key_file and key_file.is_file():
             print(f"Key file found at: {key_file}")
-            with open(key_file, "r", encoding="utf-8") as f:
-                content = f.read()
-                data = json.loads(content)
+            password = os.environ.get("OPERATE_PASSWORD", "")
+            if not password:
+                raise ValueError("OPERATE_PASSWORD is required to decrypt keys.")
 
-        create_private_key_files(data)
+            try:
+                manager = KeysManager(
+                    path=keys_dir,
+                    logger=logging.getLogger(__name__),
+                    password=password,
+                )
+                data = manager.get_decrypted(key_file.name)
+                create_private_key_files(data)
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to setup private keys from {key_file}"
+                ) from e
 
 
-def setup_operate() -> None:
+def get_password(operate: OperateApp) -> str:
+    """Load password from .env if present, otherwise prompt and persist.
+
+    :param operate: The OperateApp instance.
+    :return: Operate password
+    :raises RuntimeError: If password could not be set
+    """
+    env_path = BASE_DIR / ".env"
+    # Try loading from environment file
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path, override=False)
+        password = os.environ.get("OPERATE_PASSWORD", "")
+        if password:
+            os.environ["OPERATE_PASSWORD"] = password
+            os.environ["ATTENDED"] = "false"
+            return password
+
+    # Prompt for password
+    ask_password_if_needed(operate)
+    if not operate.password:
+        raise RuntimeError("Password could not be set for Operate.")
+
+    # Persist password
+    os.environ["OPERATE_PASSWORD"] = operate.password
+    env_path.parent.mkdir(parents=True, exist_ok=True)
+    set_key(str(env_path), "OPERATE_PASSWORD", os.environ["OPERATE_PASSWORD"])
+    os.environ["ATTENDED"] = "false"
+    return os.environ["OPERATE_PASSWORD"]
+
+
+def setup_operate(operate: OperateApp) -> None:
     """Setups the operate"""
-    operate = OperateApp()
-    operate.setup()
-
     run_service(
         operate=operate,
         config_path=GNOSIS_TEMPLATE_CONFIG_PATH,
@@ -145,12 +201,23 @@ def setup_operate() -> None:
 
 def main() -> None:
     """Runs the script"""
-    if not OPERATE_DIR.is_dir():
+    operate = OperateApp()
+    operate.setup()
+
+    services, _ = operate.service_manager().get_all_services()
+    if (
+        not services
+        or services[0].chain_configs.get(services[0].home_chain, {}).chain_data.multisig
+        is None
+    ):
         print("Setting up operate...")
-        setup_operate()
+        setup_operate(operate)
 
     print("Setting up env...")
     setup_env()
+
+    # Persist password to .env
+    get_password(operate)
 
     print("Setting up private keys...")
     setup_private_keys()
