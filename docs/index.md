@@ -118,10 +118,10 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
 
 4. Run the `setup.py` script:
     ```bash
-    python utils/setup.py
+    python utils/setup.py --chain <gnosis|base|polygon|optimism>
     ```
 
-    You will be prompted to fill in some details, including a Gnosis Chain RPC. Here, you can get one from a provider like [Quiknode](https://www.quicknode.com/) but we encourage you to first test against a virtual network using [Tenderly](https://tenderly.co/). This way, you can also use the faucet to fund the required wallets.
+    You will be prompted to fill in some details, including the RPC for your selected chain. Here, you can get one from a provider like [Quiknode](https://www.quicknode.com/) but we encourage you to first test against a virtual network using [Tenderly](https://tenderly.co/). This way, you can also use the faucet to fund the required wallets.
 
 5. Update the tool metadata hash onchain:
     ```bash
@@ -161,7 +161,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     Finally, send the request (replacing your mech address):
 
     ```bash
-    poetry run mechx interact --prompts "hello, mech!" --priority-mech <your_mech_address> --tools echo --chain-config gnosis
+    poetry run mechx request --prompts "hello, mech!" --priority-mech <your_mech_address> --tools echo --chain-config <gnosis|base|polygon|optimism>
     ```
 
     The echo tool will respond with the same text from the request. You will see something like:
@@ -169,7 +169,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     Fetching Mech Info...
     Sending Mech Marketplace request...
     - Prompt uploaded: https://gateway.autonolas.tech/ipfs/f01701220fe7480a472cc8dffe481d5883e235346793a20a25415160ad2feade0d809f9db
-    - Transaction sent: https://gnosisscan.io/tx/0x7bb3b734b5936e72c84749431081c8416c3f4c64a75f9f6c61291b47f141fd3d
+    - Transaction sent: <chain-explorer-tx-url>
     - Waiting for transaction receipt...
     - Created on-chain request with ID 63113231565093422774445497789782682647110838977840831205387629469951062204223
     ```
@@ -352,7 +352,7 @@ In order to test a tool you developed, let's update the Mech you created in the 
 2. Send the request similarly to how you did it in the first section:
     ```bash
     source .env
-    poetry run mechx interact --prompts <your_prompt> --priority-mech <your_mech_address> --tools <your_tool_name> --chain-config gnosis
+    poetry run mechx request --prompts <your_prompt> --priority-mech <your_mech_address> --tools <your_tool_name> --chain-config <gnosis|base|polygon|optimism>
     ```
 
 3. Wait for some time and you will receive the response. If there's an error in the tool, you will see it in the Mech's logs.
