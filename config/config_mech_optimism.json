@@ -29,8 +29,8 @@
     "SERVICE_REGISTRY_ADDRESS": {
       "name": "Service registry address",
       "description": "",
-      "value": "",
-      "provision_type": "user"
+      "value": "0x3d77596beb0f130a4415df3D2D8232B3d3D31e44",
+      "provision_type": "fixed"
     },
     "STAKING_TOKEN_CONTRACT_ADDRESS": {
       "name": "Staking contract address",
@@ -41,8 +41,8 @@
     "MECH_MARKETPLACE_ADDRESS": {
       "name": "Mech Marketplace address",
       "description": "The contract address of the mech marketplace, where your mech should be created.",
-      "value": "",
-      "provision_type": "user"
+      "value": "0x8Bc0a5c5B1612A16983B01ecd7ae130E728390CB",
+      "provision_type": "fixed"
     },
     "API_KEYS": {
       "name": "API keys",
@@ -131,14 +131,14 @@
     "CHECKPOINT_ADDRESS": {
       "name": "",
       "description": "",
-      "value": "",
-      "provision_type": "user"
+      "value": "0x4E82BC73BFB9647074aA71CBF467e66c1808C571",
+      "provision_type": "fixed"
     },
     "COMPLEMENTARY_SERVICE_METADATA_ADDRESS": {
       "name": "",
       "description": "",
-      "value": "",
-      "provision_type": "user"
+      "value": "0x11949cBC85d8793B360029E26b18ae759708e28b",
+      "provision_type": "fixed"
     },
     "RESET_PAUSE_DURATION": {
       "name": "",
