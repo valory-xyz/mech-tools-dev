@@ -19,7 +19,6 @@
 
 """Tests for run command."""
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
@@ -38,7 +37,7 @@ class TestRunCommand:
     def test_run_success(
         self, mock_operate: MagicMock, mock_run_service: MagicMock
     ) -> None:
-        """Test successful run."""
+        """Test successful run in production mode."""
         mock_app = MagicMock()
         mock_operate.return_value = mock_app
 
@@ -102,7 +101,8 @@ class TestRunCommand:
         result = runner.invoke(run, ["-c", "gnosis"])
 
         assert result.exit_code != 0
-        assert "Service failed to start" in result.output
+        assert result.exception is not None
+        assert "Service failed to start" in str(result.exception)
 
     def test_run_help(self) -> None:
         """Test run help output."""
@@ -111,4 +111,62 @@ class TestRunCommand:
 
         assert result.exit_code == 0
         assert "chain-config" in result.output
+        assert "--dev" in result.output
         assert "Run the mech agent service" in result.output
+
+
+class TestRunDevMode:
+    """Tests for run --dev mode."""
+
+    @patch(f"{MOCK_PATH}._run_dev_mode")
+    def test_run_dev_flag_delegates(self, mock_dev_mode: MagicMock) -> None:
+        """Test that --dev flag delegates to _run_dev_mode."""
+        runner = CliRunner()
+        result = runner.invoke(run, ["-c", "gnosis", "--dev"])
+
+        assert result.exit_code == 0
+        mock_dev_mode.assert_called_once()
+
+    @patch(f"{MOCK_PATH}.run_service")
+    @patch(f"{MOCK_PATH}.OperateApp")
+    @patch(f"{MOCK_PATH}._get_latest_service_hash", return_value="bafybei123")
+    @patch(f"{MOCK_PATH}.subprocess")
+    def test_run_dev_mode_full_flow(
+        self,
+        mock_subprocess: MagicMock,
+        mock_get_hash: MagicMock,
+        mock_operate: MagicMock,
+        mock_run_service: MagicMock,
+    ) -> None:
+        """Test dev mode pushes packages and runs with use_docker=False."""
+        mock_app = MagicMock()
+        mock_operate.return_value = mock_app
+        mock_subprocess.run.return_value = MagicMock(returncode=0)
+
+        runner = CliRunner()
+        result = runner.invoke(run, ["-c", "gnosis", "--dev"])
+
+        assert result.exit_code == 0
+        assert "Pushing local packages" in result.output
+        assert "dev mode" in result.output
+
+        mock_run_service.assert_called_once()
+        call_kwargs = mock_run_service.call_args[1]
+        assert call_kwargs["build_only"] is False
+        assert call_kwargs["use_docker"] is False
+
+    @patch(f"{MOCK_PATH}.run_service")
+    @patch(f"{MOCK_PATH}.OperateApp")
+    def test_run_without_dev_does_not_pass_use_docker(
+        self, mock_operate: MagicMock, mock_run_service: MagicMock
+    ) -> None:
+        """Test production mode does not pass use_docker."""
+        mock_app = MagicMock()
+        mock_operate.return_value = mock_app
+
+        runner = CliRunner()
+        result = runner.invoke(run, ["-c", "gnosis"])
+
+        assert result.exit_code == 0
+        call_kwargs = mock_run_service.call_args[1]
+        assert "use_docker" not in call_kwargs

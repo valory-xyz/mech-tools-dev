@@ -95,7 +95,8 @@ class TestStopCommand:
         result = runner.invoke(stop, ["-c", "gnosis"])
 
         assert result.exit_code != 0
-        assert "Service failed to stop" in result.output
+        assert result.exception is not None
+        assert "Service failed to stop" in str(result.exception)
 
     def test_stop_help(self) -> None:
         """Test stop help output."""

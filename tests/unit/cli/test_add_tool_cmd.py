@@ -116,4 +116,5 @@ class TestAddToolCommand:
         result = runner.invoke(add_tool, ["myauthor", "mytool", "--skip-lock"])
 
         assert result.exit_code != 0
-        assert "Template not found" in result.output
+        assert result.exception is not None
+        assert "Template not found" in str(result.exception)

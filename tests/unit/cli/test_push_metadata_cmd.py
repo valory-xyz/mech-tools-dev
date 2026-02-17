@@ -86,7 +86,8 @@ class TestPushMetadataCommand:
         result = runner.invoke(push_metadata, [])
 
         assert result.exit_code != 0
-        assert "Failed to generate metadata" in result.output
+        assert result.exception is not None
+        assert "Failed to generate metadata" in str(result.exception)
         mock_push.assert_not_called()
 
     @patch(f"{MOCK_PATH}.push_metadata_to_ipfs")
@@ -101,7 +102,8 @@ class TestPushMetadataCommand:
         result = runner.invoke(push_metadata, [])
 
         assert result.exit_code != 0
-        assert "IPFS connection failed" in result.output
+        assert result.exception is not None
+        assert "IPFS connection failed" in str(result.exception)
 
     def test_push_metadata_help(self) -> None:
         """Test push-metadata help output."""

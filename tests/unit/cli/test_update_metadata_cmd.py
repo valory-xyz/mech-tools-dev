@@ -51,7 +51,8 @@ class TestUpdateMetadataCommand:
         result = runner.invoke(update_metadata, [])
 
         assert result.exit_code != 0
-        assert "Transaction failed" in result.output
+        assert result.exception is not None
+        assert "Transaction failed" in str(result.exception)
 
     def test_update_metadata_help(self) -> None:
         """Test update-metadata help output."""

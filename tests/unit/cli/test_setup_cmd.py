@@ -23,22 +23,22 @@ from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 
-from mtd.commands.setup_cmd import setup
+from mtd.commands.setup_cmd import setup as setup_command
 
 
-MOCK_OPERATE_PATH = "mtd.commands.setup_cmd"
+MOD = "mtd.commands.setup_cmd"
 
 
 class TestSetupCommand:
     """Tests for setup command."""
 
-    @patch(f"{MOCK_OPERATE_PATH}.update_main")
-    @patch(f"{MOCK_OPERATE_PATH}.push_metadata_to_ipfs")
-    @patch(f"{MOCK_OPERATE_PATH}.generate_main")
-    @patch(f"{MOCK_OPERATE_PATH}.setup_private_keys")
-    @patch(f"{MOCK_OPERATE_PATH}.setup_env")
-    @patch(f"{MOCK_OPERATE_PATH}.run_service")
-    @patch(f"{MOCK_OPERATE_PATH}.OperateApp")
+    @patch(f"{MOD}._update_metadata")
+    @patch(f"{MOD}._push_metadata")
+    @patch(f"{MOD}._generate_metadata")
+    @patch(f"{MOD}.setup_private_keys")
+    @patch(f"{MOD}.setup_env")
+    @patch(f"{MOD}.run_service")
+    @patch(f"{MOD}.OperateApp")
     def test_setup_success_needs_setup(
         self,
         mock_operate: MagicMock,
@@ -57,7 +57,7 @@ class TestSetupCommand:
         mock_manager.get_all_services.return_value = ([], None)
 
         runner = CliRunner()
-        result = runner.invoke(setup, ["-c", "gnosis"])
+        result = runner.invoke(setup_command, ["-c", "gnosis"])
 
         assert result.exit_code == 0
         assert "Setting up operate" in result.output
@@ -77,13 +77,13 @@ class TestSetupCommand:
         mock_push.assert_called_once()
         mock_update.assert_called_once()
 
-    @patch(f"{MOCK_OPERATE_PATH}.update_main")
-    @patch(f"{MOCK_OPERATE_PATH}.push_metadata_to_ipfs")
-    @patch(f"{MOCK_OPERATE_PATH}.generate_main")
-    @patch(f"{MOCK_OPERATE_PATH}.setup_private_keys")
-    @patch(f"{MOCK_OPERATE_PATH}.setup_env")
-    @patch(f"{MOCK_OPERATE_PATH}.run_service")
-    @patch(f"{MOCK_OPERATE_PATH}.OperateApp")
+    @patch(f"{MOD}._update_metadata")
+    @patch(f"{MOD}._push_metadata")
+    @patch(f"{MOD}._generate_metadata")
+    @patch(f"{MOD}.setup_private_keys")
+    @patch(f"{MOD}.setup_env")
+    @patch(f"{MOD}.run_service")
+    @patch(f"{MOD}.OperateApp")
     def test_setup_skips_operate_when_already_setup(
         self,
         mock_operate: MagicMock,
@@ -109,7 +109,7 @@ class TestSetupCommand:
         mock_app.service_manager.return_value = mock_manager
 
         runner = CliRunner()
-        result = runner.invoke(setup, ["-c", "gnosis"])
+        result = runner.invoke(setup_command, ["-c", "gnosis"])
 
         assert result.exit_code == 0
         mock_run_service.assert_not_called()
@@ -122,7 +122,7 @@ class TestSetupCommand:
     def test_setup_missing_chain_config(self) -> None:
         """Test setup without required chain-config option."""
         runner = CliRunner()
-        result = runner.invoke(setup, [])
+        result = runner.invoke(setup_command, [])
 
         assert result.exit_code != 0
         assert "Missing option" in result.output or "chain-config" in result.output
@@ -130,7 +130,7 @@ class TestSetupCommand:
     def test_setup_invalid_chain_config(self) -> None:
         """Test setup with invalid chain config."""
         runner = CliRunner()
-        result = runner.invoke(setup, ["-c", "invalid_chain"])
+        result = runner.invoke(setup_command, ["-c", "invalid_chain"])
 
         assert result.exit_code != 0
         assert "Invalid value" in result.output or "invalid_chain" in result.output
@@ -138,19 +138,19 @@ class TestSetupCommand:
     def test_setup_help(self) -> None:
         """Test setup help output."""
         runner = CliRunner()
-        result = runner.invoke(setup, ["--help"])
+        result = runner.invoke(setup_command, ["--help"])
 
         assert result.exit_code == 0
         assert "chain-config" in result.output
         assert "Setup on-chain requirements" in result.output
 
-    @patch(f"{MOCK_OPERATE_PATH}.update_main")
-    @patch(f"{MOCK_OPERATE_PATH}.push_metadata_to_ipfs")
-    @patch(f"{MOCK_OPERATE_PATH}.generate_main")
-    @patch(f"{MOCK_OPERATE_PATH}.setup_private_keys")
-    @patch(f"{MOCK_OPERATE_PATH}.setup_env")
-    @patch(f"{MOCK_OPERATE_PATH}.run_service")
-    @patch(f"{MOCK_OPERATE_PATH}.OperateApp")
+    @patch(f"{MOD}._update_metadata")
+    @patch(f"{MOD}._push_metadata")
+    @patch(f"{MOD}._generate_metadata")
+    @patch(f"{MOD}.setup_private_keys")
+    @patch(f"{MOD}.setup_env")
+    @patch(f"{MOD}.run_service")
+    @patch(f"{MOD}.OperateApp")
     def test_setup_all_supported_chains(
         self,
         mock_operate: MagicMock,
@@ -170,17 +170,19 @@ class TestSetupCommand:
 
         for chain in ("gnosis", "base", "polygon", "optimism"):
             runner = CliRunner()
-            result = runner.invoke(setup, ["-c", chain])
+            result = runner.invoke(setup_command, ["-c", chain])
             assert result.exit_code == 0, f"Failed for chain {chain}: {result.output}"
 
-    @patch(f"{MOCK_OPERATE_PATH}.setup_env")
-    @patch(f"{MOCK_OPERATE_PATH}.run_service")
-    @patch(f"{MOCK_OPERATE_PATH}.OperateApp")
+    @patch(f"{MOD}._generate_metadata")
+    @patch(f"{MOD}.setup_env")
+    @patch(f"{MOD}.run_service")
+    @patch(f"{MOD}.OperateApp")
     def test_setup_env_failure_stops_execution(
         self,
         mock_operate: MagicMock,
         mock_run_service: MagicMock,
         mock_setup_env: MagicMock,
+        mock_generate: MagicMock,
     ) -> None:
         """Test that env setup failure stops the rest of the flow."""
         mock_app = MagicMock()
@@ -191,7 +193,9 @@ class TestSetupCommand:
         mock_setup_env.side_effect = Exception("env setup failed")
 
         runner = CliRunner()
-        result = runner.invoke(setup, ["-c", "gnosis"])
+        result = runner.invoke(setup_command, ["-c", "gnosis"])
 
         assert result.exit_code != 0
-        assert "env setup failed" in result.output
+        assert result.exception is not None
+        assert "env setup failed" in str(result.exception)
+        mock_generate.assert_not_called()
