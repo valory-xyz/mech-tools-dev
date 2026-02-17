@@ -34,6 +34,27 @@ CONFIG_DIR = BASE_DIR / "config"
 SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
 
 
+def _generate_metadata() -> None:
+    """Generate metadata.json from packages."""
+    from utils.generate_metadata import main  # pylint: disable=import-outside-toplevel
+
+    main()
+
+
+def _push_metadata() -> None:
+    """Push metadata.json to IPFS."""
+    from utils.publish_metadata import push_metadata_to_ipfs  # pylint: disable=import-outside-toplevel
+
+    push_metadata_to_ipfs()
+
+
+def _update_metadata() -> None:
+    """Update metadata hash on-chain via Safe transaction."""
+    from utils.update_metadata import main  # pylint: disable=import-outside-toplevel
+
+    main()
+
+
 @click.command()
 @click.option(
     "-c",
@@ -83,17 +104,13 @@ def setup(chain_config: str) -> None:
     setup_private_keys()
 
     # 3. Generate metadata, push to IPFS, update on-chain
-    from utils.generate_metadata import main as generate_main  # pylint: disable=import-outside-toplevel
-    from utils.publish_metadata import push_metadata_to_ipfs  # pylint: disable=import-outside-toplevel
-    from utils.update_metadata import main as update_main  # pylint: disable=import-outside-toplevel
-
     click.echo("Generating metadata...")
-    generate_main()
+    _generate_metadata()
 
     click.echo("Publishing metadata to IPFS...")
-    push_metadata_to_ipfs()
+    _push_metadata()
 
     click.echo("Updating metadata hash on-chain...")
-    update_main()
+    _update_metadata()
 
     click.echo("Setup complete.")
