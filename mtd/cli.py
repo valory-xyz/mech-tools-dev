@@ -27,9 +27,18 @@ from typing import Dict
 import click
 from aea.cli.packages import package_type_selector_prompt
 from autonomy.cli.packages import get_package_manager
+import json
+from operate.cli import OperateApp
+from operate.quickstart.run_service import run_service
+from utils.setup import setup_env, setup_private_keys
+
+    
 
 CURRENT_DIR = Path(__file__).parent
-PACKAGES_DIR = CURRENT_DIR.parent / "packages"
+BASE_DIR = CURRENT_DIR.parent
+PACKAGES_DIR = BASE_DIR / "packages"
+CONFIG_DIR = BASE_DIR / "config"
+SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
 CUSTOMS_DIR = "customs"
 PY_SUFFIX = ".py"
 INIT_FILENAME = f"__init__{PY_SUFFIX}"
@@ -127,3 +136,54 @@ def add_tool(
         package_type_selector_prompt
     ).dump()
     click.echo("Packages locked.")
+
+
+@cli.command()
+@click.option(
+    "-c",
+    "--chain-config",
+    type=click.Choice(SUPPORTED_CHAINS, case_sensitive=False),
+    required=True,
+    help="Target chain for the mech service.",
+)
+def setup(chain_config: str) -> None:
+    """Setup on-chain requirements for running a mech agent."""
+    config_path = CONFIG_DIR / f"config_mech_{chain_config}.json"
+    if not config_path.exists():
+        raise click.ClickException(f"Missing template config: {config_path}")
+
+    # Extract staking program from template if present
+    with open(config_path, "r", encoding="utf-8") as f:
+        template = json.load(f)
+    staking_program_id = (
+        template.get("configurations", {})
+        .get(chain_config, {})
+        .get("staking_program_id")
+    )
+
+    # Setup operate
+    operate = OperateApp()
+    operate.setup()
+
+    services, _ = operate.service_manager().get_all_services()
+    needs_setup = (
+        not services
+        or services[0].chain_configs.get(services[0].home_chain, {}).chain_data.multisig
+        is None
+    )
+
+    if needs_setup:
+        click.echo("Setting up operate...")
+        run_service(
+            operate=operate,
+            config_path=config_path,
+            build_only=True,
+            skip_dependency_check=False,
+            staking_program_id=staking_program_id,
+        )
+
+    click.echo("Setting up env...")
+    setup_env()
+
+    click.echo("Setting up private keys...")
+    setup_private_keys()
