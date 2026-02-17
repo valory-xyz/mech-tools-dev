@@ -37,12 +37,14 @@ class TestSetupCommand:
     @patch(f"{MOD}._generate_metadata")
     @patch(f"{MOD}.setup_private_keys")
     @patch(f"{MOD}.setup_env")
+    @patch(f"{MOD}._deploy_mech")
     @patch(f"{MOD}.run_service")
     @patch(f"{MOD}.OperateApp")
     def test_setup_success_needs_setup(
         self,
         mock_operate: MagicMock,
         mock_run_service: MagicMock,
+        mock_deploy_mech: MagicMock,
         mock_setup_env: MagicMock,
         mock_setup_keys: MagicMock,
         mock_generate: MagicMock,
@@ -61,6 +63,7 @@ class TestSetupCommand:
 
         assert result.exit_code == 0
         assert "Setting up operate" in result.output
+        assert "Deploying mech on marketplace" in result.output
         assert "Setting up env" in result.output
         assert "Setting up private keys" in result.output
         assert "Generating metadata" in result.output
@@ -71,6 +74,7 @@ class TestSetupCommand:
         mock_operate.assert_called_once()
         mock_app.setup.assert_called_once()
         mock_run_service.assert_called_once()
+        mock_deploy_mech.assert_called_once()
         mock_setup_env.assert_called_once()
         mock_setup_keys.assert_called_once()
         mock_generate.assert_called_once()
@@ -82,12 +86,14 @@ class TestSetupCommand:
     @patch(f"{MOD}._generate_metadata")
     @patch(f"{MOD}.setup_private_keys")
     @patch(f"{MOD}.setup_env")
+    @patch(f"{MOD}._deploy_mech")
     @patch(f"{MOD}.run_service")
     @patch(f"{MOD}.OperateApp")
     def test_setup_skips_operate_when_already_setup(
         self,
         mock_operate: MagicMock,
         mock_run_service: MagicMock,
+        mock_deploy_mech: MagicMock,
         mock_setup_env: MagicMock,
         mock_setup_keys: MagicMock,
         mock_generate: MagicMock,
@@ -113,6 +119,7 @@ class TestSetupCommand:
 
         assert result.exit_code == 0
         mock_run_service.assert_not_called()
+        mock_deploy_mech.assert_called_once()
         mock_setup_env.assert_called_once()
         mock_setup_keys.assert_called_once()
         mock_generate.assert_called_once()
@@ -149,12 +156,14 @@ class TestSetupCommand:
     @patch(f"{MOD}._generate_metadata")
     @patch(f"{MOD}.setup_private_keys")
     @patch(f"{MOD}.setup_env")
+    @patch(f"{MOD}._deploy_mech")
     @patch(f"{MOD}.run_service")
     @patch(f"{MOD}.OperateApp")
     def test_setup_all_supported_chains(
         self,
         mock_operate: MagicMock,
         mock_run_service: MagicMock,
+        mock_deploy_mech: MagicMock,
         mock_setup_env: MagicMock,
         mock_setup_keys: MagicMock,
         mock_generate: MagicMock,
@@ -173,6 +182,7 @@ class TestSetupCommand:
             result = runner.invoke(setup_command, ["-c", chain])
             assert result.exit_code == 0, f"Failed for chain {chain}: {result.output}"
 
+    @patch(f"{MOD}._deploy_mech")
     @patch(f"{MOD}._generate_metadata")
     @patch(f"{MOD}.setup_env")
     @patch(f"{MOD}.run_service")
@@ -183,6 +193,7 @@ class TestSetupCommand:
         mock_run_service: MagicMock,
         mock_setup_env: MagicMock,
         mock_generate: MagicMock,
+        mock_deploy_mech: MagicMock,
     ) -> None:
         """Test that env setup failure stops the rest of the flow."""
         mock_app = MagicMock()
@@ -199,3 +210,81 @@ class TestSetupCommand:
         assert result.exception is not None
         assert "env setup failed" in str(result.exception)
         mock_generate.assert_not_called()
+
+
+class TestSetupDeployMech:
+    """Tests for deploy-mech integration in setup."""
+
+    @patch(f"{MOD}._update_metadata")
+    @patch(f"{MOD}._push_metadata")
+    @patch(f"{MOD}._generate_metadata")
+    @patch(f"{MOD}.setup_private_keys")
+    @patch(f"{MOD}.setup_env")
+    @patch(f"{MOD}._deploy_mech")
+    @patch(f"{MOD}.run_service")
+    @patch(f"{MOD}.OperateApp")
+    def test_setup_calls_deploy_mech(
+        self,
+        mock_operate: MagicMock,
+        mock_run_service: MagicMock,
+        mock_deploy_mech: MagicMock,
+        mock_setup_env: MagicMock,
+        mock_setup_keys: MagicMock,
+        mock_generate: MagicMock,
+        mock_push: MagicMock,
+        mock_update: MagicMock,
+    ) -> None:
+        """Verify _deploy_mech is called during setup."""
+        mock_app = MagicMock()
+        mock_operate.return_value = mock_app
+        mock_manager = MagicMock()
+        mock_manager.get_all_services.return_value = ([], None)
+        mock_app.service_manager.return_value = mock_manager
+
+        runner = CliRunner()
+        result = runner.invoke(setup_command, ["-c", "gnosis"])
+
+        assert result.exit_code == 0
+        mock_deploy_mech.assert_called_once_with(mock_app, "gnosis")
+
+    @patch(f"{MOD}._update_metadata")
+    @patch(f"{MOD}._push_metadata")
+    @patch(f"{MOD}._generate_metadata")
+    @patch(f"{MOD}.setup_private_keys")
+    @patch(f"{MOD}.setup_env")
+    @patch(f"{MOD}.run_service")
+    @patch(f"{MOD}.OperateApp")
+    def test_setup_deploy_mech_skips_when_already_deployed(
+        self,
+        mock_operate: MagicMock,
+        mock_run_service: MagicMock,
+        mock_setup_env: MagicMock,
+        mock_setup_keys: MagicMock,
+        mock_generate: MagicMock,
+        mock_push: MagicMock,
+        mock_update: MagicMock,
+    ) -> None:
+        """Verify _deploy_mech skip behavior when mech is already deployed."""
+        mock_app = MagicMock()
+        mock_operate.return_value = mock_app
+        mock_manager = MagicMock()
+        mock_service = MagicMock()
+        mock_service.home_chain = "gnosis"
+        mock_service.env_variables = {
+            "AGENT_ID": {"value": "42"},
+            "MECH_TO_CONFIG": {"value": '{"0xMech":{}}'},
+            "MECH_MARKETPLACE_ADDRESS": {"value": "0x123"},
+        }
+        mock_chain_data = MagicMock()
+        mock_chain_data.multisig = "0x1234"
+        mock_chain_config = MagicMock()
+        mock_chain_config.chain_data = mock_chain_data
+        mock_service.chain_configs = {"gnosis": mock_chain_config}
+        mock_manager.get_all_services.return_value = ([mock_service], None)
+        mock_app.service_manager.return_value = mock_manager
+
+        runner = CliRunner()
+        result = runner.invoke(setup_command, ["-c", "gnosis"])
+
+        assert result.exit_code == 0
+        assert "Mech already deployed, skipping." in result.output
