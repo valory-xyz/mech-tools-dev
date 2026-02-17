@@ -98,27 +98,6 @@ mtd push-metadata --ipfs-node /dns/custom.node/tcp/5001/http
 mtd update-metadata
 ```
 
-## Architecture
-
-The CLI follows a modular command pattern (similar to [mech-client](https://github.com/valory-xyz/mech-client)):
-
-```
-mtd/
-  cli.py                      # Thin entry point: @click.group() + add_command()
-  commands/
-    __init__.py                # Re-exports all command objects
-    setup_cmd.py               # Full setup flow
-    run_cmd.py                 # Run service (production + dev mode)
-    stop_cmd.py                # Stop service
-    push_metadata_cmd.py       # Generate + IPFS publish
-    update_metadata_cmd.py     # On-chain hash update
-    add_tool_cmd.py            # Tool scaffolding
-```
-
-Each command file is self-contained: Click decorators at the top, delegation to existing service/utility logic. `cli.py` is a thin entry point that only registers commands.
-
-Service operations (`run`, `stop`, `setup`) delegate to `olas-operate-middleware`. Metadata operations delegate to utility scripts in `utils/`.
-
 ## Instructions
 
 Find more information on how to create, publish, and run your own mech tools in
