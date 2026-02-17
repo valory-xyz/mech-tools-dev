@@ -26,6 +26,99 @@ You need the following requirements installed in your system:
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [Tendermint](https://docs.tendermint.com/v0.34/introduction/install.html) `==0.34.19`
 
+## CLI
+
+All mech service operations are available through the `mtd` CLI. Install the package and run `mtd --help` to see available commands.
+
+### Commands
+
+| Command | Description |
+|---|---|
+| `mtd setup -c <chain>` | Full first-time setup: operate build, env config, key setup, metadata generation, IPFS publish, and on-chain update |
+| `mtd run -c <chain>` | Run the mech service via Docker deployment |
+| `mtd run -c <chain> --dev` | Dev mode: push local packages to IPFS, then run via host deployment (no Docker) |
+| `mtd stop -c <chain>` | Stop a running mech service |
+| `mtd push-metadata` | Generate `metadata.json` from packages and publish to IPFS |
+| `mtd update-metadata` | Update the metadata hash on-chain via Safe transaction |
+| `mtd add-tool` | Scaffold a new mech tool (interactive) |
+
+Supported chains: `gnosis`, `base`, `polygon`, `optimism`.
+
+### Setup
+
+Run the full setup flow for a new mech deployment:
+
+```bash
+mtd setup -c gnosis
+```
+
+This runs the following steps in order:
+
+1. **Operate build** - Creates the service via olas-operate-middleware (skipped if service already exists)
+2. **Env configuration** - Sets up the `.env` file with required variables
+3. **Private key setup** - Configures operator and agent keys
+4. **Metadata generation** - Generates `metadata.json` from package definitions
+5. **IPFS publish** - Pushes metadata to IPFS
+6. **On-chain update** - Updates the metadata hash on-chain via Safe transaction
+
+### Running the service
+
+**Production mode** (Docker deployment):
+
+```bash
+mtd run -c gnosis
+```
+
+**Dev mode** (host deployment, no Docker):
+
+```bash
+mtd run -c gnosis --dev
+```
+
+Dev mode pushes your local packages to IPFS, updates the config template with the new service hash, and runs the service directly on the host using `olas-operate-middleware` with `use_docker=False`.
+
+### Stopping the service
+
+```bash
+mtd stop -c gnosis
+```
+
+### Metadata operations
+
+Generate and publish metadata independently of the full setup:
+
+```bash
+# Generate metadata.json and publish to IPFS
+mtd push-metadata
+
+# Use a custom IPFS node
+mtd push-metadata --ipfs-node /dns/custom.node/tcp/5001/http
+
+# Update the on-chain metadata hash
+mtd update-metadata
+```
+
+## Architecture
+
+The CLI follows a modular command pattern (similar to [mech-client](https://github.com/valory-xyz/mech-client)):
+
+```
+mtd/
+  cli.py                      # Thin entry point: @click.group() + add_command()
+  commands/
+    __init__.py                # Re-exports all command objects
+    setup_cmd.py               # Full setup flow
+    run_cmd.py                 # Run service (production + dev mode)
+    stop_cmd.py                # Stop service
+    push_metadata_cmd.py       # Generate + IPFS publish
+    update_metadata_cmd.py     # On-chain hash update
+    add_tool_cmd.py            # Tool scaffolding
+```
+
+Each command file is self-contained: Click decorators at the top, delegation to existing service/utility logic. `cli.py` is a thin entry point that only registers commands.
+
+Service operations (`run`, `stop`, `setup`) delegate to `olas-operate-middleware`. Metadata operations delegate to utility scripts in `utils/`.
+
 ## Instructions
 
 Find more information on how to create, publish, and run your own mech tools in
