@@ -23,6 +23,7 @@ import click
 
 from mtd.commands import (
     add_tool,
+    deploy_mech_command,
     push_metadata,
     run,
     setup,
@@ -37,6 +38,7 @@ def cli() -> None:
 
 
 cli.add_command(add_tool)
+cli.add_command(deploy_mech_command)
 cli.add_command(setup)
 cli.add_command(run)
 cli.add_command(stop)

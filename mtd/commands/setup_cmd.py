@@ -55,6 +55,25 @@ def _update_metadata() -> None:
     main()
 
 
+def _deploy_mech(operate: OperateApp, chain_config: str) -> None:
+    """Deploy mech on the marketplace if needed."""
+    from mtd.deploy_mech import deploy_mech, needs_mech_deployment, update_service_after_deploy  # pylint: disable=import-outside-toplevel
+
+    manager = operate.service_manager()
+    services, _ = manager.get_all_services()
+    if not services:
+        return
+    service = services[0]
+    if not needs_mech_deployment(service):
+        click.echo("Mech already deployed, skipping.")
+        return
+    ledger_config = service.chain_configs[service.home_chain].ledger_config
+    sftxb = manager.get_eth_safe_tx_builder(ledger_config)
+    mech_address, agent_id = deploy_mech(sftxb=sftxb, service=service)
+    update_service_after_deploy(service, mech_address, agent_id)
+    click.echo(f"Mech deployed at {mech_address} (agent_id={agent_id})")
+
+
 @click.command()
 @click.option(
     "-c",
@@ -96,14 +115,18 @@ def setup(chain_config: str) -> None:
             skip_dependency_check=False,
         )
 
-    # 2. Setup env and private keys
+    # 2. Deploy mech on marketplace if needed
+    click.echo("Deploying mech on marketplace...")
+    _deploy_mech(operate, chain_config)
+
+    # 3. Setup env and private keys
     click.echo("Setting up env...")
     setup_env()
 
     click.echo("Setting up private keys...")
     setup_private_keys()
 
-    # 3. Generate metadata, push to IPFS, update on-chain
+    # 4. Generate metadata, push to IPFS, update on-chain
     click.echo("Generating metadata...")
     _generate_metadata()
 
