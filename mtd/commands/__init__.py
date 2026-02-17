@@ -16,17 +16,22 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""The script combines the setup scripts for ease of use"""
 
-from utils.setup import main as setup_main
-from utils.update_metadata import main as update_metadata_main
+"""CLI command modules."""
+
+from mtd.commands.add_tool_cmd import add_tool
+from mtd.commands.push_metadata_cmd import push_metadata
+from mtd.commands.run_cmd import run
+from mtd.commands.setup_cmd import setup
+from mtd.commands.stop_cmd import stop
+from mtd.commands.update_metadata_cmd import update_metadata
 
 
-def main() -> None:
-    """Runs the script"""
-    setup_main()
-    update_metadata_main()
-
-
-if __name__ == "__main__":
-    main()
+__all__ = [
+    "add_tool",
+    "push_metadata",
+    "run",
+    "setup",
+    "stop",
+    "update_metadata",
+]

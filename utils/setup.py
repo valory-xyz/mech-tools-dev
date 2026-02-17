@@ -16,25 +16,20 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""The script allows the user to setup onchain requirements for running mechs"""
+"""Helpers for setting up env and private keys from operate service config."""
 
 import json
 import logging
 import os
 from pathlib import Path
 
-from dotenv import dotenv_values, load_dotenv, set_key
-from operate.cli import OperateApp, run_service
+from dotenv import dotenv_values
 from operate.keys import KeysManager
-from operate.quickstart.run_service import ask_password_if_needed
 
 
 CURR_DIR = Path(__file__).resolve().parent
 BASE_DIR = CURR_DIR.parent
 SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
-TEMPLATE_CONFIG_PATHS = {
-    chain: BASE_DIR / "config" / f"config_mech_{chain}.json" for chain in SUPPORTED_CHAINS
-}
 OPERATE_DIR = BASE_DIR / ".operate"
 OPERATE_CONFIG_PATH = "services/sc-*/config.json"
 AGENT_KEY = "ethereum_private_key.txt"
@@ -184,86 +179,3 @@ def setup_private_keys() -> None:
                 raise RuntimeError(
                     f"Failed to setup private keys from {key_file}"
                 ) from e
-
-
-def ask_chain() -> str:
-    """Ask user for a target chain."""
-    options = ", ".join(SUPPORTED_CHAINS)
-    while True:
-        selected_chain = input(f"Select chain ({options}): ").strip().lower()
-        if selected_chain in SUPPORTED_CHAINS:
-            return selected_chain
-        print(f"Invalid chain `{selected_chain}`. Please choose one of: {options}.")
-
-
-def get_password(operate: OperateApp) -> str:
-    """Load password from .env if present, otherwise prompt and persist.
-
-    :param operate: The OperateApp instance.
-    :return: Operate password
-    :raises RuntimeError: If password could not be set
-    """
-    env_path = BASE_DIR / ".env"
-    # Try loading from environment file
-    if env_path.exists():
-        load_dotenv(dotenv_path=env_path, override=False)
-        password = os.environ.get("OPERATE_PASSWORD", "")
-        if password:
-            os.environ["OPERATE_PASSWORD"] = password
-            os.environ["ATTENDED"] = "false"
-            return password
-
-    # Prompt for password
-    ask_password_if_needed(operate)
-    if not operate.password:
-        raise RuntimeError("Password could not be set for Operate.")
-
-    # Persist password
-    os.environ["OPERATE_PASSWORD"] = operate.password
-    env_path.parent.mkdir(parents=True, exist_ok=True)
-    set_key(str(env_path), "OPERATE_PASSWORD", os.environ["OPERATE_PASSWORD"])
-    os.environ["ATTENDED"] = "false"
-    return os.environ["OPERATE_PASSWORD"]
-
-
-def setup_operate(operate: OperateApp) -> None:
-    """Setups the operate"""
-    selected_chain = ask_chain()
-    config_path = TEMPLATE_CONFIG_PATHS[selected_chain]
-    if not config_path.exists():
-        raise FileNotFoundError(f"Missing template config: {config_path}")
-
-    run_service(
-        operate=operate,
-        config_path=config_path,
-        build_only=True,
-        skip_dependency_check=False,
-    )
-
-
-def main() -> None:
-    """Runs the script"""
-    operate = OperateApp()
-    operate.setup()
-
-    services, _ = operate.service_manager().get_all_services()
-    if (
-        not services
-        or services[0].chain_configs.get(services[0].home_chain, {}).chain_data.multisig
-        is None
-    ):
-        print("Setting up operate...")
-        setup_operate(operate)
-
-    print("Setting up env...")
-    setup_env()
-
-    # Persist password to .env
-    get_password(operate)
-
-    print("Setting up private keys...")
-    setup_private_keys()
-
-
-if __name__ == "__main__":
-    main()
