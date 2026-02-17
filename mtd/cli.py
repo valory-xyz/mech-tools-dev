@@ -27,7 +27,6 @@ from typing import Dict
 import click
 from aea.cli.packages import package_type_selector_prompt
 from autonomy.cli.packages import get_package_manager
-import json
 from operate.cli import OperateApp
 from operate.quickstart.run_service import run_service
 from utils.setup import setup_env, setup_private_keys
@@ -152,15 +151,6 @@ def setup(chain_config: str) -> None:
     if not config_path.exists():
         raise click.ClickException(f"Missing template config: {config_path}")
 
-    # Extract staking program from template if present
-    with open(config_path, "r", encoding="utf-8") as f:
-        template = json.load(f)
-    staking_program_id = (
-        template.get("configurations", {})
-        .get(chain_config, {})
-        .get("staking_program_id")
-    )
-
     # Setup operate
     operate = OperateApp()
     operate.setup()
@@ -179,7 +169,6 @@ def setup(chain_config: str) -> None:
             config_path=config_path,
             build_only=True,
             skip_dependency_check=False,
-            staking_program_id=staking_program_id,
         )
 
     click.echo("Setting up env...")
