@@ -1,0 +1,20 @@
+name: security_advisor
+author: rubix1138
+version: 0.1.0
+type: custom
+description: AI-powered security advisor for autonomous agents and blockchain systems.
+  Analyses security questions, configurations, and threat scenarios using Claude AI
+  (Anthropic). Returns structured JSON with severity rating, detailed analysis, and
+  actionable recommendations. Specialised for agent architecture, crypto key
+  management, and on-chain threat assessment.
+license: Apache-2.0
+aea_version: '>=2.0.0, <3.0.0'
+fingerprint:
+  __init__.py: bafkreifmhlxv4vui7q7vpxt6duyjkuxgsk5xs6vutbyaygml6t5fnra4gy
+  security_advisor.py: bafkreicixntd2xmwclwzawk2gwm74izaoyq6n6rmn76vz4ntyg5rxv4aea
+fingerprint_ignore_patterns: []
+entry_point: security_advisor.py
+callable: run
+dependencies:
+  anthropic:
+    version: '>=0.40.0'

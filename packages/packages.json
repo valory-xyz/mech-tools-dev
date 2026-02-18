@@ -2,7 +2,8 @@
     "dev": {
         "custom/valory/echo/0.1.0": "bafybeie6xgocwpadvznoq4my75lpybso5gellmvqp5x3dzraz7e2yx4kh4",
         "agent/valory/mech/0.1.0": "bafybeifrujtgyq47h5temdrzacyipunt7osrehrbixzeg55ihvp2uejayq",
-        "service/valory/mech/0.1.0": "bafybeidro72ilizzhcvlqjaw5uda2vrhw3bi5gg3fmz3fwcaye7ahlln6u"
+        "service/valory/mech/0.1.0": "bafybeidro72ilizzhcvlqjaw5uda2vrhw3bi5gg3fmz3fwcaye7ahlln6u",
+        "custom/rubix1138/security_advisor/0.1.0": "bafybeidf4i3nsqozxdz4d2lf673jx65d744stjesdyaao37b5mjj3veqjm"
     },
     "third_party": {
         "protocol/valory/acn_data_share/0.1.0": "bafybeic7infync56c4b5qzmgomcfkh3au5bpsd53rlfq4hzyjelb3w2u74",
