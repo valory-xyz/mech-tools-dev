@@ -34,6 +34,7 @@ class TestCli:
 
         assert result.exit_code == 0
         assert "add-tool" in result.output
+        assert "deploy-mech" in result.output
         assert "setup" in result.output
         assert "run" in result.output
         assert "stop" in result.output

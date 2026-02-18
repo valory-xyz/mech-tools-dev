@@ -20,6 +20,7 @@
 """CLI command modules."""
 
 from mtd.commands.add_tool_cmd import add_tool
+from mtd.commands.deploy_mech_cmd import deploy_mech_command
 from mtd.commands.push_metadata_cmd import push_metadata
 from mtd.commands.run_cmd import run
 from mtd.commands.setup_cmd import setup
@@ -29,6 +30,7 @@ from mtd.commands.update_metadata_cmd import update_metadata
 
 __all__ = [
     "add_tool",
+    "deploy_mech_command",
     "push_metadata",
     "run",
     "setup",
