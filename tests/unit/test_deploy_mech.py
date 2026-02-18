@@ -284,6 +284,11 @@ class TestUpdateServiceAfterDeploy:
     def test_update_service_after_deploy(self) -> None:
         """Verify env variables are updated correctly."""
         mock_service = MagicMock()
+        mock_service.home_chain = "gnosis"
+        mock_chain_config = MagicMock()
+        mock_chain_config.chain_data.token = 123
+        mock_chain_config.ledger_config.rpc = "https://rpc.gnosis.test"
+        mock_service.chain_configs = {"gnosis": mock_chain_config}
         mock_service.env_variables = {
             "MECH_REQUEST_PRICE": {"value": 10000000000000000},
         }
@@ -301,10 +306,18 @@ class TestUpdateServiceAfterDeploy:
 
         mech_to_max = json.loads(call_args["MECH_TO_MAX_DELIVERY_RATE"])
         assert mech_to_max["0xMechAddr"] == 10000000000000000
+        assert call_args["ON_CHAIN_SERVICE_ID"] == 123
+        assert call_args["ETHEREUM_LEDGER_RPC_0"] == "https://rpc.gnosis.test"
+        assert call_args["GNOSIS_LEDGER_RPC_0"] == "https://rpc.gnosis.test"
 
     def test_update_service_after_deploy_default_price(self) -> None:
         """Verify default price when MECH_REQUEST_PRICE is missing."""
         mock_service = MagicMock()
+        mock_service.home_chain = "base"
+        mock_chain_config = MagicMock()
+        mock_chain_config.chain_data.token = 7
+        mock_chain_config.ledger_config.rpc = "https://rpc.base.test"
+        mock_service.chain_configs = {"base": mock_chain_config}
         mock_service.env_variables = {}
 
         update_service_after_deploy(mock_service, "0xMech", "1")
@@ -312,3 +325,6 @@ class TestUpdateServiceAfterDeploy:
         call_args = mock_service.update_env_variables_values.call_args[0][0]
         mech_to_max = json.loads(call_args["MECH_TO_MAX_DELIVERY_RATE"])
         assert mech_to_max["0xMech"] == 10000000000000000
+        assert call_args["ON_CHAIN_SERVICE_ID"] == 7
+        assert call_args["ETHEREUM_LEDGER_RPC_0"] == "https://rpc.base.test"
+        assert call_args["BASE_LEDGER_RPC_0"] == "https://rpc.base.test"

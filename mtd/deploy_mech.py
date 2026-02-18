@@ -148,6 +148,10 @@ def update_service_after_deploy(
     mech_request_price = service.env_variables.get(
         "MECH_REQUEST_PRICE", {}
     ).get("value", 10000000000000000)
+    home_chain = service.home_chain
+    chain_config = service.chain_configs[home_chain]
+    chain_rpc = chain_config.ledger_config.rpc
+    chain_rpc_env_var = f"{home_chain.upper()}_LEDGER_RPC_0"
     service.update_env_variables_values({
         "AGENT_ID": agent_id,
         "MECH_TO_CONFIG": json.dumps(
@@ -158,4 +162,7 @@ def update_service_after_deploy(
             {mech_address: mech_request_price},
             separators=(",", ":"),
         ),
+        "ON_CHAIN_SERVICE_ID": chain_config.chain_data.token,
+        "ETHEREUM_LEDGER_RPC_0": chain_rpc,
+        chain_rpc_env_var: chain_rpc,
     })
