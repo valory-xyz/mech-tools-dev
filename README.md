@@ -36,7 +36,7 @@ All mech service operations are available through the `mtd` CLI. Install the pac
 |---|---|
 | `mtd setup -c <chain>` | Full first-time setup: operate build, mech deployment, env config, key setup, metadata generation, IPFS publish, and on-chain update |
 | `mtd run -c <chain>` | Run the mech service via Docker deployment |
-| `mtd run -c <chain> --dev` | Dev mode: push local packages to IPFS, then run via host deployment (no Docker) |
+| `mtd run -c <chain> --dev` | Dev mode: push local packages to IPFS, refresh service hash, then run via host deployment (no Docker) |
 | `mtd stop -c <chain>` | Stop a running mech service |
 | `mtd deploy-mech -c <chain>` | Deploy a mech on the marketplace for an existing service (also runs automatically during setup) |
 | `mtd push-metadata` | Generate `metadata.json` from packages and publish to IPFS |
@@ -44,6 +44,43 @@ All mech service operations are available through the `mtd` CLI. Install the pac
 | `mtd add-tool` | Scaffold a new mech tool (interactive) |
 
 Supported chains: `gnosis`, `base`, `polygon`, `optimism`.
+
+### Recommended user flow
+
+Use this sequence for normal operations:
+
+1. **Initial setup**
+
+```bash
+mtd setup -c <chain>
+```
+
+2. **Update API keys in `.env`**
+
+After setup generates `.env`, set your real API keys (replace any `dummy_api_key` values), for example:
+
+```env
+API_KEYS={"openai":["<YOUR_OPENAI_KEY>"],"google_api_key":["<YOUR_GOOGLE_KEY>"]}
+```
+
+3. **If tools/packages changed, refresh metadata**
+
+```bash
+mtd push-metadata
+mtd update-metadata
+```
+
+4. **Run the service**
+
+```bash
+mtd run -c <chain>
+```
+
+5. **Stop when needed**
+
+```bash
+mtd stop -c <chain>
+```
 
 ### Setup
 
