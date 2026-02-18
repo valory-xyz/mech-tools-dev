@@ -19,59 +19,9 @@
 
 """Setup command for mech agent service configuration and metadata deployment."""
 
-from pathlib import Path
-
 import click
-from operate.cli import OperateApp
-from operate.quickstart.run_service import run_service
 
-from utils.setup import setup_env, setup_private_keys
-
-
-CURRENT_DIR = Path(__file__).parent.parent
-BASE_DIR = CURRENT_DIR.parent
-CONFIG_DIR = BASE_DIR / "config"
-SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
-
-
-def _generate_metadata() -> None:
-    """Generate metadata.json from packages."""
-    from utils.generate_metadata import main  # pylint: disable=import-outside-toplevel
-
-    main()
-
-
-def _push_metadata() -> None:
-    """Push metadata.json to IPFS."""
-    from utils.publish_metadata import push_metadata_to_ipfs  # pylint: disable=import-outside-toplevel
-
-    push_metadata_to_ipfs()
-
-
-def _update_metadata() -> None:
-    """Update metadata hash on-chain via Safe transaction."""
-    from utils.update_metadata import main  # pylint: disable=import-outside-toplevel
-
-    main()
-
-
-def _deploy_mech(operate: OperateApp, chain_config: str) -> None:
-    """Deploy mech on the marketplace if needed."""
-    from mtd.deploy_mech import deploy_mech, needs_mech_deployment, update_service_after_deploy  # pylint: disable=import-outside-toplevel
-
-    manager = operate.service_manager()
-    services, _ = manager.get_all_services()
-    if not services:
-        return
-    service = services[0]
-    if not needs_mech_deployment(service):
-        click.echo("Mech already deployed, skipping.")
-        return
-    ledger_config = service.chain_configs[service.home_chain].ledger_config
-    sftxb = manager.get_eth_safe_tx_builder(ledger_config)
-    mech_address, agent_id = deploy_mech(sftxb=sftxb, service=service)
-    update_service_after_deploy(service, mech_address, agent_id)
-    click.echo(f"Mech deployed at {mech_address} (agent_id={agent_id})")
+from mtd.setup_flow import SUPPORTED_CHAINS, run_setup
 
 
 @click.command()
@@ -91,49 +41,4 @@ def setup(chain_config: str) -> None:
 
     Example: mtd setup -c gnosis
     """
-    config_path = CONFIG_DIR / f"config_mech_{chain_config}.json"
-    if not config_path.exists():
-        raise click.ClickException(f"Missing template config: {config_path}")
-
-    # 1. Setup operate
-    operate = OperateApp()
-    operate.setup()
-
-    services, _ = operate.service_manager().get_all_services()
-    needs_setup = (
-        not services
-        or services[0].chain_configs.get(services[0].home_chain, {}).chain_data.multisig
-        is None
-    )
-
-    if needs_setup:
-        click.echo("Setting up operate...")
-        run_service(
-            operate=operate,
-            config_path=config_path,
-            build_only=True,
-            skip_dependency_check=False,
-        )
-
-    # 2. Deploy mech on marketplace if needed
-    click.echo("Deploying mech on marketplace...")
-    _deploy_mech(operate, chain_config)
-
-    # 3. Setup env and private keys
-    click.echo("Setting up env...")
-    setup_env()
-
-    click.echo("Setting up private keys...")
-    setup_private_keys()
-
-    # 4. Generate metadata, push to IPFS, update on-chain
-    click.echo("Generating metadata...")
-    _generate_metadata()
-
-    click.echo("Publishing metadata to IPFS...")
-    _push_metadata()
-
-    click.echo("Updating metadata hash on-chain...")
-    _update_metadata()
-
-    click.echo("Setup complete.")
+    run_setup(chain_config=chain_config)

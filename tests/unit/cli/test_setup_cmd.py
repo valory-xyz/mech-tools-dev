@@ -32,99 +32,34 @@ MOD = "mtd.commands.setup_cmd"
 class TestSetupCommand:
     """Tests for setup command."""
 
-    @patch(f"{MOD}._update_metadata")
-    @patch(f"{MOD}._push_metadata")
-    @patch(f"{MOD}._generate_metadata")
-    @patch(f"{MOD}.setup_private_keys")
-    @patch(f"{MOD}.setup_env")
-    @patch(f"{MOD}._deploy_mech")
-    @patch(f"{MOD}.run_service")
-    @patch(f"{MOD}.OperateApp")
-    def test_setup_success_needs_setup(
-        self,
-        mock_operate: MagicMock,
-        mock_run_service: MagicMock,
-        mock_deploy_mech: MagicMock,
-        mock_setup_env: MagicMock,
-        mock_setup_keys: MagicMock,
-        mock_generate: MagicMock,
-        mock_push: MagicMock,
-        mock_update: MagicMock,
-    ) -> None:
-        """Test full setup flow when service needs setup."""
-        mock_app = MagicMock()
-        mock_operate.return_value = mock_app
-        mock_manager = MagicMock()
-        mock_app.service_manager.return_value = mock_manager
-        mock_manager.get_all_services.return_value = ([], None)
-
+    @patch(f"{MOD}.run_setup")
+    def test_setup_success(self, mock_run_setup: MagicMock) -> None:
+        """Test setup delegates to setup flow with selected chain."""
         runner = CliRunner()
         result = runner.invoke(setup_command, ["-c", "gnosis"])
 
         assert result.exit_code == 0
-        assert "Setting up operate" in result.output
-        assert "Deploying mech on marketplace" in result.output
-        assert "Setting up env" in result.output
-        assert "Setting up private keys" in result.output
-        assert "Generating metadata" in result.output
-        assert "Publishing metadata to IPFS" in result.output
-        assert "Updating metadata hash on-chain" in result.output
-        assert "Setup complete" in result.output
+        mock_run_setup.assert_called_once_with(chain_config="gnosis")
 
-        mock_operate.assert_called_once()
-        mock_app.setup.assert_called_once()
-        mock_run_service.assert_called_once()
-        mock_deploy_mech.assert_called_once()
-        mock_setup_env.assert_called_once()
-        mock_setup_keys.assert_called_once()
-        mock_generate.assert_called_once()
-        mock_push.assert_called_once()
-        mock_update.assert_called_once()
+    @patch(f"{MOD}.run_setup")
+    def test_setup_all_supported_chains(self, mock_run_setup: MagicMock) -> None:
+        """Test setup works for all supported chains."""
+        for chain in ("gnosis", "base", "polygon", "optimism"):
+            runner = CliRunner()
+            result = runner.invoke(setup_command, ["-c", chain])
+            assert result.exit_code == 0, f"Failed for chain {chain}: {result.output}"
 
-    @patch(f"{MOD}._update_metadata")
-    @patch(f"{MOD}._push_metadata")
-    @patch(f"{MOD}._generate_metadata")
-    @patch(f"{MOD}.setup_private_keys")
-    @patch(f"{MOD}.setup_env")
-    @patch(f"{MOD}._deploy_mech")
-    @patch(f"{MOD}.run_service")
-    @patch(f"{MOD}.OperateApp")
-    def test_setup_skips_operate_when_already_setup(
-        self,
-        mock_operate: MagicMock,
-        mock_run_service: MagicMock,
-        mock_deploy_mech: MagicMock,
-        mock_setup_env: MagicMock,
-        mock_setup_keys: MagicMock,
-        mock_generate: MagicMock,
-        mock_push: MagicMock,
-        mock_update: MagicMock,
-    ) -> None:
-        """Test setup skips operate build when service already exists."""
-        mock_app = MagicMock()
-        mock_operate.return_value = mock_app
-        mock_service = MagicMock()
-        mock_service.home_chain = "gnosis"
-        mock_chain_data = MagicMock()
-        mock_chain_data.multisig = "0x1234"
-        mock_chain_config = MagicMock()
-        mock_chain_config.chain_data = mock_chain_data
-        mock_service.chain_configs = {"gnosis": mock_chain_config}
-        mock_manager = MagicMock()
-        mock_manager.get_all_services.return_value = ([mock_service], None)
-        mock_app.service_manager.return_value = mock_manager
+    @patch(f"{MOD}.run_setup")
+    def test_setup_propagates_errors(self, mock_run_setup: MagicMock) -> None:
+        """Test setup surfaces underlying setup flow errors."""
+        mock_run_setup.side_effect = Exception("setup failed")
 
         runner = CliRunner()
         result = runner.invoke(setup_command, ["-c", "gnosis"])
 
-        assert result.exit_code == 0
-        mock_run_service.assert_not_called()
-        mock_deploy_mech.assert_called_once()
-        mock_setup_env.assert_called_once()
-        mock_setup_keys.assert_called_once()
-        mock_generate.assert_called_once()
-        mock_push.assert_called_once()
-        mock_update.assert_called_once()
+        assert result.exit_code != 0
+        assert result.exception is not None
+        assert "setup failed" in str(result.exception)
 
     def test_setup_missing_chain_config(self) -> None:
         """Test setup without required chain-config option."""
@@ -150,141 +85,3 @@ class TestSetupCommand:
         assert result.exit_code == 0
         assert "chain-config" in result.output
         assert "Setup on-chain requirements" in result.output
-
-    @patch(f"{MOD}._update_metadata")
-    @patch(f"{MOD}._push_metadata")
-    @patch(f"{MOD}._generate_metadata")
-    @patch(f"{MOD}.setup_private_keys")
-    @patch(f"{MOD}.setup_env")
-    @patch(f"{MOD}._deploy_mech")
-    @patch(f"{MOD}.run_service")
-    @patch(f"{MOD}.OperateApp")
-    def test_setup_all_supported_chains(
-        self,
-        mock_operate: MagicMock,
-        mock_run_service: MagicMock,
-        mock_deploy_mech: MagicMock,
-        mock_setup_env: MagicMock,
-        mock_setup_keys: MagicMock,
-        mock_generate: MagicMock,
-        mock_push: MagicMock,
-        mock_update: MagicMock,
-    ) -> None:
-        """Test setup works for all supported chains."""
-        mock_app = MagicMock()
-        mock_operate.return_value = mock_app
-        mock_manager = MagicMock()
-        mock_manager.get_all_services.return_value = ([], None)
-        mock_app.service_manager.return_value = mock_manager
-
-        for chain in ("gnosis", "base", "polygon", "optimism"):
-            runner = CliRunner()
-            result = runner.invoke(setup_command, ["-c", chain])
-            assert result.exit_code == 0, f"Failed for chain {chain}: {result.output}"
-
-    @patch(f"{MOD}._deploy_mech")
-    @patch(f"{MOD}._generate_metadata")
-    @patch(f"{MOD}.setup_env")
-    @patch(f"{MOD}.run_service")
-    @patch(f"{MOD}.OperateApp")
-    def test_setup_env_failure_stops_execution(
-        self,
-        mock_operate: MagicMock,
-        mock_run_service: MagicMock,
-        mock_setup_env: MagicMock,
-        mock_generate: MagicMock,
-        mock_deploy_mech: MagicMock,
-    ) -> None:
-        """Test that env setup failure stops the rest of the flow."""
-        mock_app = MagicMock()
-        mock_operate.return_value = mock_app
-        mock_manager = MagicMock()
-        mock_manager.get_all_services.return_value = ([], None)
-        mock_app.service_manager.return_value = mock_manager
-        mock_setup_env.side_effect = Exception("env setup failed")
-
-        runner = CliRunner()
-        result = runner.invoke(setup_command, ["-c", "gnosis"])
-
-        assert result.exit_code != 0
-        assert result.exception is not None
-        assert "env setup failed" in str(result.exception)
-        mock_generate.assert_not_called()
-
-
-class TestSetupDeployMech:
-    """Tests for deploy-mech integration in setup."""
-
-    @patch(f"{MOD}._update_metadata")
-    @patch(f"{MOD}._push_metadata")
-    @patch(f"{MOD}._generate_metadata")
-    @patch(f"{MOD}.setup_private_keys")
-    @patch(f"{MOD}.setup_env")
-    @patch(f"{MOD}._deploy_mech")
-    @patch(f"{MOD}.run_service")
-    @patch(f"{MOD}.OperateApp")
-    def test_setup_calls_deploy_mech(
-        self,
-        mock_operate: MagicMock,
-        mock_run_service: MagicMock,
-        mock_deploy_mech: MagicMock,
-        mock_setup_env: MagicMock,
-        mock_setup_keys: MagicMock,
-        mock_generate: MagicMock,
-        mock_push: MagicMock,
-        mock_update: MagicMock,
-    ) -> None:
-        """Verify _deploy_mech is called during setup."""
-        mock_app = MagicMock()
-        mock_operate.return_value = mock_app
-        mock_manager = MagicMock()
-        mock_manager.get_all_services.return_value = ([], None)
-        mock_app.service_manager.return_value = mock_manager
-
-        runner = CliRunner()
-        result = runner.invoke(setup_command, ["-c", "gnosis"])
-
-        assert result.exit_code == 0
-        mock_deploy_mech.assert_called_once_with(mock_app, "gnosis")
-
-    @patch(f"{MOD}._update_metadata")
-    @patch(f"{MOD}._push_metadata")
-    @patch(f"{MOD}._generate_metadata")
-    @patch(f"{MOD}.setup_private_keys")
-    @patch(f"{MOD}.setup_env")
-    @patch(f"{MOD}.run_service")
-    @patch(f"{MOD}.OperateApp")
-    def test_setup_deploy_mech_skips_when_already_deployed(
-        self,
-        mock_operate: MagicMock,
-        mock_run_service: MagicMock,
-        mock_setup_env: MagicMock,
-        mock_setup_keys: MagicMock,
-        mock_generate: MagicMock,
-        mock_push: MagicMock,
-        mock_update: MagicMock,
-    ) -> None:
-        """Verify _deploy_mech skip behavior when mech is already deployed."""
-        mock_app = MagicMock()
-        mock_operate.return_value = mock_app
-        mock_manager = MagicMock()
-        mock_service = MagicMock()
-        mock_service.home_chain = "gnosis"
-        mock_service.env_variables = {
-            "AGENT_ID": {"value": "42"},
-            "MECH_TO_CONFIG": {"value": '{"0xMech":{}}'},
-            "MECH_MARKETPLACE_ADDRESS": {"value": "0x123"},
-        }
-        mock_chain_data = MagicMock()
-        mock_chain_data.multisig = "0x1234"
-        mock_chain_config = MagicMock()
-        mock_chain_config.chain_data = mock_chain_data
-        mock_service.chain_configs = {"gnosis": mock_chain_config}
-        mock_manager.get_all_services.return_value = ([mock_service], None)
-        mock_app.service_manager.return_value = mock_manager
-
-        runner = CliRunner()
-        result = runner.invoke(setup_command, ["-c", "gnosis"])
-
-        assert result.exit_code == 0
-        assert "Mech already deployed, skipping." in result.output
