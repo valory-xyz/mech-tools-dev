@@ -105,15 +105,15 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     cd mech-tools-dev/
     ```
 
-2. Prepare the virtual environment and install all the Python dependencies:
+2. Install all Python dependencies:
     ```bash
-    poetry shell
     poetry install
     ```
+    Use `poetry run <command>` for Python/CLI commands below when using Poetry 2.
 
 3. Download all the mech packages from IPFS:
     ```bash
-    autonomy packages sync --update-packages
+    poetry run autonomy packages sync --update-packages
     ```
 
 4. Run the setup command:
@@ -125,7 +125,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
 
 5. Update the tool metadata hash onchain:
     ```bash
-    python utils/update_metadata.py
+    poetry run python utils/update_metadata.py
     ```
 
 6. And just run your agent instance:
@@ -211,7 +211,7 @@ In order to contribute to Mechs' abilities, one can create and publish a tool. I
 
 **Requirements**:
   - [Python](https://www.python.org/) `>=3.10`
-  - [Poetry](https://python-poetry.org/docs/) `>=1.4.0 && <2.x`
+  - [Poetry](https://python-poetry.org/docs/) `>=1.4.0`
 
 In order to create a tool, the steps are as follows:
 
@@ -221,7 +221,7 @@ In order to create a tool, the steps are as follows:
 2. Create the tool's structure by using the following command, after replacing the values for the `AUTHOR_NAME` and `TOOL_NAME` variables:
 
 ```bash
-mtd add-tool -d AUTHOR_NAME TOOL_NAME
+poetry run mtd add-tool -d AUTHOR_NAME TOOL_NAME
 ```
 
 You will be asked whether this is a dev or a third-party package. Select dev package.
@@ -239,7 +239,7 @@ packages/
 
 For more options, use the tool helper:
 ```bash
-mtd --help
+poetry run mtd --help
 ```
 
 3. Now that your tool's structure is set up, all that's left is to configure the tool component and implement the tool's functionality in Python.
@@ -281,24 +281,19 @@ The [component.yaml](https://github.com/valory-xyz/mech-tools-dev/blob/main/mtd/
 
 ### 2. Publishing the tool
 
-1. Before proceeding, make sure that you are inside the poetry environment:
-    ```bash
-    poetry shell
-    ```
-
-2. Update the package hash, by running the following commands, from the root:
+1. Update the package hash by running the following command from the project root:
 
     ```bash
-    autonomy packages lock
+    poetry run autonomy packages lock
     ```
 
-3. Push the packages to IPFS:
+2. Push the packages to IPFS:
 
     ```bash
-    autonomy push-all
+    poetry run autonomy push-all
     ```
 
-4. Mint the tool [here](https://marketplace.olas.network/ethereum/components/mint) as a component on the Olas Registry.
+3. Mint the tool [here](https://marketplace.olas.network/ethereum/components/mint) as a component on the Olas Registry.
     You will need an address (EOA) and the hash of the metadata file.
     In order to generate this hash, click on “Generate Hash & File” and provide the following information:
     - name (name of the tool)
@@ -310,7 +305,7 @@ The [component.yaml](https://github.com/valory-xyz/mech-tools-dev/blob/main/mtd/
     In order to push an image on IPFS, use the [mech-client](https://github.com/valory-xyz/mech-client.git) cli tool, replacing `<file_name>` with the name of your file:
 
         ```bash
-        mechx push-to-ipfs ./<file_name>
+        poetry run mechx push-to-ipfs ./<file_name>
         ```
 
 After this, the tool can be deployed and used by a Mech, as shown in the next steps.
@@ -323,19 +318,19 @@ In order to test a tool you developed, let's update the Mech you created in the 
 
 1. Create the `metadata.json` for your mech:
     ```bash
-    python utils/generate_metadata.py
+    poetry run python utils/generate_metadata.py
     ```
 
 2. Publish the tool metadata hash to IPFS:
     ```bash
-    python utils/publish_metadata.py
+    poetry run python utils/publish_metadata.py
     ```
 
 3. Update the `METADATA_HASH` variable in your `.env` file with the hash you got in the previous step.
 
 4. Update the tool metadata hash onchain:
     ```bash
-    python utils/update_metadata.py
+    poetry run python utils/update_metadata.py
     ```
 
 5. Copy your tool hash from `packages/packages.json` and add it to the `TOOLS_TO_PACKAGE_HASH` variable in your `.env`.
@@ -369,7 +364,7 @@ In order to test a tool you developed, let's update the Mech you created in the 
 
 3. **Issue**: Tool changes not being reflected <br>
 
-    **Solution**: Update the tool hash if there are any changes inside the tools or configs. To update run autonomy packages lock and update the tool hash (if needed) inside TOOLS_TO_PACKAGE_HASH
+    **Solution**: Update the tool hash if there are any changes inside the tools or configs. To update run `poetry run autonomy packages lock` and update the tool hash (if needed) inside TOOLS_TO_PACKAGE_HASH
 
 4. **Issue**: env formatting issues <br>
 
