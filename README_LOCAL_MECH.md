@@ -16,14 +16,25 @@ cd mech-tools-dev
 ```bash
 poetry shell
 poetry install
-autonomy packages sync --update-packages
+poetry run autonomy packages sync --update-packages
 ```
 
 3. Run initial setup (creates/updates `.env`, keys, and local operate config):
 
 ```bash
-python utils/setup.py
+poetry run python utils/setup.py
 ```
+
+If you need a non-interactive run, set these vars before running setup:
+
+- `OPERATE_PASSWORD`
+- `ATTENDED=false`
+- `GNOSIS_LEDGER_RPC` (note: this is different from `GNOSIS_LEDGER_RPC_0`)
+- `STAKING_PROGRAM` (menu index, e.g. `1` for "No staking")
+- `MECH_TYPE` (for example `Native`)
+- `MECH_REQUEST_PRICE` (wei)
+
+During setup, Operate may request funding for both the Master EOA and the Master Safe.
 
 4. Make sure `.env` has the required values (at least these):
 
@@ -64,7 +75,7 @@ Add these entries to `packages/packages.json` under `third_party`:
 Then run:
 
 ```bash
-autonomy packages sync --update-packages
+poetry run autonomy packages sync --update-packages
 ```
 
 Tool source code references:
@@ -244,10 +255,10 @@ Repeat this checklist:
 1. Re-run `autonomy packages lock` after any tool code/config/dependency change.
 2. Update `.env` `TOOLS_TO_PACKAGE_HASH` from the latest `packages/packages.json`.
 3. If tool metadata changed (tool names/descriptions/available tools), re-run:
-   - `python utils/generate_metadata.py`
-   - `python utils/publish_metadata.py`
+   - `poetry run python utils/generate_metadata.py`
+   - `poetry run python utils/publish_metadata.py`
    - copy the printed hash manually and set new `METADATA_HASH` in `.env`
-   - `python utils/update_metadata.py`
+   - `poetry run python utils/update_metadata.py`
 4. Restart your running mech:
    - local run: stop and re-run `./run_agent.sh`
    - docker run: re-run `./run_service.sh`
@@ -289,7 +300,7 @@ API keys:
 Deploy the full dockerized service:
 
 ```bash
-./run_service.sh
+poetry run bash ./run_service.sh
 ```
 
 What this does:
@@ -303,7 +314,7 @@ What this does:
 Stop the deployed service:
 
 ```bash
-./stop_service.sh
+poetry run bash ./stop_service.sh
 ```
 
 ## 5. Steps to run local Mech
@@ -311,7 +322,7 @@ Stop the deployed service:
 For local debugging (non-docker, single process):
 
 ```bash
-./run_agent.sh
+poetry run bash ./run_agent.sh
 ```
 
 This starts Tendermint and runs the agent locally.
@@ -320,7 +331,7 @@ To test the mech from another terminal:
 
 ```bash
 source .env
-poetry run mechx request --prompts "hello, mech!" --priority-mech <your_mech_address> --tools <your_tool_name> --chain-config gnosis
+poetry run mechx --client-mode request --prompts "hello, mech!" --priority-mech <your_mech_address> --tools <your_tool_name> --chain-config gnosis --key ethereum_private_key.txt
 ```
 
 `<your_mech_address>` should match the address in `MECH_TO_CONFIG`.

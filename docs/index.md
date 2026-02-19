@@ -109,35 +109,43 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     ```bash
     poetry shell
     poetry install
+    poetry run autonomy packages sync --update-packages
     ```
 
-3. Download all the mech packages from IPFS:
+3. Run the `setup.py` script:
     ```bash
-    autonomy packages sync --update-packages
+    poetry run python utils/setup.py
     ```
 
-4. Run the `setup.py` script:
+    You will be prompted to fill in details including a Gnosis Chain RPC. If you run this script non-interactively (for example in CI or remote shells), set:
+    - `OPERATE_PASSWORD`
+    - `ATTENDED=false`
+    - `GNOSIS_LEDGER_RPC` (note: this is different from `GNOSIS_LEDGER_RPC_0`)
+    - `STAKING_PROGRAM` (menu index, e.g. `1` for "No staking")
+    - `MECH_TYPE` (e.g. `Native`)
+    - `MECH_REQUEST_PRICE` (wei)
+
+    During setup, you may need to fund both:
+    - the Master EOA
+    - the Master Safe
+
+    Use a Gnosis RPC from a provider like [Quiknode](https://www.quicknode.com/), or first test against a virtual network using [Tenderly](https://tenderly.co/).
+
+4. Update the tool metadata hash onchain:
     ```bash
-    python utils/setup.py
+    poetry run python utils/update_metadata.py
     ```
 
-    You will be prompted to fill in some details, including a Gnosis Chain RPC. Here, you can get one from a provider like [Quiknode](https://www.quicknode.com/) but we encourage you to first test against a virtual network using [Tenderly](https://tenderly.co/). This way, you can also use the faucet to fund the required wallets.
-
-5. Update the tool metadata hash onchain:
+5. And just run your agent instance:
     ```bash
-    python utils/update_metadata.py
-    ```
-
-6. And just run your agent instance:
-    ```bash
-    ./run_agent.sh
+    poetry run bash ./run_agent.sh
     ```
     This option is recommended to quickly test or debug agents, so it's the one we recommend the first time you run this tutorial.
     The next time you use this command, it will ask you for your sudo password to remove the previous build.
 
-7. Alternatively, you can also run the full dockerized AI agent with:
+6. Alternatively, you can also run the full dockerized AI agent with:
     ```bash
-    ./run_service.sh
+    poetry run bash ./run_service.sh
     ```
 
     You can check your Mech's logs with:
@@ -148,7 +156,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     Replace the Mech name with the one that appears after the `run_service.sh` script has finished.
     This option is recommended when your AI agent is ready to be deployed.
 
-8. Once your agent instance is running, and from another terminal (within the same virtual environment), send a request to it. First, load all the RPCs required for the mech client to work:
+7. Once your agent instance is running, and from another terminal (within the same virtual environment), send a request to it. First, load all the RPCs required for the mech client to work:
     ```bash
     source .env
     ```
@@ -161,7 +169,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     Finally, send the request (replacing your mech address):
 
     ```bash
-    poetry run mechx interact --prompts "hello, mech!" --priority-mech <your_mech_address> --tools echo --chain-config gnosis
+    poetry run mechx --client-mode request --prompts "hello, mech!" --priority-mech <your_mech_address> --tools echo --chain-config gnosis --key ethereum_private_key.txt
     ```
 
     The echo tool will respond with the same text from the request. You will see something like:
@@ -198,7 +206,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     }
     ```
 
-9. Stop your agent instance. If you have run the `run_agent.sh` script, just hit `ctrl+c`. If you are using `run_service.sh`, run:
+8. Stop your agent instance. If you have run the `run_agent.sh` script, just hit `ctrl+c`. If you are using `run_service.sh`, run:
     ```bash
     ./stop_service.sh
     ```
@@ -221,7 +229,7 @@ In order to create a tool, the steps are as follows:
 2. Create the tool's structure by using the following command, after replacing the values for the `AUTHOR_NAME` and `TOOL_NAME` variables:
 
 ```bash
-mtd add-tool -d AUTHOR_NAME TOOL_NAME
+mtd add-tool AUTHOR_NAME TOOL_NAME -d "Tool description"
 ```
 
 You will be asked whether this is a dev or a third-party package. Select dev package.
@@ -286,16 +294,16 @@ The [component.yaml](https://github.com/valory-xyz/mech-tools-dev/blob/main/mtd/
     poetry shell
     ```
 
-2. Update the package hash, by running the following commands, from the root:
+2. Update the package hash by running the following command from the root:
 
     ```bash
-    autonomy packages lock
+    poetry run autonomy packages lock
     ```
 
 3. Push the packages to IPFS:
 
     ```bash
-    autonomy push-all
+    poetry run autonomy push-all
     ```
 
 4.  Mint the tool [here](https://marketplace.olas.network/ethereum/components/mint) as a component on the Olas Registry;
@@ -352,7 +360,7 @@ In order to test a tool you developed, let's update the Mech you created in the 
 2. Send the request similarly to how you did it in the first section:
     ```bash
     source .env
-    poetry run mechx interact --prompts <your_prompt> --priority-mech <your_mech_address> --tools <your_tool_name> --chain-config gnosis
+    poetry run mechx --client-mode request --prompts "<your_prompt>" --priority-mech <your_mech_address> --tools <your_tool_name> --chain-config gnosis --key ethereum_private_key.txt
     ```
 
 3. Wait for some time and you will receive the response. If there's an error in the tool, you will see it in the Mech's logs.
