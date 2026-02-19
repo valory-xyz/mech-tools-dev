@@ -21,7 +21,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Tuple
+from typing import Optional, Tuple, cast
 
 import dotenv
 from multibase import multibase
@@ -34,25 +34,89 @@ from web3.contract import Contract
 from web3.types import TxReceipt
 
 
-dotenv.load_dotenv(dotenv_path=".env", override=True)
-
-GNOSIS_RPC = os.environ["GNOSIS_LEDGER_RPC_0"]
-GNOSIS_CHAIN_ID = os.environ["GNOSIS_LEDGER_CHAIN_ID"]
-COMPLEMENTARY_SERVICE_METADATA_ADDRESS = os.environ[
-    "COMPLEMENTARY_SERVICE_METADATA_ADDRESS"
-]
-METADATA_HASH = os.environ["METADATA_HASH"]
-ON_CHAIN_SERVICE_ID = os.environ["ON_CHAIN_SERVICE_ID"]
-SAFE_CONTRACT_ADDRESS = os.environ["SAFE_CONTRACT_ADDRESS"]
-
-
 CURR_DIR = Path(__file__).resolve().parent
 BASE_DIR = CURR_DIR.parent
 
+# Runtime-initialized globals (loaded in _load_runtime_config).
+DEFAULT_CHAIN_ID = ""
+CHAIN_RPC = ""
+CHAIN_ID = ""
+COMPLEMENTARY_SERVICE_METADATA_ADDRESS = ""
+METADATA_HASH = ""
+ON_CHAIN_SERVICE_ID = ""
+SAFE_CONTRACT_ADDRESS = ""
+web3 = None
+ethereum_client = None
 
-# Instantiate the web3 provider and ethereum client
-web3 = Web3(Web3.HTTPProvider(GNOSIS_RPC))
-ethereum_client = EthereumClient(GNOSIS_RPC)
+
+def _get_web3() -> Web3:
+    """Return initialized web3 instance."""
+    if web3 is None:
+        raise RuntimeError(
+            "Web3 client not initialized. Call _load_runtime_config first."
+        )
+    return cast(Web3, web3)
+
+
+def _get_ethereum_client() -> EthereumClient:
+    """Return initialized ethereum client."""
+    if ethereum_client is None:
+        raise RuntimeError(
+            "Ethereum client not initialized. Call _load_runtime_config first."
+        )
+    return cast(EthereumClient, ethereum_client)
+
+
+def _load_runtime_config() -> None:
+    """Load and validate env configuration at runtime."""
+    global DEFAULT_CHAIN_ID
+    global CHAIN_RPC
+    global CHAIN_ID
+    global COMPLEMENTARY_SERVICE_METADATA_ADDRESS
+    global METADATA_HASH
+    global ON_CHAIN_SERVICE_ID
+    global SAFE_CONTRACT_ADDRESS
+    global web3
+    global ethereum_client
+
+    dotenv.load_dotenv(dotenv_path=".env", override=True)
+
+    DEFAULT_CHAIN_ID = os.environ.get("DEFAULT_CHAIN_ID", "").strip().upper()
+    if not DEFAULT_CHAIN_ID:
+        raise ValueError("Missing DEFAULT_CHAIN_ID in environment.")
+
+    CHAIN_RPC = os.environ.get(f"{DEFAULT_CHAIN_ID}_LEDGER_RPC_0", "")
+    CHAIN_ID = os.environ.get(f"{DEFAULT_CHAIN_ID}_LEDGER_CHAIN_ID", "")
+    if not CHAIN_RPC:
+        raise ValueError(
+            f"Missing RPC for chain {DEFAULT_CHAIN_ID}: {DEFAULT_CHAIN_ID}_LEDGER_RPC_0"
+        )
+    if not CHAIN_ID:
+        raise ValueError(
+            f"Missing chain id for chain {DEFAULT_CHAIN_ID}: {DEFAULT_CHAIN_ID}_LEDGER_CHAIN_ID"
+        )
+
+    COMPLEMENTARY_SERVICE_METADATA_ADDRESS = os.environ[
+        "COMPLEMENTARY_SERVICE_METADATA_ADDRESS"
+    ]
+    METADATA_HASH = os.environ["METADATA_HASH"]
+    ON_CHAIN_SERVICE_ID = os.environ["ON_CHAIN_SERVICE_ID"]
+    SAFE_CONTRACT_ADDRESS = os.environ["SAFE_CONTRACT_ADDRESS"]
+
+    for required_key, value in (
+        (
+            "COMPLEMENTARY_SERVICE_METADATA_ADDRESS",
+            COMPLEMENTARY_SERVICE_METADATA_ADDRESS,
+        ),
+        ("METADATA_HASH", METADATA_HASH),
+        ("ON_CHAIN_SERVICE_ID", ON_CHAIN_SERVICE_ID),
+        ("SAFE_CONTRACT_ADDRESS", SAFE_CONTRACT_ADDRESS),
+    ):
+        if not value:
+            raise ValueError(f"Missing {required_key} in environment.")
+
+    web3 = Web3(Web3.HTTPProvider(CHAIN_RPC))
+    ethereum_client = EthereumClient(CHAIN_RPC)
 
 
 def load_contract(
@@ -65,7 +129,8 @@ def load_contract(
         if has_abi_key:
             contract_abi = contract_abi["abi"]
 
-    contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+    web3_client = _get_web3()
+    contract = web3_client.eth.contract(address=contract_address, abi=contract_abi)
     return contract
 
 
@@ -91,13 +156,14 @@ def send_safe_tx(
     signer_pkey: str,
     gas: int,
     value: int = 0,
-) -> TxReceipt:
+) -> Optional[TxReceipt]:
     # pylint: disable=too-many-positional-arguments
     """Send a Safe transaction"""
+    web3_client = _get_web3()
+    eth_client = _get_ethereum_client()
+
     # Get the safe
-    safe = Safe(  # pylint:disable=abstract-class-instantiated
-        safe_address, ethereum_client
-    )
+    safe = Safe(safe_address, eth_client)  # pylint:disable=abstract-class-instantiated
 
     # Build, sign and send the safe transaction
     safe_tx = safe.build_multisig_tx(
@@ -114,18 +180,17 @@ def send_safe_tx(
     safe_tx.sign(signer_pkey)
     try:
         tx_hash, _ = safe_tx.execute(signer_pkey)
-        tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+        tx_receipt = web3_client.eth.wait_for_transaction_receipt(tx_hash)
         return tx_receipt
     except Exception as e:
         print(f"Exception while sending a safe transaction: {e}")
-        return False
+        return None
 
 
 def get_safe_nonce(safe_address: str) -> int:
     """Get the Safe nonce"""
-    safe = Safe(  # pylint:disable=abstract-class-instantiated
-        safe_address, ethereum_client
-    )
+    eth_client = _get_ethereum_client()
+    safe = Safe(safe_address, eth_client)  # pylint:disable=abstract-class-instantiated
     return safe.retrieve_nonce()
 
 
@@ -134,8 +199,8 @@ def update_metadata_hash_from_safe(
     signer_pkey: str,
 ) -> Tuple[bool, bytes]:
     """Update metadata hash"""
-
-    safe_address = web3.to_checksum_address(safe_address)
+    web3_client = _get_web3()
+    safe_address = web3_client.to_checksum_address(safe_address)
 
     metadata_hash_contract = load_contract(
         COMPLEMENTARY_SERVICE_METADATA_ADDRESS,
@@ -156,9 +221,9 @@ def update_metadata_hash_from_safe(
     )
     transaction = function.build_transaction(
         {
-            "chainId": int(GNOSIS_CHAIN_ID),
+            "chainId": int(CHAIN_ID),
             "gas": 100000,
-            "gasPrice": web3.to_wei("3", "gwei"),
+            "gasPrice": web3_client.to_wei("3", "gwei"),
             "nonce": safe_nonce,
         }
     )
@@ -170,15 +235,28 @@ def update_metadata_hash_from_safe(
         signer_pkey=signer_pkey,
         gas=100000,
     )
+    if tx_receipt is None:
+        raise RuntimeError(
+            "Safe transaction execution failed; no transaction receipt returned."
+        )
 
     return (tx_receipt.status, tx_receipt.transactionHash)
 
 
 def main() -> None:
     """Run the publish_metadata script."""
+    _load_runtime_config()
+
     agent_key_path = BASE_DIR / "ethereum_private_key.txt"
+    if not agent_key_path.exists():
+        raise FileNotFoundError(
+            f"Private key file not found: {agent_key_path}. Run setup first."
+        )
+
     with open(agent_key_path, "r", encoding="utf-8") as data:
-        signer_pkey = data.read()
+        signer_pkey = data.read().strip()
+        if not signer_pkey:
+            raise ValueError("Private key file is empty.")
         success, tx_hash = update_metadata_hash_from_safe(
             SAFE_CONTRACT_ADDRESS, signer_pkey
         )

@@ -16,17 +16,19 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""The script combines the setup scripts for ease of use"""
 
-from utils.setup import main as setup_main
-from utils.update_metadata import main as update_metadata_main
+"""Update-metadata command for updating the metadata hash on-chain."""
 
-
-def main() -> None:
-    """Runs the script"""
-    setup_main()
-    update_metadata_main()
+import click
 
 
-if __name__ == "__main__":
-    main()
+@click.command(name="update-metadata")
+def update_metadata() -> None:
+    """Update the metadata hash on-chain via Safe transaction.
+
+    Example: mtd update-metadata
+    """
+    from utils.update_metadata import main as update_main  # pylint: disable=import-outside-toplevel
+
+    click.echo("Updating metadata hash on-chain...")
+    update_main()

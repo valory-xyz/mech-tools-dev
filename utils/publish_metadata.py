@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """The script allows the user to publish the metadata of the tools on ipfs"""
-import argparse
 import json
 import sys
 from typing import Dict, List, Tuple
@@ -76,12 +75,9 @@ properties_data_schema = {
 }
 
 
-def push_metadata_to_ipfs() -> None:
+def push_metadata_to_ipfs(ipfs_node: str = DEFAULT_IPFS_NODE) -> None:
     """Pushes the metadata to ipfs"""
-    parser = argparse.ArgumentParser(description="Pushes metadata.json to ipfs")
-    parser.add_argument("--ipfs-node", type=str, default=DEFAULT_IPFS_NODE)
-    args = parser.parse_args()
-    addr = args.ipfs_node
+    addr = ipfs_node
 
     status, error_msg = __validate_metadata_file(METADATA_FILE_PATH)
     if not status:

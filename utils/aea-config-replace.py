@@ -34,14 +34,21 @@ AGENT_NAME = "agent"
 
 PATH_TO_VAR = {
     # Ledgers
+    "config/ledger_apis/base/address": "BASE_LEDGER_RPC_0",
+    "config/ledger_apis/base/chain_id": "BASE_LEDGER_CHAIN_ID",
     "config/ledger_apis/gnosis/address": "GNOSIS_LEDGER_RPC_0",
     "config/ledger_apis/gnosis/chain_id": "GNOSIS_LEDGER_CHAIN_ID",
+    "config/ledger_apis/polygon/address": "POLYGON_LEDGER_RPC_0",
+    "config/ledger_apis/polygon/chain_id": "POLYGON_LEDGER_CHAIN_ID",
+    "config/ledger_apis/optimism/address": "OPTIMISM_LEDGER_RPC_0",
+    "config/ledger_apis/optimism/chain_id": "OPTIMISM_LEDGER_CHAIN_ID",
     # Agent
     "models/params/args/setup/all_participants": "ALL_PARTICIPANTS",
     "models/params/args/setup/safe_contract_address": "SAFE_CONTRACT_ADDRESS",
     "models/params/args/on_chain_service_id": "ON_CHAIN_SERVICE_ID",
     "models/params/args/num_agents": "NUM_AGENTS",
     "models/params/args/reset_pause_duration": "RESET_PAUSE_DURATION",
+    "models/params/args/default_chain_id": "DEFAULT_CHAIN_ID",
     # Tools
     "models/params/args/tools_to_package_hash": "TOOLS_TO_PACKAGE_HASH",
     "models/params/args/api_keys": "API_KEYS",
@@ -106,8 +113,12 @@ def main() -> None:
 
     # Search and replace all the secrets
     for path, var in PATH_TO_VAR.items():
+        new_value = os.getenv(var)
+        if new_value is None:
+            continue
+
         try:
-            config = find_and_replace(config, path.split("/"), os.getenv(var))
+            config = find_and_replace(config, path.split("/"), new_value)
         except Exception as e:
             print(f"Exception while replacing {path}:\n{e}")
             raise ValueError from e

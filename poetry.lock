@@ -2227,21 +2227,21 @@ files = [
 
 [[package]]
 name = "mech-client"
-version = "0.18.7"
+version = "0.18.8"
 description = "Basic client to interact with a mech"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "mech_client-0.18.7-py3-none-any.whl", hash = "sha256:815d1eefb8258df880983ec6d5a09bf090a9567a7b3dd786f92c11f01207b3b1"},
-    {file = "mech_client-0.18.7.tar.gz", hash = "sha256:d8f3e6580e7fd181b24a2174c15f8084934c01e3e515391bea9aa82b16d46047"},
+    {file = "mech_client-0.18.8-py3-none-any.whl", hash = "sha256:ffb5f6f83c2b9a362632cf5efd44ccd37bfa80ce0a3149cbd25f0fae23b05071"},
+    {file = "mech_client-0.18.8.tar.gz", hash = "sha256:ca1ef6ee11accaa1a9f2cf104fe0f28fbc37c1e6f71de478b4cf3709514fa391"},
 ]
 
 [package.dependencies]
 asn1crypto = ">=1.4.0,<1.5.0"
 click = "8.1.8"
 gql = ">=3.4.1"
-olas-operate-middleware = "0.14.10"
+olas-operate-middleware = "0.14.16"
 safe-eth-py = ">=7.18.0,<8.0.0"
 setuptools = ">=77.0.3,<78.0.0"
 tabulate = ">=0.9.0,<0.10.0"
@@ -2534,14 +2534,14 @@ nicer-shell = ["ipython"]
 
 [[package]]
 name = "olas-operate-middleware"
-version = "0.14.10"
+version = "0.14.16"
 description = ""
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "olas_operate_middleware-0.14.10-py3-none-any.whl", hash = "sha256:9eaccfa4fb62bc09e1915f05a79a967f1fe31e6ff9a62df55f9e03a0bdac793a"},
-    {file = "olas_operate_middleware-0.14.10.tar.gz", hash = "sha256:3649d756d42090438bda6e78f8bf8c48873de87f6640b62be7e6f58e1013ea9d"},
+    {file = "olas_operate_middleware-0.14.16-py3-none-any.whl", hash = "sha256:c5d80f752686f94286b1fc331dfb930e8bd50757749771dffc9198041fdd09a0"},
+    {file = "olas_operate_middleware-0.14.16.tar.gz", hash = "sha256:853a51749d6fcece8f0a666ce2e92e6ae5e3a87d29f0b7df42205844a001f468"},
 ]
 
 [package.dependencies]
@@ -2557,7 +2557,7 @@ open-aea-cli-ipfs = ">=2.0.8,<3.0.0"
 open-aea-ledger-cosmos = ">=2.0.8,<3.0.0"
 open-aea-ledger-ethereum = ">=2.0.8,<3.0.0"
 open-aea-ledger-ethereum-flashbots = ">=2.0.8,<3.0.0"
-open-autonomy = ">=0.21.9,<0.22.0"
+open-autonomy = ">=0.21.11,<0.22.0"
 psutil = ">=5.9.8,<6.0.0"
 pyinstaller = ">=6.8.0,<7.0.0"
 requests-mock = ">=1.12.1,<2.0.0"
@@ -4759,4 +4759,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "b7b6ce5762bd751d0e4dc97ac2ee2d0a96e226632179752372a2eb89eefb6c0f"
+content-hash = "ee19c4b9d7166f2d99676129dcd5af58de65d4f58687ae2cca5058894dac3e85"

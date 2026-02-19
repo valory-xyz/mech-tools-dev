@@ -105,27 +105,27 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     cd mech-tools-dev/
     ```
 
-2. Prepare the virtual environment and install all the Python dependencies:
+2. Install all Python dependencies:
     ```bash
-    poetry shell
     poetry install
     ```
+    Use `poetry run <command>` for Python/CLI commands below when using Poetry 2.
 
 3. Download all the mech packages from IPFS:
     ```bash
-    autonomy packages sync --update-packages
+    poetry run autonomy packages sync --update-packages
     ```
 
-4. Run the `setup.py` script:
+4. Run the setup command:
     ```bash
-    python utils/setup.py
+    poetry run mtd setup -c <gnosis|base|polygon|optimism>
     ```
 
-    You will be prompted to fill in some details, including a Gnosis Chain RPC. Here, you can get one from a provider like [Quiknode](https://www.quicknode.com/) but we encourage you to first test against a virtual network using [Tenderly](https://tenderly.co/). This way, you can also use the faucet to fund the required wallets.
+    You will be prompted to select a chain (`gnosis`, `base`, `polygon`, `optimism`) and fill in some details, including the RPC for that chain. Here, you can get one from a provider like [Quiknode](https://www.quicknode.com/) but we encourage you to first test against a virtual network using [Tenderly](https://tenderly.co/). This way, you can also use the faucet to fund the required wallets.
 
 5. Update the tool metadata hash onchain:
     ```bash
-    python utils/update_metadata.py
+    poetry run python utils/update_metadata.py
     ```
 
 6. And just run your agent instance:
@@ -161,7 +161,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     Finally, send the request (replacing your mech address):
 
     ```bash
-    poetry run mechx interact --prompts "hello, mech!" --priority-mech <your_mech_address> --tools echo --chain-config gnosis
+    poetry run mechx request --prompts "hello, mech!" --priority-mech <your_mech_address> --tools echo --chain-config <gnosis|base|polygon|optimism>
     ```
 
     The echo tool will respond with the same text from the request. You will see something like:
@@ -169,7 +169,7 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     Fetching Mech Info...
     Sending Mech Marketplace request...
     - Prompt uploaded: https://gateway.autonolas.tech/ipfs/f01701220fe7480a472cc8dffe481d5883e235346793a20a25415160ad2feade0d809f9db
-    - Transaction sent: https://gnosisscan.io/tx/0x7bb3b734b5936e72c84749431081c8416c3f4c64a75f9f6c61291b47f141fd3d
+    - Transaction sent: <chain-explorer-tx-url>
     - Waiting for transaction receipt...
     - Created on-chain request with ID 63113231565093422774445497789782682647110838977840831205387629469951062204223
     ```
@@ -211,7 +211,7 @@ In order to contribute to Mechs' abilities, one can create and publish a tool. I
 
 **Requirements**:
   - [Python](https://www.python.org/) `>=3.10`
-  - [Poetry](https://python-poetry.org/docs/) `>=1.4.0 && <2.x`
+  - [Poetry](https://python-poetry.org/docs/) `>=1.4.0`
 
 In order to create a tool, the steps are as follows:
 
@@ -221,7 +221,7 @@ In order to create a tool, the steps are as follows:
 2. Create the tool's structure by using the following command, after replacing the values for the `AUTHOR_NAME` and `TOOL_NAME` variables:
 
 ```bash
-mtd add-tool -d AUTHOR_NAME TOOL_NAME
+poetry run mtd add-tool -d AUTHOR_NAME TOOL_NAME
 ```
 
 You will be asked whether this is a dev or a third-party package. Select dev package.
@@ -239,7 +239,7 @@ packages/
 
 For more options, use the tool helper:
 ```bash
-mtd --help
+poetry run mtd --help
 ```
 
 3. Now that your tool's structure is set up, all that's left is to configure the tool component and implement the tool's functionality in Python.
@@ -281,25 +281,20 @@ The [component.yaml](https://github.com/valory-xyz/mech-tools-dev/blob/main/mtd/
 
 ### 2. Publishing the tool
 
-1. Before proceeding, make sure that you are inside the poetry environment:
-    ```bash
-    poetry shell
-    ```
-
-2. Update the package hash, by running the following commands, from the root:
+1. Update the package hash by running the following command from the project root:
 
     ```bash
-    autonomy packages lock
+    poetry run autonomy packages lock
     ```
 
-3. Push the packages to IPFS:
+2. Push the packages to IPFS:
 
     ```bash
-    autonomy push-all
+    poetry run autonomy push-all
     ```
 
-4.  Mint the tool [here](https://marketplace.olas.network/ethereum/components/mint) as a component on the Olas Registry;
-    For this is needed: an address (EOA) and the hash of the meta-data file.
+3. Mint the tool [here](https://marketplace.olas.network/ethereum/components/mint) as a component on the Olas Registry.
+    You will need an address (EOA) and the hash of the metadata file.
     In order to generate this hash, click on “Generate Hash & File” and provide the following information:
     - name (name of the tool)
     - description (of the tool)
@@ -310,32 +305,32 @@ The [component.yaml](https://github.com/valory-xyz/mech-tools-dev/blob/main/mtd/
     In order to push an image on IPFS, use the [mech-client](https://github.com/valory-xyz/mech-client.git) cli tool, replacing `<file_name>` with the name of your file:
 
         ```bash
-        mechx push-to-ipfs ./<file_name>
+        poetry run mechx push-to-ipfs ./<file_name>
         ```
 
-After this, the tool can be deployed to be used by a Mech as shown in steps outlined below.
+After this, the tool can be deployed and used by a Mech, as shown in the next steps.
 
 
-## Deploying a Mech with custom tools
+### 3. Deploying a Mech with custom tools
 
 In order to test a tool you developed, let's update the Mech you created in the previous sections.
 
 
 1. Create the `metadata.json` for your mech:
     ```bash
-    python utils/generate_metadata.py
+    poetry run python utils/generate_metadata.py
     ```
 
 2. Publish the tool metadata hash to IPFS:
     ```bash
-    python utils/publish_metadata.py
+    poetry run python utils/publish_metadata.py
     ```
 
 3. Update the `METADATA_HASH` variable in your `.env` file with the hash you got in the previous step.
 
 4. Update the tool metadata hash onchain:
     ```bash
-    python utils/update_metadata.py
+    poetry run python utils/update_metadata.py
     ```
 
 5. Copy your tool hash from `packages/packages.json` and add it to the `TOOLS_TO_PACKAGE_HASH` variable in your `.env`.
@@ -345,14 +340,14 @@ In order to test a tool you developed, let's update the Mech you created in the 
 6. Run your mech using `run_agent.sh` or `run_service.sh` as seen in the previous sections.
 
 
-## Sending a request to your custom Mech
+### 4. Sending a request to your custom Mech
 
 1. Copy your Mech's address from the `.env` file. There should be a variable called `MECH_TO_CONFIG` that includes it.
 
 2. Send the request similarly to how you did it in the first section:
     ```bash
     source .env
-    poetry run mechx interact --prompts <your_prompt> --priority-mech <your_mech_address> --tools <your_tool_name> --chain-config gnosis
+    poetry run mechx request --prompts <your_prompt> --priority-mech <your_mech_address> --tools <your_tool_name> --chain-config <gnosis|base|polygon|optimism>
     ```
 
 3. Wait for some time and you will receive the response. If there's an error in the tool, you will see it in the Mech's logs.
@@ -369,7 +364,7 @@ In order to test a tool you developed, let's update the Mech you created in the 
 
 3. **Issue**: Tool changes not being reflected <br>
 
-    **Solution**: Update the tool hash if there are any changes inside the tools or configs. To update run autonomy packages lock and update the tool hash (if needed) inside TOOLS_TO_PACKAGE_HASH
+    **Solution**: Update the tool hash if there are any changes inside the tools or configs. To update run `poetry run autonomy packages lock` and update the tool hash (if needed) inside TOOLS_TO_PACKAGE_HASH
 
 4. **Issue**: env formatting issues <br>
 

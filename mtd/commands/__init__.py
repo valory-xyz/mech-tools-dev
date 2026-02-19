@@ -17,30 +17,23 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The mech tools dev CLI's entry point."""
+"""CLI command modules."""
 
-import click
-
-from mtd.commands import (
-    add_tool,
-    deploy_mech_command,
-    push_metadata,
-    run,
-    setup,
-    stop,
-    update_metadata,
-)
+from mtd.commands.add_tool_cmd import add_tool
+from mtd.commands.deploy_mech_cmd import deploy_mech_command
+from mtd.commands.push_metadata_cmd import push_metadata
+from mtd.commands.run_cmd import run
+from mtd.commands.setup_cmd import setup
+from mtd.commands.stop_cmd import stop
+from mtd.commands.update_metadata_cmd import update_metadata
 
 
-@click.group()
-def cli() -> None:
-    """Dev CLI tool."""
-
-
-cli.add_command(add_tool)
-cli.add_command(deploy_mech_command)
-cli.add_command(setup)
-cli.add_command(run)
-cli.add_command(stop)
-cli.add_command(push_metadata)
-cli.add_command(update_metadata)
+__all__ = [
+    "add_tool",
+    "deploy_mech_command",
+    "push_metadata",
+    "run",
+    "setup",
+    "stop",
+    "update_metadata",
+]
