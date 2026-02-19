@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2025 Valory AG
+#   Copyright 2025-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
 
 """Tests for update-metadata command."""
 
+import sys
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
@@ -26,29 +28,30 @@ from click.testing import CliRunner
 from mtd.commands.update_metadata_cmd import update_metadata
 
 
-MOCK_PATH = "mtd.commands.update_metadata_cmd"
-
-
 class TestUpdateMetadataCommand:
     """Tests for update-metadata command."""
 
-    @patch(f"{MOCK_PATH}.update_main")
-    def test_update_metadata_success(self, mock_update: MagicMock) -> None:
+    def test_update_metadata_success(self) -> None:
         """Test successful update-metadata."""
+        mock_update = MagicMock()
+        fake_module = SimpleNamespace(main=mock_update)
+
         runner = CliRunner()
-        result = runner.invoke(update_metadata, [])
+        with patch.dict(sys.modules, {"utils.update_metadata": fake_module}):
+            result = runner.invoke(update_metadata, [])
 
         assert result.exit_code == 0
         assert "Updating metadata hash on-chain" in result.output
         mock_update.assert_called_once()
 
-    @patch(f"{MOCK_PATH}.update_main")
-    def test_update_metadata_failure(self, mock_update: MagicMock) -> None:
+    def test_update_metadata_failure(self) -> None:
         """Test update-metadata when update fails."""
-        mock_update.side_effect = Exception("Transaction failed")
+        mock_update = MagicMock(side_effect=Exception("Transaction failed"))
+        fake_module = SimpleNamespace(main=mock_update)
 
         runner = CliRunner()
-        result = runner.invoke(update_metadata, [])
+        with patch.dict(sys.modules, {"utils.update_metadata": fake_module}):
+            result = runner.invoke(update_metadata, [])
 
         assert result.exit_code != 0
         assert result.exception is not None

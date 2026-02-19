@@ -116,9 +116,9 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
     autonomy packages sync --update-packages
     ```
 
-4. Run the `setup.py` script:
+4. Run the setup command:
     ```bash
-    python utils/setup.py
+    poetry run mtd setup -c <gnosis|base|polygon|optimism>
     ```
 
     You will be prompted to select a chain (`gnosis`, `base`, `polygon`, `optimism`) and fill in some details, including the RPC for that chain. Here, you can get one from a provider like [Quiknode](https://www.quicknode.com/) but we encourage you to first test against a virtual network using [Tenderly](https://tenderly.co/). This way, you can also use the faucet to fund the required wallets.

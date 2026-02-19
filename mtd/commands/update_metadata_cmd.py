@@ -21,8 +21,6 @@
 
 import click
 
-from utils.update_metadata import main as update_main
-
 
 @click.command(name="update-metadata")
 def update_metadata() -> None:
@@ -30,5 +28,7 @@ def update_metadata() -> None:
 
     Example: mtd update-metadata
     """
+    from utils.update_metadata import main as update_main  # pylint: disable=import-outside-toplevel
+
     click.echo("Updating metadata hash on-chain...")
     update_main()

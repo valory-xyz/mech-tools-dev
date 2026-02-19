@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2025 Valory AG
+#   Copyright 2025-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -35,7 +35,9 @@ class TestRunCommand:
     @patch(f"{MOCK_PATH}.run_service")
     @patch(f"{MOCK_PATH}.OperateApp")
     def test_run_success(
-        self, mock_operate: MagicMock, mock_run_service: MagicMock
+        self,
+        mock_operate: MagicMock,
+        mock_run_service: MagicMock,
     ) -> None:
         """Test successful run in production mode."""
         mock_app = MagicMock()
@@ -58,7 +60,9 @@ class TestRunCommand:
     @patch(f"{MOCK_PATH}.run_service")
     @patch(f"{MOCK_PATH}.OperateApp")
     def test_run_all_chains(
-        self, mock_operate: MagicMock, mock_run_service: MagicMock
+        self,
+        mock_operate: MagicMock,
+        mock_run_service: MagicMock,
     ) -> None:
         """Test run works for all supported chains."""
         mock_app = MagicMock()
@@ -90,7 +94,9 @@ class TestRunCommand:
     @patch(f"{MOCK_PATH}.run_service")
     @patch(f"{MOCK_PATH}.OperateApp")
     def test_run_service_failure(
-        self, mock_operate: MagicMock, mock_run_service: MagicMock
+        self,
+        mock_operate: MagicMock,
+        mock_run_service: MagicMock,
     ) -> None:
         """Test run when run_service raises an error."""
         mock_app = MagicMock()
@@ -155,12 +161,20 @@ class TestRunDevMode:
         assert call_kwargs["build_only"] is False
         assert call_kwargs["use_docker"] is False
 
+        assert mock_subprocess.run.call_count == 1
+        first_call = mock_subprocess.run.call_args_list[0]
+        assert first_call.args[0] == ["autonomy", "push-all"]
+
     @patch(f"{MOCK_PATH}.run_service")
     @patch(f"{MOCK_PATH}.OperateApp")
-    def test_run_without_dev_does_not_pass_use_docker(
-        self, mock_operate: MagicMock, mock_run_service: MagicMock
+    @patch(f"{MOCK_PATH}._push_all_packages")
+    def test_run_without_dev_does_not_push_or_pass_use_docker(
+        self,
+        mock_push_all: MagicMock,
+        mock_operate: MagicMock,
+        mock_run_service: MagicMock,
     ) -> None:
-        """Test production mode does not pass use_docker."""
+        """Test production mode does not push packages or pass use_docker."""
         mock_app = MagicMock()
         mock_operate.return_value = mock_app
 
@@ -170,3 +184,4 @@ class TestRunDevMode:
         assert result.exit_code == 0
         call_kwargs = mock_run_service.call_args[1]
         assert "use_docker" not in call_kwargs
+        mock_push_all.assert_not_called()

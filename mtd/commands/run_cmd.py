@@ -34,9 +34,19 @@ CONFIG_DIR = BASE_DIR / "config"
 SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
 
 
+def _push_all_packages() -> None:
+    """Push local packages to IPFS so service hashes resolve during runtime."""
+    click.echo("Pushing local packages...")
+    subprocess.run(
+        ["autonomy", "push-all"],
+        check=True,
+        cwd=str(BASE_DIR),
+    )
+
+
 def _get_latest_service_hash() -> str:
     """Get the latest service hash from autonomy packages."""
-    result = subprocess.run(
+    subprocess.run(
         ["autonomy", "packages", "lock", "--check"],
         capture_output=True,
         text=True,
@@ -54,12 +64,7 @@ def _get_latest_service_hash() -> str:
 
 def _run_dev_mode(config_path: Path) -> None:
     """Dev mode: push local packages, update config hash, run via middleware."""
-    click.echo("Pushing local packages...")
-    subprocess.run(
-        ["autonomy", "push-all"],
-        check=True,
-        cwd=str(BASE_DIR),
-    )
+    _push_all_packages()
 
     new_hash = _get_latest_service_hash()
 
