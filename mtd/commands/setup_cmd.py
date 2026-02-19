@@ -17,30 +17,28 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The mech tools dev CLI's entry point."""
+"""Setup command for mech agent service configuration and metadata deployment."""
 
 import click
 
-from mtd.commands import (
-    add_tool,
-    deploy_mech_command,
-    push_metadata,
-    run,
-    setup,
-    stop,
-    update_metadata,
+from mtd.setup_flow import SUPPORTED_CHAINS, run_setup
+
+
+@click.command()
+@click.option(
+    "-c",
+    "--chain-config",
+    type=click.Choice(SUPPORTED_CHAINS, case_sensitive=False),
+    required=True,
+    help="Target chain for the mech service.",
 )
+def setup(chain_config: str) -> None:
+    """Setup on-chain requirements for running a mech agent.
 
+    Runs the full setup flow: operate build, env configuration,
+    private key setup, metadata generation, IPFS publish, and
+    on-chain metadata hash update.
 
-@click.group()
-def cli() -> None:
-    """Dev CLI tool."""
-
-
-cli.add_command(add_tool)
-cli.add_command(deploy_mech_command)
-cli.add_command(setup)
-cli.add_command(run)
-cli.add_command(stop)
-cli.add_command(push_metadata)
-cli.add_command(update_metadata)
+    Example: mtd setup -c gnosis
+    """
+    run_setup(chain_config=chain_config)

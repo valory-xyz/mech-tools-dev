@@ -16,33 +16,112 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""The script allows the user to setup onchain requirements for running mechs"""
+
+"""Setup flow for mech agent service configuration and metadata deployment."""
 
 import json
 import logging
 import os
 from pathlib import Path
 
-from dotenv import dotenv_values, load_dotenv, set_key
-from operate.cli import OperateApp, run_service
+import click
+from dotenv import dotenv_values, set_key
+from operate.cli import OperateApp
 from operate.keys import KeysManager
-from operate.quickstart.run_service import ask_password_if_needed
+from operate.quickstart.run_service import ask_password_if_needed, run_service
 
 
-CURR_DIR = Path(__file__).resolve().parent
-BASE_DIR = CURR_DIR.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
+CONFIG_DIR = BASE_DIR / "config"
 SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
-TEMPLATE_CONFIG_PATHS = {
-    chain: BASE_DIR / "config" / f"config_mech_{chain}.json" for chain in SUPPORTED_CHAINS
-}
 OPERATE_DIR = BASE_DIR / ".operate"
 OPERATE_CONFIG_PATH = "services/sc-*/config.json"
 AGENT_KEY = "ethereum_private_key.txt"
 SERVICE_KEY = "keys.json"
 
 
-def read_and_update_env(data: dict) -> None:
-    """Reads the generated env from operate and creates the required .env"""
+def _generate_metadata() -> None:
+    """Generate metadata.json from packages."""
+    from utils.generate_metadata import main  # pylint: disable=import-outside-toplevel
+
+    main()
+
+
+def _push_metadata() -> None:
+    """Push metadata.json to IPFS."""
+    from utils.publish_metadata import push_metadata_to_ipfs  # pylint: disable=import-outside-toplevel
+
+    push_metadata_to_ipfs()
+
+
+def _update_metadata() -> None:
+    """Update metadata hash on-chain via Safe transaction."""
+    from utils.update_metadata import main  # pylint: disable=import-outside-toplevel
+
+    main()
+
+
+def _deploy_mech(operate: OperateApp, chain_config: str) -> None:
+    """Deploy mech on the marketplace if needed."""
+    from mtd.deploy_mech import (  # pylint: disable=import-outside-toplevel
+        deploy_mech,
+        needs_mech_deployment,
+        update_service_after_deploy,
+    )
+
+    manager = operate.service_manager()
+    services, _ = manager.get_all_services()
+    if not services:
+        return
+    service = services[0]
+    if not needs_mech_deployment(service):
+        click.echo("Mech already deployed, skipping.")
+        return
+    ledger_config = service.chain_configs[service.home_chain].ledger_config
+    sftxb = manager.get_eth_safe_tx_builder(ledger_config)
+    mech_address, agent_id = deploy_mech(sftxb=sftxb, service=service)
+    update_service_after_deploy(service, mech_address, agent_id)
+    click.echo(f"Mech deployed at {mech_address} (agent_id={agent_id})")
+
+
+def _get_password(operate: OperateApp) -> str:
+    """Load password from .env if present, otherwise prompt and persist."""
+    env_path = BASE_DIR / ".env"
+
+    if env_path.exists():
+        env_values = dotenv_values(env_path)
+        password = (env_values.get("OPERATE_PASSWORD") or "").strip()
+        if password:
+            os.environ["OPERATE_PASSWORD"] = password
+            operate.password = password
+            return password
+
+    os.environ["ATTENDED"] = "true"
+    ask_password_if_needed(operate)
+    if not operate.password:
+        raise click.ClickException("Password could not be set for Operate.")
+
+    os.environ["OPERATE_PASSWORD"] = operate.password
+    env_path.parent.mkdir(parents=True, exist_ok=True)
+    set_key(str(env_path), "OPERATE_PASSWORD", os.environ["OPERATE_PASSWORD"])
+    return os.environ["OPERATE_PASSWORD"]
+
+
+def _configure_quickstart_env(operate: OperateApp, chain_config: str, config_path: Path) -> None:
+    """Configure middleware env for interactive quickstart setup."""
+    del chain_config  # not needed in interactive mode
+    del config_path
+
+    password = _get_password(operate)
+
+    os.environ["OPERATE_PASSWORD"] = password
+    os.environ["ATTENDED"] = "true"
+
+    click.echo("Using interactive setup flow (ATTENDED=true)")
+
+
+def _read_and_update_env(data: dict) -> None:
+    """Read generated env from operate and create required .env file."""
     with open(".example.env", "r", encoding="utf-8") as f:
         lines = f.readlines()
 
@@ -67,6 +146,7 @@ def read_and_update_env(data: dict) -> None:
         raise ValueError(
             f"Missing safe address for `{home_chain}` in operate chain config."
         )
+
     all_participants = json.dumps(data["agent_addresses"])
 
     var_data = data["env_variables"].get("MECH_TO_MAX_DELIVERY_RATE", {}).get("value", "")
@@ -74,6 +154,7 @@ def read_and_update_env(data: dict) -> None:
         parsed = json.loads(var_data or "{}")
     except json.JSONDecodeError as e:
         raise ValueError("Invalid MECH_TO_MAX_DELIVERY_RATE JSON in operate config.") from e
+
     parsed_dict = {k: int(v) for k, v in parsed.items()}
     mech_to_max_delivery_rate = json.dumps(parsed_dict, separators=(",", ":"))
 
@@ -89,12 +170,19 @@ def read_and_update_env(data: dict) -> None:
         raise ValueError(
             f"Missing `{chain_rpc_env_var}` in operate env variables for chain `{home_chain}`."
         )
+
     mechx_env_data = {
-        "MECHX_RPC_URL": chain_rpc,
+        "MECHX_CHAIN_RPC": chain_rpc,
         "MECHX_LEDGER_ADDRESS": chain_rpc,
         "MECHX_CHAIN_CONFIG": home_chain,
         "MECHX_MECH_OFFCHAIN_URL": "http://localhost:8000/",
     }
+
+    def _format_env_value(value: object) -> str:
+        """Serialize env values without Python repr wrappers."""
+        if isinstance(value, (dict, list)):
+            return json.dumps(value, separators=(",", ":"))
+        return str(value)
 
     filled_lines = []
     written_keys = set()
@@ -106,34 +194,32 @@ def read_and_update_env(data: dict) -> None:
             if value is None:
                 value = data["env_variables"].get(key, {}).get("value", "")
 
-            # remove vars that are not used. Creates issues during run_service
             if value not in ("", None, {}, []):
-                filled_lines.append(f"{key}={value!r}\n")
+                filled_lines.append(f"{key}={_format_env_value(value)}\n")
                 written_keys.add(key)
         else:
             filled_lines.append(line)
 
-    for key in mechx_env_data.keys():
-        value = mechx_env_data.get(key)
+    for key, value in mechx_env_data.items():
         if value not in ("", None, {}, []):
-            filled_lines.append(f"export {key}={value!r}\n")
+            filled_lines.append(f"{key}={_format_env_value(value)}\n")
 
     if (
         existing_operate_password not in ("", None)
         and "OPERATE_PASSWORD" not in written_keys
     ):
-        filled_lines.append(f"OPERATE_PASSWORD={existing_operate_password!r}\n")
+        filled_lines.append(f"OPERATE_PASSWORD={_format_env_value(existing_operate_password)}\n")
 
     with open(".env", "w", encoding="utf-8") as f:
         f.writelines(filled_lines)
 
 
-def setup_env() -> None:
-    """Setups the env"""
+def _setup_env() -> None:
+    """Set up env from generated operate config."""
     matching_paths = OPERATE_DIR.glob(OPERATE_CONFIG_PATH)
     data = {}
     for file_path in matching_paths:
-        print(f"Reading from: {file_path}")
+        click.echo(f"Reading from: {file_path}")
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
             data = json.loads(content)
@@ -143,31 +229,31 @@ def setup_env() -> None:
             f"No operate config found under {OPERATE_DIR / 'services'} matching {OPERATE_CONFIG_PATH}."
         )
 
-    read_and_update_env(data)
+    _read_and_update_env(data)
 
 
-def create_private_key_files(data: dict) -> None:
-    """Reads the generated env from operate and creates the required keys.json and ethereum_private_key.txt. Skips if files already exists"""
+def _create_private_key_files(data: dict) -> None:
+    """Create keys.json and ethereum_private_key.txt from decrypted key data."""
     agent_key_path = BASE_DIR / AGENT_KEY
     if agent_key_path.exists():
-        print(f"Agent key found at: {agent_key_path}. Skipping creation")
+        click.echo(f"Agent key found at: {agent_key_path}. Skipping creation")
     else:
         agent_key_path.write_text(data["private_key"], encoding="utf-8")
 
     service_key_path = BASE_DIR / SERVICE_KEY
     if service_key_path.exists():
-        print(f"Service key found at: {service_key_path}. Skipping creation")
+        click.echo(f"Service key found at: {service_key_path}. Skipping creation")
     else:
         service_key_path.write_text(json.dumps([data], indent=2), encoding="utf-8")
 
 
-def setup_private_keys() -> None:
-    """Setups the private keys"""
+def _setup_private_keys() -> None:
+    """Set up private key files from operate key store."""
     keys_dir = OPERATE_DIR / "keys"
     if keys_dir.is_dir():
         key_file = next(keys_dir.glob("*"), None)
         if key_file and key_file.is_file():
-            print(f"Key file found at: {key_file}")
+            click.echo(f"Key file found at: {key_file}")
             password = os.environ.get("OPERATE_PASSWORD", "")
             if not password:
                 raise ValueError("OPERATE_PASSWORD is required to decrypt keys.")
@@ -179,91 +265,58 @@ def setup_private_keys() -> None:
                     password=password,
                 )
                 data = manager.get_decrypted(key_file.name)
-                create_private_key_files(data)
+                _create_private_key_files(data)
             except Exception as e:
                 raise RuntimeError(
                     f"Failed to setup private keys from {key_file}"
                 ) from e
 
 
-def ask_chain() -> str:
-    """Ask user for a target chain."""
-    options = ", ".join(SUPPORTED_CHAINS)
-    while True:
-        selected_chain = input(f"Select chain ({options}): ").strip().lower()
-        if selected_chain in SUPPORTED_CHAINS:
-            return selected_chain
-        print(f"Invalid chain `{selected_chain}`. Please choose one of: {options}.")
-
-
-def get_password(operate: OperateApp) -> str:
-    """Load password from .env if present, otherwise prompt and persist.
-
-    :param operate: The OperateApp instance.
-    :return: Operate password
-    :raises RuntimeError: If password could not be set
-    """
-    env_path = BASE_DIR / ".env"
-    # Try loading from environment file
-    if env_path.exists():
-        load_dotenv(dotenv_path=env_path, override=False)
-        password = os.environ.get("OPERATE_PASSWORD", "")
-        if password:
-            os.environ["OPERATE_PASSWORD"] = password
-            os.environ["ATTENDED"] = "false"
-            return password
-
-    # Prompt for password
-    ask_password_if_needed(operate)
-    if not operate.password:
-        raise RuntimeError("Password could not be set for Operate.")
-
-    # Persist password
-    os.environ["OPERATE_PASSWORD"] = operate.password
-    env_path.parent.mkdir(parents=True, exist_ok=True)
-    set_key(str(env_path), "OPERATE_PASSWORD", os.environ["OPERATE_PASSWORD"])
-    os.environ["ATTENDED"] = "false"
-    return os.environ["OPERATE_PASSWORD"]
-
-
-def setup_operate(operate: OperateApp) -> None:
-    """Setups the operate"""
-    selected_chain = ask_chain()
-    config_path = TEMPLATE_CONFIG_PATHS[selected_chain]
+def run_setup(chain_config: str) -> None:
+    """Run the full setup flow for the given chain."""
+    config_path = CONFIG_DIR / f"config_mech_{chain_config}.json"
     if not config_path.exists():
-        raise FileNotFoundError(f"Missing template config: {config_path}")
+        raise click.ClickException(f"Missing template config: {config_path}")
 
-    run_service(
-        operate=operate,
-        config_path=config_path,
-        build_only=True,
-        skip_dependency_check=False,
-    )
-
-
-def main() -> None:
-    """Runs the script"""
     operate = OperateApp()
     operate.setup()
 
+    # Ensure wallet operations work even when setup is skipped.
+    _get_password(operate)
+
     services, _ = operate.service_manager().get_all_services()
-    if (
+    needs_setup = (
         not services
         or services[0].chain_configs.get(services[0].home_chain, {}).chain_data.multisig
         is None
-    ):
-        print("Setting up operate...")
-        setup_operate(operate)
+    )
 
-    print("Setting up env...")
-    setup_env()
+    if needs_setup:
+        click.echo("Setting up operate...")
+        _configure_quickstart_env(operate, chain_config, config_path)
+        run_service(
+            operate=operate,
+            config_path=config_path,
+            build_only=True,
+            skip_dependency_check=False,
+        )
 
-    # Persist password to .env
-    get_password(operate)
+    click.echo("Deploying mech on marketplace...")
+    _deploy_mech(operate, chain_config)
 
-    print("Setting up private keys...")
-    setup_private_keys()
+    click.echo("Setting up env...")
+    _setup_env()
 
+    click.echo("Setting up private keys...")
+    _setup_private_keys()
 
-if __name__ == "__main__":
-    main()
+    click.echo("Generating metadata...")
+    _generate_metadata()
+
+    click.echo("Publishing metadata to IPFS...")
+    _push_metadata()
+
+    click.echo("Updating metadata hash on-chain...")
+    _update_metadata()
+
+    click.echo("Setup complete.")
