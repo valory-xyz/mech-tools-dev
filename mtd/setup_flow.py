@@ -172,7 +172,7 @@ def _read_and_update_env(data: dict) -> None:
         )
 
     mechx_env_data = {
-        "MECHX_RPC_URL": chain_rpc,
+        "MECHX_CHAIN_RPC": chain_rpc,
         "MECHX_LEDGER_ADDRESS": chain_rpc,
         "MECHX_CHAIN_CONFIG": home_chain,
         "MECHX_MECH_OFFCHAIN_URL": "http://localhost:8000/",
