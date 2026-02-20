@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2025 Valory AG
+#   Copyright 2025-2026 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,34 +17,29 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The mech tools dev CLI's entry point."""
+"""Helpers for accessing mtd click context."""
 
 import click
 
-from mtd.commands import (
-    add_tool,
-    deploy_mech_command,
-    push_metadata,
-    run,
-    setup,
-    stop,
-    update_metadata,
-)
-from mtd.context import build_context
+from mtd.context import MtdContext, build_context
 
 
-@click.group()
-@click.pass_context
-def cli(ctx: click.Context) -> None:
-    """Dev CLI tool."""
-    ctx.ensure_object(dict)
-    ctx.obj["mtd_context"] = build_context()
+def get_mtd_context(ctx: click.Context) -> MtdContext:
+    """Get mtd context from click context object."""
+    ctx_obj = ctx.ensure_object(dict)
+    context = ctx_obj.get("mtd_context")
+    if isinstance(context, MtdContext):
+        return context
+
+    fallback = build_context()
+    ctx_obj["mtd_context"] = fallback
+    return fallback
 
 
-cli.add_command(add_tool)
-cli.add_command(deploy_mech_command)
-cli.add_command(setup)
-cli.add_command(run)
-cli.add_command(stop)
-cli.add_command(push_metadata)
-cli.add_command(update_metadata)
+def require_initialized(context: MtdContext) -> None:
+    """Raise if workspace is not initialized."""
+    if not context.is_initialized():
+        raise click.ClickException(
+            f"Workspace is not initialized: {context.workspace_path}. "
+            "Run 'mtd init' first."
+        )
