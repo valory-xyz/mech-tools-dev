@@ -98,6 +98,19 @@ See some examples of requests and responses on the [Mech Hub](https://mech.olas.
 
 In this example, we will locally run a Mech with a dummy "echo" tool.
 
+### Workspace-first quickstart
+
+For installed-package usage (no repo clone), use:
+
+```bash
+pip install mech-tools-dev
+mtd setup -c <gnosis|base|polygon|optimism>
+mtd run -c <gnosis|base|polygon|optimism>
+```
+
+`mtd setup` auto-bootstraps the default workspace if it does not exist yet.
+
+`--dev` mode is only for local package development and requires `packages/` in the workspace.
 
 1. First, clone the following repository:
     ```bash

@@ -55,7 +55,7 @@ Use this sequence for normal operations:
 mtd setup -c <chain>
 ```
 
-2. **Update API keys in `.env`**
+2. **Update API keys in workspace `.env`**
 
 After setup generates `.env`, set your real API keys (replace any `dummy_api_key` values), for example:
 
@@ -114,7 +114,7 @@ mtd run -c gnosis
 mtd run -c gnosis --dev
 ```
 
-Dev mode pushes your local packages to IPFS, updates the config template with the new service hash, and runs the service directly on the host using `olas-operate-middleware` with `use_docker=False`.
+Dev mode pushes your local packages to IPFS, updates the config template with the new service hash, and runs the service directly on the host using `olas-operate-middleware` with `use_docker=False`. Dev mode requires a local workspace `packages/` directory.
 
 ### Stopping the service
 
@@ -155,6 +155,11 @@ mtd push-metadata --ipfs-node /dns/custom.node/tcp/5001/http
 # Update the on-chain metadata hash
 mtd update-metadata
 ```
+
+## Workspace troubleshooting
+
+- `setup` auto-bootstraps workspace if missing; `run/stop` still require initialized workspace.
+- `--dev` mode is for local package development and requires `packages/` inside the workspace.
 
 ## Instructions
 
