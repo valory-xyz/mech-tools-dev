@@ -12,7 +12,9 @@ METADATA_FILE_PATH = "metadata.json"
 
 def main() -> None:
     """Run the generate_metadata script."""
-    generate_metadata(packages_dir=Path(ROOT_DIR), metadata_path=Path(METADATA_FILE_PATH))
+    generate_metadata(
+        packages_dir=Path(ROOT_DIR), metadata_path=Path(METADATA_FILE_PATH)
+    )
 
 
 if __name__ == "__main__":

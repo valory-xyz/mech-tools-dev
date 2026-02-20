@@ -14,7 +14,9 @@ def push_metadata_to_ipfs(ipfs_node: str = DEFAULT_IPFS_NODE) -> None:
     metadata_hash = publish_metadata_to_ipfs(
         metadata_path=Path(METADATA_FILE_PATH), ipfs_node=ipfs_node
     )
-    print(f"Metadata successfully pushed to ipfs. The metadata hash is: {metadata_hash}")
+    print(
+        f"Metadata successfully pushed to ipfs. The metadata hash is: {metadata_hash}"
+    )
 
 
 def main() -> None:
