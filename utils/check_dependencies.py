@@ -151,15 +151,15 @@ def update_tox_ini(
 
 
 def check_for_no_changes(
-    original_pyproject: str,
-    original_tox_ini: str,
+    baseline_pyproject: str,
+    baseline_tox_ini: str,
     pyproject_toml_path: Path = DEFAULT_PYPROJECT_TOML_PATH,
     tox_ini_path: Path = DEFAULT_TOX_INI_PATH,
 ) -> bool:
     """Check if dependency sync introduced changes."""
     return (
-        pyproject_toml_path.read_text(encoding="utf-8") == original_pyproject
-        and tox_ini_path.read_text(encoding="utf-8") == original_tox_ini
+        pyproject_toml_path.read_text(encoding="utf-8") == baseline_pyproject
+        and tox_ini_path.read_text(encoding="utf-8") == baseline_tox_ini
     )
 
 
@@ -176,8 +176,8 @@ if __name__ == "__main__":
     update_toml(listed_package_dependencies)
     update_tox_ini(listed_package_dependencies)
     if not update and not check_for_no_changes(
-        original_pyproject=original_pyproject,
-        original_tox_ini=original_tox_ini,
+        baseline_pyproject=original_pyproject,
+        baseline_tox_ini=original_tox_ini,
     ):
         print(
             "There are mismatching package dependencies in the pyproject.toml file and the packages."
