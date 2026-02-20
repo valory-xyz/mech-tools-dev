@@ -20,69 +20,93 @@
 """Run command for starting the mech agent service."""
 
 import json
+import os
 import subprocess
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 
 import click
 from operate.cli import OperateApp
 from operate.quickstart.run_service import run_service
 
+from mtd.commands.context_utils import get_mtd_context, require_initialized
+from mtd.context import MtdContext
 
-CURRENT_DIR = Path(__file__).parent.parent
-BASE_DIR = CURRENT_DIR.parent
-CONFIG_DIR = BASE_DIR / "config"
+
 SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
 
 
-def _push_all_packages() -> None:
+@contextmanager
+def _workspace_cwd(context: MtdContext) -> Iterator[None]:
+    """Run operations from workspace root."""
+    previous = Path.cwd()
+    os.chdir(context.workspace_path)
+    try:
+        yield
+    finally:
+        os.chdir(previous)
+
+
+def _push_all_packages(context: MtdContext) -> None:
     """Push local packages to IPFS so service hashes resolve during runtime."""
+    if not context.packages_dir.exists():
+        raise click.ClickException(
+            "Dev mode requires a local packages directory in the workspace. "
+            "Initialize/copy packages first or run without --dev."
+        )
+
     click.echo("Pushing local packages...")
     subprocess.run(
         ["autonomy", "push-all"],
         check=True,
-        cwd=str(BASE_DIR),
+        cwd=str(context.workspace_path),
     )
 
 
-def _get_latest_service_hash() -> str:
+def _get_latest_service_hash(context: MtdContext) -> str:
     """Get the latest service hash from autonomy packages."""
     subprocess.run(
         ["autonomy", "packages", "lock", "--check"],
         capture_output=True,
         text=True,
-        cwd=str(BASE_DIR),
+        cwd=str(context.workspace_path),
     )
-    # Fall back to reading packages.json if lock check fails
-    packages_file = BASE_DIR / "packages" / "packages.json"
+
+    packages_file = context.packages_dir / "packages.json"
     if packages_file.exists():
-        packages = json.loads(packages_file.read_text())
+        packages = json.loads(packages_file.read_text(encoding="utf-8"))
         for key, hash_val in packages.get("dev", {}).items():
             if "service" in key and "mech" in key:
                 return hash_val
-    raise click.ClickException("Could not determine latest service hash.")
+
+    raise click.ClickException(
+        f"Could not determine latest service hash from {packages_file}."
+    )
 
 
-def _run_dev_mode(config_path: Path) -> None:
+def _run_dev_mode(config_path: Path, context: MtdContext) -> None:
     """Dev mode: push local packages, update config hash, run via middleware."""
-    _push_all_packages()
+    _push_all_packages(context=context)
 
-    new_hash = _get_latest_service_hash()
+    new_hash = _get_latest_service_hash(context=context)
 
     click.echo(f"Updating config template with hash: {new_hash}")
-    config = json.loads(config_path.read_text())
+    config = json.loads(config_path.read_text(encoding="utf-8"))
     config["hash"] = new_hash
-    config_path.write_text(json.dumps(config, indent=2))
+    config_path.write_text(json.dumps(config, indent=2), encoding="utf-8")
 
     click.echo("Starting service in dev mode (host deployment)...")
-    operate = OperateApp()
-    operate.setup()
-    run_service(
-        operate=operate,
-        config_path=config_path,
-        build_only=False,
-        skip_dependency_check=False,
-        use_docker=False,
-    )
+    with _workspace_cwd(context):
+        operate = OperateApp()
+        operate.setup()
+        run_service(
+            operate=operate,
+            config_path=config_path,
+            build_only=False,
+            skip_dependency_check=False,
+            use_docker=False,
+        )
 
 
 @click.command()
@@ -99,7 +123,8 @@ def _run_dev_mode(config_path: Path) -> None:
     default=False,
     help="Dev mode: push local packages, then run via host deployment.",
 )
-def run(chain_config: str, dev: bool) -> None:
+@click.pass_context
+def run(ctx: click.Context, chain_config: str, dev: bool) -> None:
     """Run the mech agent service.
 
     In production mode (default), runs via Docker deployment.
@@ -110,19 +135,23 @@ def run(chain_config: str, dev: bool) -> None:
         mtd run -c gnosis
         mtd run -c gnosis --dev
     """
-    config_path = CONFIG_DIR / f"config_mech_{chain_config}.json"
+    context = get_mtd_context(ctx)
+    require_initialized(context)
+
+    config_path = context.config_dir / f"config_mech_{chain_config}.json"
     if not config_path.exists():
         raise click.ClickException(f"Missing template config: {config_path}")
 
     if dev:
-        _run_dev_mode(config_path)
+        _run_dev_mode(config_path=config_path, context=context)
         return
 
-    operate = OperateApp()
-    operate.setup()
-    run_service(
-        operate=operate,
-        config_path=config_path,
-        build_only=False,
-        skip_dependency_check=False,
-    )
+    with _workspace_cwd(context):
+        operate = OperateApp()
+        operate.setup()
+        run_service(
+            operate=operate,
+            config_path=config_path,
+            build_only=False,
+            skip_dependency_check=False,
+        )
