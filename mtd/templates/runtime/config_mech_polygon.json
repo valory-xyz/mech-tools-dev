@@ -65,19 +65,19 @@
     "MECH_TO_CONFIG": {
       "name": "Mech to config",
       "description": "",
-      "value": "",
+      "value": "{}",
       "provision_type": "computed"
     },
     "MECH_TO_MAX_DELIVERY_RATE": {
       "name": "Mech to Max delivery rate",
       "description": "",
-      "value": "",
+      "value": "{}",
       "provision_type": "computed"
     },
     "ON_CHAIN_SERVICE_ID": {
       "name": "On-chain service ID",
       "description": "",
-      "value": "",
+      "value": "null",
       "provision_type": "computed"
     },
     "TOOLS_TO_PACKAGE_HASH": {

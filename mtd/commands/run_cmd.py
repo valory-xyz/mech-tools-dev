@@ -41,11 +41,18 @@ SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
 def _workspace_cwd(context: MtdContext) -> Iterator[None]:
     """Run operations from workspace root."""
     previous = Path.cwd()
+    previous_operate_home = os.environ.get("OPERATE_HOME")
+    context.operate_dir.mkdir(parents=True, exist_ok=True)
+    os.environ["OPERATE_HOME"] = str(context.operate_dir)
     os.chdir(context.workspace_path)
     try:
         yield
     finally:
         os.chdir(previous)
+        if previous_operate_home is None:
+            os.environ.pop("OPERATE_HOME", None)
+        else:
+            os.environ["OPERATE_HOME"] = previous_operate_home
 
 
 def _push_all_packages(context: MtdContext) -> None:
@@ -98,7 +105,7 @@ def _run_dev_mode(config_path: Path, context: MtdContext) -> None:
 
     click.echo("Starting service in dev mode (host deployment)...")
     with _workspace_cwd(context):
-        operate = OperateApp()
+        operate = OperateApp(home=context.operate_dir)
         operate.setup()
         run_service(
             operate=operate,
@@ -147,7 +154,7 @@ def run(ctx: click.Context, chain_config: str, dev: bool) -> None:
         return
 
     with _workspace_cwd(context):
-        operate = OperateApp()
+        operate = OperateApp(home=context.operate_dir)
         operate.setup()
         run_service(
             operate=operate,

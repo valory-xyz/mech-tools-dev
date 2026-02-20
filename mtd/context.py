@@ -73,7 +73,7 @@ def build_context() -> MtdContext:
         workspace_path=workspace_path,
         env_path=workspace_path / ".env",
         config_dir=workspace_path / "config",
-        operate_dir=workspace_path / ".operate",
+        operate_dir=workspace_path,
         keys_dir=workspace_path / "keys",
         metadata_path=workspace_path / "metadata.json",
         packages_dir=workspace_path / "packages",

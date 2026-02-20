@@ -43,17 +43,29 @@ SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
 OPERATE_CONFIG_PATH = "services/sc-*/config.json"
 AGENT_KEY = "ethereum_private_key.txt"
 SERVICE_KEY = "keys.json"
+NULLABLE_INT_ENV_DEFAULTS = {"ON_CHAIN_SERVICE_ID": "null"}
+NULLABLE_DICT_ENV_DEFAULTS = {
+    "MECH_TO_CONFIG": "{}",
+    "MECH_TO_MAX_DELIVERY_RATE": "{}",
+}
 
 
 @contextmanager
 def _workspace_cwd(context: MtdContext) -> Iterator[None]:
     """Run operations from workspace root."""
     previous = Path.cwd()
+    previous_operate_home = os.environ.get("OPERATE_HOME")
+    context.operate_dir.mkdir(parents=True, exist_ok=True)
+    os.environ["OPERATE_HOME"] = str(context.operate_dir)
     os.chdir(context.workspace_path)
     try:
         yield
     finally:
         os.chdir(previous)
+        if previous_operate_home is None:
+            os.environ.pop("OPERATE_HOME", None)
+        else:
+            os.environ["OPERATE_HOME"] = previous_operate_home
 
 
 def _deploy_mech(operate: OperateApp) -> None:
@@ -105,6 +117,82 @@ def _configure_quickstart_env(operate: OperateApp, context: MtdContext) -> None:
     os.environ["OPERATE_PASSWORD"] = password
     os.environ["ATTENDED"] = "true"
     click.echo("Using interactive setup flow (ATTENDED=true)")
+
+
+def _sanitize_local_quickstart_user_args(context: MtdContext, config_path: Path) -> None:
+    """Replace empty local quickstart user args with template defaults."""
+    template = json.loads(config_path.read_text(encoding="utf-8"))
+    service_name = template.get("name")
+    if not isinstance(service_name, str) or not service_name:
+        return
+
+    quickstart_config_path = context.operate_dir / f"{service_name}-quickstart-config.json"
+    if not quickstart_config_path.exists():
+        return
+
+    local_config = json.loads(quickstart_config_path.read_text(encoding="utf-8"))
+    user_args = local_config.get("user_provided_args")
+    if not isinstance(user_args, dict):
+        return
+
+    changed = False
+    for env_var_name, env_var_data in template.get("env_variables", {}).items():
+        if env_var_data.get("provision_type") != "user":
+            continue
+        if env_var_name not in user_args:
+            continue
+
+        current_value = user_args.get(env_var_name)
+        default_value = env_var_data.get("value")
+        if (
+            isinstance(current_value, str)
+            and current_value.strip() == ""
+            and default_value not in ("", None)
+        ):
+            user_args[env_var_name] = str(default_value)
+            changed = True
+
+    if changed:
+        quickstart_config_path.write_text(json.dumps(local_config, indent=2), encoding="utf-8")
+        click.echo(f"Sanitized empty quickstart args in {quickstart_config_path}")
+
+
+def _normalize_nullable_env_vars(env_variables: dict) -> bool:
+    """Replace empty nullable env vars with parseable defaults."""
+    changed = False
+    for env_var, default_value in (
+        NULLABLE_INT_ENV_DEFAULTS | NULLABLE_DICT_ENV_DEFAULTS
+    ).items():
+        env_data = env_variables.get(env_var)
+        if not isinstance(env_data, dict):
+            continue
+        if env_data.get("value") in ("", None):
+            env_data["value"] = default_value
+            changed = True
+    return changed
+
+
+def _normalize_template_nullable_env_vars(config_path: Path) -> None:
+    """Normalize nullable env vars in chain template config before run_service."""
+    template = json.loads(config_path.read_text(encoding="utf-8"))
+    env_variables = template.get("env_variables")
+    if not isinstance(env_variables, dict):
+        return
+    if _normalize_nullable_env_vars(env_variables):
+        config_path.write_text(json.dumps(template, indent=2), encoding="utf-8")
+        click.echo(f"Normalized nullable env vars in {config_path}")
+
+
+def _normalize_service_nullable_env_vars(context: MtdContext) -> None:
+    """Normalize nullable env vars in existing operate service configs."""
+    for file_path in context.operate_dir.glob(OPERATE_CONFIG_PATH):
+        data = json.loads(file_path.read_text(encoding="utf-8"))
+        env_variables = data.get("env_variables")
+        if not isinstance(env_variables, dict):
+            continue
+        if _normalize_nullable_env_vars(env_variables):
+            file_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            click.echo(f"Normalized nullable env vars in {file_path}")
 
 
 def _read_and_update_env(data: dict, context: MtdContext) -> None:
@@ -252,8 +340,9 @@ def run_setup(chain_config: str, context: MtdContext) -> None:
         raise click.ClickException(f"Missing template config: {config_path}")
 
     with _workspace_cwd(context):
-        operate = OperateApp()
+        operate = OperateApp(home=context.operate_dir)
         operate.setup()
+        _normalize_service_nullable_env_vars(context=context)
 
         _get_password(operate=operate, context=context)
 
@@ -266,6 +355,8 @@ def run_setup(chain_config: str, context: MtdContext) -> None:
 
         if needs_setup:
             click.echo("Setting up operate...")
+            _sanitize_local_quickstart_user_args(context=context, config_path=config_path)
+            _normalize_template_nullable_env_vars(config_path=config_path)
             _configure_quickstart_env(operate=operate, context=context)
             run_service(
                 operate=operate,
