@@ -1,6 +1,10 @@
 .PHONY: clean
 clean: clean-build clean-pyc clean-test clean-docs
 
+.PHONY: dist
+dist: clean-build
+	poetry build
+
 .PHONY: clean-build
 clean-build:
 	rm -fr build/

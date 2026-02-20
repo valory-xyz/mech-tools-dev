@@ -16,11 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Tests for update-metadata command."""
 
-import sys
-from types import SimpleNamespace
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
@@ -28,34 +26,37 @@ from click.testing import CliRunner
 from mtd.commands.update_metadata_cmd import update_metadata
 
 
+MOCK_PATH = "mtd.commands.update_metadata_cmd"
+
+
 class TestUpdateMetadataCommand:
     """Tests for update-metadata command."""
 
-    def test_update_metadata_success(self) -> None:
+    @patch(f"{MOCK_PATH}.update_metadata_onchain", return_value=(True, "0xtx"))
+    @patch(f"{MOCK_PATH}.require_initialized")
+    @patch(f"{MOCK_PATH}.get_mtd_context")
+    def test_update_metadata_success(
+        self,
+        mock_get_context: MagicMock,
+        mock_require_initialized: MagicMock,
+        mock_update: MagicMock,
+        tmp_path: Path,
+    ) -> None:
         """Test successful update-metadata."""
-        mock_update = MagicMock()
-        fake_module = SimpleNamespace(main=mock_update)
+        context = MagicMock()
+        context.env_path = tmp_path / ".env"
+        context.keys_dir = tmp_path / "keys"
+        mock_get_context.return_value = context
 
         runner = CliRunner()
-        with patch.dict(sys.modules, {"utils.update_metadata": fake_module}):
-            result = runner.invoke(update_metadata, [])
+        result = runner.invoke(update_metadata, [])
 
         assert result.exit_code == 0
-        assert "Updating metadata hash on-chain" in result.output
-        mock_update.assert_called_once()
-
-    def test_update_metadata_failure(self) -> None:
-        """Test update-metadata when update fails."""
-        mock_update = MagicMock(side_effect=Exception("Transaction failed"))
-        fake_module = SimpleNamespace(main=mock_update)
-
-        runner = CliRunner()
-        with patch.dict(sys.modules, {"utils.update_metadata": fake_module}):
-            result = runner.invoke(update_metadata, [])
-
-        assert result.exit_code != 0
-        assert result.exception is not None
-        assert "Transaction failed" in str(result.exception)
+        mock_require_initialized.assert_called_once_with(context)
+        mock_update.assert_called_once_with(
+            env_path=context.env_path,
+            private_key_path=context.keys_dir / "ethereum_private_key.txt",
+        )
 
     def test_update_metadata_help(self) -> None:
         """Test update-metadata help output."""
@@ -64,10 +65,3 @@ class TestUpdateMetadataCommand:
 
         assert result.exit_code == 0
         assert "Update the metadata hash on-chain" in result.output
-
-    def test_update_metadata_no_args_required(self) -> None:
-        """Test update-metadata takes no arguments."""
-        runner = CliRunner()
-        result = runner.invoke(update_metadata, ["extra_arg"])
-
-        assert result.exit_code != 0

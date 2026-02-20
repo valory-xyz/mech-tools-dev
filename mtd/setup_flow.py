@@ -22,7 +22,9 @@
 import json
 import logging
 import os
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 
 import click
 from dotenv import dotenv_values, set_key
@@ -30,38 +32,43 @@ from operate.cli import OperateApp
 from operate.keys import KeysManager
 from operate.quickstart.run_service import ask_password_if_needed, run_service
 
+from mtd.context import MtdContext
+from mtd.resources import read_text_resource
+from mtd.services.metadata.generate import generate_metadata
+from mtd.services.metadata.publish import publish_metadata_to_ipfs
+from mtd.services.metadata.update_onchain import update_metadata_onchain
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-CONFIG_DIR = BASE_DIR / "config"
+
 SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
-OPERATE_DIR = BASE_DIR / ".operate"
 OPERATE_CONFIG_PATH = "services/sc-*/config.json"
 AGENT_KEY = "ethereum_private_key.txt"
 SERVICE_KEY = "keys.json"
+NULLABLE_INT_ENV_DEFAULTS = {"ON_CHAIN_SERVICE_ID": "null"}
+NULLABLE_DICT_ENV_DEFAULTS = {
+    "MECH_TO_CONFIG": "{}",
+    "MECH_TO_MAX_DELIVERY_RATE": "{}",
+}
 
 
-def _generate_metadata() -> None:
-    """Generate metadata.json from packages."""
-    from utils.generate_metadata import main  # pylint: disable=import-outside-toplevel
-
-    main()
-
-
-def _push_metadata() -> None:
-    """Push metadata.json to IPFS."""
-    from utils.publish_metadata import push_metadata_to_ipfs  # pylint: disable=import-outside-toplevel
-
-    push_metadata_to_ipfs()
-
-
-def _update_metadata() -> None:
-    """Update metadata hash on-chain via Safe transaction."""
-    from utils.update_metadata import main  # pylint: disable=import-outside-toplevel
-
-    main()
+@contextmanager
+def _workspace_cwd(context: MtdContext) -> Iterator[None]:
+    """Run operations from workspace root."""
+    previous = Path.cwd()
+    previous_operate_home = os.environ.get("OPERATE_HOME")
+    context.operate_dir.mkdir(parents=True, exist_ok=True)
+    os.environ["OPERATE_HOME"] = str(context.operate_dir)
+    os.chdir(context.workspace_path)
+    try:
+        yield
+    finally:
+        os.chdir(previous)
+        if previous_operate_home is None:
+            os.environ.pop("OPERATE_HOME", None)
+        else:
+            os.environ["OPERATE_HOME"] = previous_operate_home
 
 
-def _deploy_mech(operate: OperateApp, chain_config: str) -> None:
+def _deploy_mech(operate: OperateApp) -> None:
     """Deploy mech on the marketplace if needed."""
     from mtd.deploy_mech import (  # pylint: disable=import-outside-toplevel
         deploy_mech,
@@ -84,12 +91,10 @@ def _deploy_mech(operate: OperateApp, chain_config: str) -> None:
     click.echo(f"Mech deployed at {mech_address} (agent_id={agent_id})")
 
 
-def _get_password(operate: OperateApp) -> str:
-    """Load password from .env if present, otherwise prompt and persist."""
-    env_path = BASE_DIR / ".env"
-
-    if env_path.exists():
-        env_values = dotenv_values(env_path)
+def _get_password(operate: OperateApp, context: MtdContext) -> str:
+    """Load password from workspace .env if present, otherwise prompt and persist."""
+    if context.env_path.exists():
+        env_values = dotenv_values(context.env_path)
         password = (env_values.get("OPERATE_PASSWORD") or "").strip()
         if password:
             os.environ["OPERATE_PASSWORD"] = password
@@ -102,30 +107,100 @@ def _get_password(operate: OperateApp) -> str:
         raise click.ClickException("Password could not be set for Operate.")
 
     os.environ["OPERATE_PASSWORD"] = operate.password
-    env_path.parent.mkdir(parents=True, exist_ok=True)
-    set_key(str(env_path), "OPERATE_PASSWORD", os.environ["OPERATE_PASSWORD"])
+    set_key(str(context.env_path), "OPERATE_PASSWORD", os.environ["OPERATE_PASSWORD"])
     return os.environ["OPERATE_PASSWORD"]
 
 
-def _configure_quickstart_env(operate: OperateApp, chain_config: str, config_path: Path) -> None:
+def _configure_quickstart_env(operate: OperateApp, context: MtdContext) -> None:
     """Configure middleware env for interactive quickstart setup."""
-    del chain_config  # not needed in interactive mode
-    del config_path
-
-    password = _get_password(operate)
-
+    password = _get_password(operate=operate, context=context)
     os.environ["OPERATE_PASSWORD"] = password
     os.environ["ATTENDED"] = "true"
-
     click.echo("Using interactive setup flow (ATTENDED=true)")
 
 
-def _read_and_update_env(data: dict) -> None:
-    """Read generated env from operate and create required .env file."""
-    with open(".example.env", "r", encoding="utf-8") as f:
-        lines = f.readlines()
+def _sanitize_local_quickstart_user_args(context: MtdContext, config_path: Path) -> None:
+    """Replace empty local quickstart user args with template defaults."""
+    template = json.loads(config_path.read_text(encoding="utf-8"))
+    service_name = template.get("name")
+    if not isinstance(service_name, str) or not service_name:
+        return
 
-    existing_env = dotenv_values(".env")
+    quickstart_config_path = context.operate_dir / f"{service_name}-quickstart-config.json"
+    if not quickstart_config_path.exists():
+        return
+
+    local_config = json.loads(quickstart_config_path.read_text(encoding="utf-8"))
+    user_args = local_config.get("user_provided_args")
+    if not isinstance(user_args, dict):
+        return
+
+    changed = False
+    for env_var_name, env_var_data in template.get("env_variables", {}).items():
+        if env_var_data.get("provision_type") != "user":
+            continue
+        if env_var_name not in user_args:
+            continue
+
+        current_value = user_args.get(env_var_name)
+        default_value = env_var_data.get("value")
+        if (
+            isinstance(current_value, str)
+            and current_value.strip() == ""
+            and default_value not in ("", None)
+        ):
+            user_args[env_var_name] = str(default_value)
+            changed = True
+
+    if changed:
+        quickstart_config_path.write_text(json.dumps(local_config, indent=2), encoding="utf-8")
+        click.echo(f"Sanitized empty quickstart args in {quickstart_config_path}")
+
+
+def _normalize_nullable_env_vars(env_variables: dict) -> bool:
+    """Replace empty nullable env vars with parseable defaults."""
+    changed = False
+    for env_var, default_value in (
+        NULLABLE_INT_ENV_DEFAULTS | NULLABLE_DICT_ENV_DEFAULTS
+    ).items():
+        env_data = env_variables.get(env_var)
+        if not isinstance(env_data, dict):
+            continue
+        if env_data.get("value") in ("", None):
+            env_data["value"] = default_value
+            changed = True
+    return changed
+
+
+def _normalize_template_nullable_env_vars(config_path: Path) -> None:
+    """Normalize nullable env vars in chain template config before run_service."""
+    template = json.loads(config_path.read_text(encoding="utf-8"))
+    env_variables = template.get("env_variables")
+    if not isinstance(env_variables, dict):
+        return
+    if _normalize_nullable_env_vars(env_variables):
+        config_path.write_text(json.dumps(template, indent=2), encoding="utf-8")
+        click.echo(f"Normalized nullable env vars in {config_path}")
+
+
+def _normalize_service_nullable_env_vars(context: MtdContext) -> None:
+    """Normalize nullable env vars in existing operate service configs."""
+    for file_path in context.operate_dir.glob(OPERATE_CONFIG_PATH):
+        data = json.loads(file_path.read_text(encoding="utf-8"))
+        env_variables = data.get("env_variables")
+        if not isinstance(env_variables, dict):
+            continue
+        if _normalize_nullable_env_vars(env_variables):
+            file_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            click.echo(f"Normalized nullable env vars in {file_path}")
+
+
+def _read_and_update_env(data: dict, context: MtdContext) -> None:
+    """Read generated env from operate and create required workspace .env file."""
+    template_text = read_text_resource("mtd.templates.runtime", ".example.env")
+    lines = [line if line.endswith("\n") else f"{line}\n" for line in template_text.splitlines()]
+
+    existing_env = dotenv_values(context.env_path)
     existing_operate_password = existing_env.get("OPERATE_PASSWORD") or os.environ.get(
         "OPERATE_PASSWORD", ""
     )
@@ -150,11 +225,7 @@ def _read_and_update_env(data: dict) -> None:
     all_participants = json.dumps(data["agent_addresses"])
 
     var_data = data["env_variables"].get("MECH_TO_MAX_DELIVERY_RATE", {}).get("value", "")
-    try:
-        parsed = json.loads(var_data or "{}")
-    except json.JSONDecodeError as e:
-        raise ValueError("Invalid MECH_TO_MAX_DELIVERY_RATE JSON in operate config.") from e
-
+    parsed = json.loads(var_data or "{}")
     parsed_dict = {k: int(v) for k, v in parsed.items()}
     mech_to_max_delivery_rate = json.dumps(parsed_dict, separators=(",", ":"))
 
@@ -179,7 +250,6 @@ def _read_and_update_env(data: dict) -> None:
     }
 
     def _format_env_value(value: object) -> str:
-        """Serialize env values without Python repr wrappers."""
         if isinstance(value, (dict, list)):
             return json.dumps(value, separators=(",", ":"))
         return str(value)
@@ -190,66 +260,62 @@ def _read_and_update_env(data: dict) -> None:
         if "=" in line:
             key = line.split("=")[0].strip()
             value = computed_env_data.get(key)
-
             if value is None:
                 value = data["env_variables"].get(key, {}).get("value", "")
 
             if value not in ("", None, {}, []):
                 filled_lines.append(f"{key}={_format_env_value(value)}\n")
                 written_keys.add(key)
-        else:
-            filled_lines.append(line)
+            continue
+
+        filled_lines.append(line)
 
     for key, value in mechx_env_data.items():
         if value not in ("", None, {}, []):
             filled_lines.append(f"{key}={_format_env_value(value)}\n")
 
-    if (
-        existing_operate_password not in ("", None)
-        and "OPERATE_PASSWORD" not in written_keys
-    ):
+    if existing_operate_password not in ("", None) and "OPERATE_PASSWORD" not in written_keys:
         filled_lines.append(f"OPERATE_PASSWORD={_format_env_value(existing_operate_password)}\n")
 
-    with open(".env", "w", encoding="utf-8") as f:
-        f.writelines(filled_lines)
+    context.env_path.write_text("".join(filled_lines), encoding="utf-8")
 
 
-def _setup_env() -> None:
+def _setup_env(context: MtdContext) -> None:
     """Set up env from generated operate config."""
-    matching_paths = OPERATE_DIR.glob(OPERATE_CONFIG_PATH)
+    matching_paths = context.operate_dir.glob(OPERATE_CONFIG_PATH)
     data = {}
     for file_path in matching_paths:
         click.echo(f"Reading from: {file_path}")
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-            data = json.loads(content)
+        data = json.loads(file_path.read_text(encoding="utf-8"))
 
     if not data:
         raise FileNotFoundError(
-            f"No operate config found under {OPERATE_DIR / 'services'} matching {OPERATE_CONFIG_PATH}."
+            f"No operate config found under {context.operate_dir / 'services'} matching {OPERATE_CONFIG_PATH}."
         )
 
-    _read_and_update_env(data)
+    _read_and_update_env(data=data, context=context)
 
 
-def _create_private_key_files(data: dict) -> None:
+def _create_private_key_files(data: dict, context: MtdContext) -> None:
     """Create keys.json and ethereum_private_key.txt from decrypted key data."""
-    agent_key_path = BASE_DIR / AGENT_KEY
+    context.keys_dir.mkdir(parents=True, exist_ok=True)
+
+    agent_key_path = context.keys_dir / AGENT_KEY
     if agent_key_path.exists():
         click.echo(f"Agent key found at: {agent_key_path}. Skipping creation")
     else:
         agent_key_path.write_text(data["private_key"], encoding="utf-8")
 
-    service_key_path = BASE_DIR / SERVICE_KEY
+    service_key_path = context.keys_dir / SERVICE_KEY
     if service_key_path.exists():
         click.echo(f"Service key found at: {service_key_path}. Skipping creation")
     else:
         service_key_path.write_text(json.dumps([data], indent=2), encoding="utf-8")
 
 
-def _setup_private_keys() -> None:
+def _setup_private_keys(context: MtdContext) -> None:
     """Set up private key files from operate key store."""
-    keys_dir = OPERATE_DIR / "keys"
+    keys_dir = context.operate_dir / "keys"
     if keys_dir.is_dir():
         key_file = next(keys_dir.glob("*"), None)
         if key_file and key_file.is_file():
@@ -258,65 +324,68 @@ def _setup_private_keys() -> None:
             if not password:
                 raise ValueError("OPERATE_PASSWORD is required to decrypt keys.")
 
-            try:
-                manager = KeysManager(
-                    path=keys_dir,
-                    logger=logging.getLogger(__name__),
-                    password=password,
-                )
-                data = manager.get_decrypted(key_file.name)
-                _create_private_key_files(data)
-            except Exception as e:
-                raise RuntimeError(
-                    f"Failed to setup private keys from {key_file}"
-                ) from e
+            manager = KeysManager(
+                path=keys_dir,
+                logger=logging.getLogger(__name__),
+                password=password,
+            )
+            data = manager.get_decrypted(key_file.name)
+            _create_private_key_files(data=data, context=context)
 
 
-def run_setup(chain_config: str) -> None:
-    """Run the full setup flow for the given chain."""
-    config_path = CONFIG_DIR / f"config_mech_{chain_config}.json"
+def run_setup(chain_config: str, context: MtdContext) -> None:
+    """Run the full setup flow for the given chain and workspace context."""
+    config_path = context.config_dir / f"config_mech_{chain_config}.json"
     if not config_path.exists():
         raise click.ClickException(f"Missing template config: {config_path}")
 
-    operate = OperateApp()
-    operate.setup()
+    with _workspace_cwd(context):
+        operate = OperateApp(home=context.operate_dir)
+        operate.setup()
+        _normalize_service_nullable_env_vars(context=context)
 
-    # Ensure wallet operations work even when setup is skipped.
-    _get_password(operate)
+        _get_password(operate=operate, context=context)
 
-    services, _ = operate.service_manager().get_all_services()
-    needs_setup = (
-        not services
-        or services[0].chain_configs.get(services[0].home_chain, {}).chain_data.multisig
-        is None
-    )
-
-    if needs_setup:
-        click.echo("Setting up operate...")
-        _configure_quickstart_env(operate, chain_config, config_path)
-        run_service(
-            operate=operate,
-            config_path=config_path,
-            build_only=True,
-            skip_dependency_check=False,
+        services, _ = operate.service_manager().get_all_services()
+        needs_setup = (
+            not services
+            or services[0].chain_configs.get(services[0].home_chain, {}).chain_data.multisig
+            is None
         )
 
-    click.echo("Deploying mech on marketplace...")
-    _deploy_mech(operate, chain_config)
+        if needs_setup:
+            click.echo("Setting up operate...")
+            _sanitize_local_quickstart_user_args(context=context, config_path=config_path)
+            _normalize_template_nullable_env_vars(config_path=config_path)
+            _configure_quickstart_env(operate=operate, context=context)
+            run_service(
+                operate=operate,
+                config_path=config_path,
+                build_only=True,
+                skip_dependency_check=False,
+            )
 
-    click.echo("Setting up env...")
-    _setup_env()
+        click.echo("Deploying mech on marketplace...")
+        _deploy_mech(operate)
 
-    click.echo("Setting up private keys...")
-    _setup_private_keys()
+        click.echo("Setting up env...")
+        _setup_env(context=context)
 
-    click.echo("Generating metadata...")
-    _generate_metadata()
+        click.echo("Setting up private keys...")
+        _setup_private_keys(context=context)
 
-    click.echo("Publishing metadata to IPFS...")
-    _push_metadata()
+        click.echo("Generating metadata...")
+        generate_metadata(packages_dir=context.packages_dir, metadata_path=context.metadata_path)
 
-    click.echo("Updating metadata hash on-chain...")
-    _update_metadata()
+        click.echo("Publishing metadata to IPFS...")
+        metadata_hash = publish_metadata_to_ipfs(metadata_path=context.metadata_path)
+        set_key(str(context.env_path), "METADATA_HASH", metadata_hash)
 
-    click.echo("Setup complete.")
+        click.echo("Updating metadata hash on-chain...")
+        success, tx_hash = update_metadata_onchain(
+            env_path=context.env_path,
+            private_key_path=context.keys_dir / AGENT_KEY,
+        )
+        click.echo(f"Metadata update status: success={success}, tx_hash={tx_hash}")
+
+        click.echo("Setup complete.")

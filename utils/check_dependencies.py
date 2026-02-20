@@ -26,7 +26,6 @@ In particular:
 It is assumed the script is run from the repository root.
 """
 import os
-import subprocess  # nosec
 import sys
 from copy import deepcopy
 from pathlib import Path
@@ -38,7 +37,14 @@ from aea.package_manager.base import load_configuration
 from aea.package_manager.v1 import PackageManagerV1
 
 
-def load_pyproject_toml(pyproject_toml_path: str = "./pyproject.toml") -> dict:
+ROOT_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_PYPROJECT_TOML_PATH = ROOT_DIR / "pyproject.toml"
+DEFAULT_TOX_INI_PATH = ROOT_DIR / "tox.ini"
+
+
+def load_pyproject_toml(
+    pyproject_toml_path: Path = DEFAULT_PYPROJECT_TOML_PATH,
+) -> dict:
     """Load the pyproject.toml file contents."""
 
     # Load the pyproject.toml file
@@ -85,7 +91,8 @@ def get_package_dependencies() -> Dict[str, Any]:
 
 
 def update_toml(
-    new_package_dependencies: dict, pyproject_toml_path: str = "./pyproject.toml"
+    new_package_dependencies: dict,
+    pyproject_toml_path: Path = DEFAULT_PYPROJECT_TOML_PATH,
 ) -> None:
     """Update the pyproject.toml file with the new package dependencies."""
 
@@ -104,7 +111,8 @@ def update_toml(
 
 
 def update_tox_ini(
-    new_package_dependencies: dict, tox_ini_path: str = "./tox.ini"
+    new_package_dependencies: dict,
+    tox_ini_path: Path = DEFAULT_TOX_INI_PATH,
 ) -> None:
     """Update the tox.ini file with the new package dependencies."""
     new_package_dependencies.pop("python", None)
@@ -143,22 +151,22 @@ def update_tox_ini(
 
 
 def check_for_no_changes(
-    pyproject_toml_path: str = "./pyproject.toml", tox_ini_path: str = "./tox.ini"
+    baseline_pyproject: str,
+    baseline_tox_ini: str,
+    pyproject_toml_path: Path = DEFAULT_PYPROJECT_TOML_PATH,
+    tox_ini_path: Path = DEFAULT_TOX_INI_PATH,
 ) -> bool:
-    """Check if there are any changes in the current repository."""
-
-    # Check if there are any changes
-    result = subprocess.run(  # pylint: disable=W1510 # nosec
-        ["git", "diff", "--quiet", "--", pyproject_toml_path, tox_ini_path],
-        capture_output=True,
-        text=True,
+    """Check if dependency sync introduced changes."""
+    return (
+        pyproject_toml_path.read_text(encoding="utf-8") == baseline_pyproject
+        and tox_ini_path.read_text(encoding="utf-8") == baseline_tox_ini
     )
-
-    return result.returncode == 0
 
 
 if __name__ == "__main__":
     update = len(sys.argv[1:]) > 0
+    original_pyproject = DEFAULT_PYPROJECT_TOML_PATH.read_text(encoding="utf-8")
+    original_tox_ini = DEFAULT_TOX_INI_PATH.read_text(encoding="utf-8")
     package_dependencies = get_package_dependencies()
     # temp hack
     package_dependencies["requests"] = "==2.28.2"
@@ -167,7 +175,10 @@ if __name__ == "__main__":
     listed_package_dependencies.update(package_dependencies)
     update_toml(listed_package_dependencies)
     update_tox_ini(listed_package_dependencies)
-    if not update and not check_for_no_changes():
+    if not update and not check_for_no_changes(
+        baseline_pyproject=original_pyproject,
+        baseline_tox_ini=original_tox_ini,
+    ):
         print(
             "There are mismatching package dependencies in the pyproject.toml file and the packages."
         )

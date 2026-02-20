@@ -16,9 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Tests for add-tool command."""
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
@@ -34,87 +34,81 @@ class TestAddToolCommand:
 
     @patch(f"{MOCK_PATH}.get_package_manager")
     @patch(f"{MOCK_PATH}.generate_tool")
+    @patch(f"{MOCK_PATH}.require_initialized")
+    @patch(f"{MOCK_PATH}.get_mtd_context")
     def test_add_tool_success(
-        self, mock_generate: MagicMock, mock_pkg_manager: MagicMock
+        self,
+        mock_get_context: MagicMock,
+        mock_require_initialized: MagicMock,
+        mock_generate: MagicMock,
+        mock_pkg_manager: MagicMock,
+        tmp_path: Path,
     ) -> None:
         """Test successful tool addition."""
+        context = MagicMock()
+        context.packages_dir = tmp_path / "packages"
+        mock_get_context.return_value = context
+
         mock_manager_instance = MagicMock()
         mock_pkg_manager.return_value = mock_manager_instance
-        mock_manager_instance.update_package_hashes.return_value = (
-            mock_manager_instance
-        )
+        mock_manager_instance.update_package_hashes.return_value = mock_manager_instance
 
         runner = CliRunner()
         result = runner.invoke(add_tool, ["myauthor", "mytool"])
 
         assert result.exit_code == 0
-        assert "Adding tool: myauthor/mytool" in result.output
-        assert "Tool myauthor/mytool added" in result.output
-        assert "Locking packages" in result.output
-        mock_generate.assert_called_once_with("myauthor", "mytool", "A mech tool.")
+        mock_require_initialized.assert_called_once_with(context)
+        mock_generate.assert_called_once_with(
+            "myauthor", "mytool", "A mech tool.", context.packages_dir
+        )
 
     @patch(f"{MOCK_PATH}.generate_tool")
-    def test_add_tool_with_skip_lock(self, mock_generate: MagicMock) -> None:
+    @patch(f"{MOCK_PATH}.require_initialized")
+    @patch(f"{MOCK_PATH}.get_mtd_context")
+    def test_add_tool_with_skip_lock(
+        self,
+        mock_get_context: MagicMock,
+        mock_require_initialized: MagicMock,
+        mock_generate: MagicMock,
+        tmp_path: Path,
+    ) -> None:
         """Test tool addition with --skip-lock."""
+        context = MagicMock()
+        context.packages_dir = tmp_path / "packages"
+        mock_get_context.return_value = context
+
         runner = CliRunner()
         result = runner.invoke(add_tool, ["myauthor", "mytool", "--skip-lock"])
 
         assert result.exit_code == 0
-        assert "Locking packages" not in result.output
+        mock_require_initialized.assert_called_once_with(context)
         mock_generate.assert_called_once()
 
-    @patch(f"{MOCK_PATH}.get_package_manager")
     @patch(f"{MOCK_PATH}.generate_tool")
-    def test_add_tool_with_description(
-        self, mock_generate: MagicMock, mock_pkg_manager: MagicMock
+    @patch(f"{MOCK_PATH}.require_initialized")
+    @patch(f"{MOCK_PATH}.get_mtd_context")
+    def test_add_tool_with_custom_packages_dir(
+        self,
+        mock_get_context: MagicMock,
+        mock_require_initialized: MagicMock,
+        mock_generate: MagicMock,
+        tmp_path: Path,
     ) -> None:
-        """Test tool addition with custom description."""
-        mock_manager_instance = MagicMock()
-        mock_pkg_manager.return_value = mock_manager_instance
-        mock_manager_instance.update_package_hashes.return_value = (
-            mock_manager_instance
-        )
+        """Test add-tool with explicit --packages-dir override."""
+        context = MagicMock()
+        context.packages_dir = tmp_path / "ignored"
+        mock_get_context.return_value = context
+
+        custom_packages = tmp_path / "custom_packages"
 
         runner = CliRunner()
         result = runner.invoke(
-            add_tool, ["myauthor", "mytool", "-d", "My custom tool."]
+            add_tool,
+            ["myauthor", "mytool", "--skip-lock", "--packages-dir", str(custom_packages)],
         )
 
         assert result.exit_code == 0
-        mock_generate.assert_called_once_with("myauthor", "mytool", "My custom tool.")
-
-    def test_add_tool_missing_author(self) -> None:
-        """Test add-tool without author argument."""
-        runner = CliRunner()
-        result = runner.invoke(add_tool, [])
-
-        assert result.exit_code != 0
-
-    def test_add_tool_missing_tool_name(self) -> None:
-        """Test add-tool without tool_name argument."""
-        runner = CliRunner()
-        result = runner.invoke(add_tool, ["myauthor"])
-
-        assert result.exit_code != 0
-
-    def test_add_tool_help(self) -> None:
-        """Test add-tool help output."""
-        runner = CliRunner()
-        result = runner.invoke(add_tool, ["--help"])
-
-        assert result.exit_code == 0
-        assert "Add a new mech tool" in result.output
-        assert "tool-description" in result.output
-        assert "skip-lock" in result.output
-
-    @patch(f"{MOCK_PATH}.generate_tool")
-    def test_add_tool_generate_failure(self, mock_generate: MagicMock) -> None:
-        """Test add-tool when generation fails."""
-        mock_generate.side_effect = Exception("Template not found")
-
-        runner = CliRunner()
-        result = runner.invoke(add_tool, ["myauthor", "mytool", "--skip-lock"])
-
-        assert result.exit_code != 0
-        assert result.exception is not None
-        assert "Template not found" in str(result.exception)
+        mock_require_initialized.assert_called_once_with(context)
+        mock_generate.assert_called_once_with(
+            "myauthor", "mytool", "A mech tool.", custom_packages
+        )

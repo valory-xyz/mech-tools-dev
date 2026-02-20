@@ -19,17 +19,38 @@
 
 """Stop command for stopping the mech agent service."""
 
+import os
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 
 import click
 from operate.cli import OperateApp
 from operate.quickstart.stop_service import stop_service
 
+from mtd.commands.context_utils import get_mtd_context, require_initialized
+from mtd.context import MtdContext
 
-CURRENT_DIR = Path(__file__).parent.parent
-BASE_DIR = CURRENT_DIR.parent
-CONFIG_DIR = BASE_DIR / "config"
+
 SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
+
+
+@contextmanager
+def _workspace_cwd(context: MtdContext) -> Iterator[None]:
+    """Run operations from workspace root."""
+    previous = Path.cwd()
+    previous_operate_home = os.environ.get("OPERATE_HOME")
+    context.operate_dir.mkdir(parents=True, exist_ok=True)
+    os.environ["OPERATE_HOME"] = str(context.operate_dir)
+    os.chdir(context.workspace_path)
+    try:
+        yield
+    finally:
+        os.chdir(previous)
+        if previous_operate_home is None:
+            os.environ.pop("OPERATE_HOME", None)
+        else:
+            os.environ["OPERATE_HOME"] = previous_operate_home
 
 
 @click.command()
@@ -40,15 +61,20 @@ SUPPORTED_CHAINS = ("gnosis", "base", "polygon", "optimism")
     required=True,
     help="Target chain for the mech service.",
 )
-def stop(chain_config: str) -> None:
+@click.pass_context
+def stop(ctx: click.Context, chain_config: str) -> None:
     """Stop the mech agent service.
 
-    Example: mtd stop -c gnosis
+    Example: mech stop -c gnosis
     """
-    config_path = CONFIG_DIR / f"config_mech_{chain_config}.json"
+    context = get_mtd_context(ctx)
+    require_initialized(context)
+
+    config_path = context.config_dir / f"config_mech_{chain_config}.json"
     if not config_path.exists():
         raise click.ClickException(f"Missing template config: {config_path}")
 
-    operate = OperateApp()
-    operate.setup()
-    stop_service(operate=operate, config_path=config_path)
+    with _workspace_cwd(context):
+        operate = OperateApp(home=context.operate_dir)
+        operate.setup()
+        stop_service(operate=operate, config_path=config_path)

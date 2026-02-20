@@ -21,14 +21,24 @@
 
 import click
 
+from mtd.commands.context_utils import get_mtd_context, require_initialized
+from mtd.services.metadata.update_onchain import update_metadata_onchain
+
 
 @click.command(name="update-metadata")
-def update_metadata() -> None:
+@click.pass_context
+def update_metadata(ctx: click.Context) -> None:
     """Update the metadata hash on-chain via Safe transaction.
 
-    Example: mtd update-metadata
+    Example: mech update-metadata
     """
-    from utils.update_metadata import main as update_main  # pylint: disable=import-outside-toplevel
+    context = get_mtd_context(ctx)
+    require_initialized(context)
 
     click.echo("Updating metadata hash on-chain...")
-    update_main()
+    success, tx_hash = update_metadata_onchain(
+        env_path=context.env_path,
+        private_key_path=context.keys_dir / "ethereum_private_key.txt",
+    )
+    click.echo(f"Success: {success}")
+    click.echo(f"Tx Hash: {tx_hash}")

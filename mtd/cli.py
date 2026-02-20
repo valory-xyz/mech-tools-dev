@@ -30,11 +30,15 @@ from mtd.commands import (
     stop,
     update_metadata,
 )
+from mtd.context import build_context
 
 
 @click.group()
-def cli() -> None:
+@click.pass_context
+def cli(ctx: click.Context) -> None:
     """Dev CLI tool."""
+    ctx.ensure_object(dict)
+    ctx.obj["mtd_context"] = build_context()
 
 
 cli.add_command(add_tool)

@@ -16,14 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Tests for the CLI entry point."""
 
 from click.testing import CliRunner
 
 from mtd.cli import cli
-
-
 class TestCli:
     """Tests for the CLI group."""
 
@@ -33,6 +30,7 @@ class TestCli:
         result = runner.invoke(cli, ["--help"])
 
         assert result.exit_code == 0
+        assert "init" not in result.output
         assert "add-tool" in result.output
         assert "deploy-mech" in result.output
         assert "setup" in result.output
@@ -40,6 +38,14 @@ class TestCli:
         assert "stop" in result.output
         assert "push-metadata" in result.output
         assert "update-metadata" in result.output
+
+    def test_no_workspace_option(self) -> None:
+        """CLI help should not expose workspace override option."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--help"])
+
+        assert result.exit_code == 0
+        assert "--workspace" not in result.output
 
     def test_no_command(self) -> None:
         """Test CLI with no subcommand shows help."""

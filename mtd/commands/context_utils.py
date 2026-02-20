@@ -17,30 +17,29 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Backward-compatible wrapper for metadata publish."""
+"""Helpers for accessing mech click context."""
 
-from pathlib import Path
+import click
 
-from mtd.services.metadata.publish import DEFAULT_IPFS_NODE, publish_metadata_to_ipfs
-
-
-METADATA_FILE_PATH = "metadata.json"
+from mtd.context import MtdContext, build_context
 
 
-def push_metadata_to_ipfs(ipfs_node: str = DEFAULT_IPFS_NODE) -> None:
-    """Push metadata to IPFS."""
-    metadata_hash = publish_metadata_to_ipfs(
-        metadata_path=Path(METADATA_FILE_PATH), ipfs_node=ipfs_node
-    )
-    print(
-        f"Metadata successfully pushed to ipfs. The metadata hash is: {metadata_hash}"
-    )
+def get_mtd_context(ctx: click.Context) -> MtdContext:
+    """Get mech context from click context object."""
+    ctx_obj = ctx.ensure_object(dict)
+    context = ctx_obj.get("mtd_context")
+    if isinstance(context, MtdContext):
+        return context
+
+    fallback = build_context()
+    ctx_obj["mtd_context"] = fallback
+    return fallback
 
 
-def main() -> None:
-    """Run the publish_metadata script."""
-    push_metadata_to_ipfs()
-
-
-if __name__ == "__main__":
-    main()
+def require_initialized(context: MtdContext) -> None:
+    """Raise if workspace is not initialized."""
+    if not context.is_initialized():
+        raise click.ClickException(
+            f"Workspace is not initialized: {context.workspace_path}. "
+            "Run 'mech setup -c <chain>' first."
+        )

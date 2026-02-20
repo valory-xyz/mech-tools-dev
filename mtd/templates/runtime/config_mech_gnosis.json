@@ -1,6 +1,6 @@
 {
     "name": "Mech",
-    "hash": "bafybeihrjvinvcljb3hqb6gucbadnnknszdw6742zd2oy2sz7k4vn25e5u",
+    "hash": "bafybeigzprddzesgdt7o5bbcvpgzoiz6owffb3qi7fv6pz5qkgj3bd5hta",
     "description": "The mech executes AI tasks requested on-chain and delivers the results to the requester.",
     "image": "https://gateway.autonolas.tech/ipfs/bafybeidzpenez565d7vp7jexfrwisa2wijzx6vwcffli57buznyyqkrceq",
     "service_version": "v0.9.0",
@@ -59,25 +59,25 @@
         "METADATA_HASH": {
             "name": "Metadata hash",
             "description": "The IPFS hash of the Mech metadata JSON",
-            "value": "f01701220d781cbc6a7f5d460ceb237c9c09e5ee5d4a3722bd3c62d9ff3677ad228049f90",
+            "value": "",
             "provision_type": "fixed"
         },
         "MECH_TO_CONFIG": {
             "name": "Mech to config",
             "description": "",
-            "value": "",
+            "value": "{}",
             "provision_type": "computed"
         },
         "MECH_TO_MAX_DELIVERY_RATE": {
             "name": "Mech to Max delivery rate",
             "description": "",
-            "value": "",
+            "value": "{}",
             "provision_type": "computed"
         },
         "ON_CHAIN_SERVICE_ID": {
             "name": "On-chain service ID",
             "description": "",
-            "value": "",
+            "value": "null",
             "provision_type": "computed"
         },
         "TOOLS_TO_PACKAGE_HASH": {

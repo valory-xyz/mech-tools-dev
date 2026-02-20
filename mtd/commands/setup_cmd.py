@@ -21,7 +21,9 @@
 
 import click
 
+from mtd.commands.context_utils import get_mtd_context
 from mtd.setup_flow import SUPPORTED_CHAINS, run_setup
+from mtd.workspace import initialize_workspace
 
 
 @click.command()
@@ -32,13 +34,18 @@ from mtd.setup_flow import SUPPORTED_CHAINS, run_setup
     required=True,
     help="Target chain for the mech service.",
 )
-def setup(chain_config: str) -> None:
+@click.pass_context
+def setup(ctx: click.Context, chain_config: str) -> None:
     """Setup on-chain requirements for running a mech agent.
 
     Runs the full setup flow: operate build, env configuration,
     private key setup, metadata generation, IPFS publish, and
     on-chain metadata hash update.
 
-    Example: mtd setup -c gnosis
+    Example: mech setup -c gnosis
     """
-    run_setup(chain_config=chain_config)
+    context = get_mtd_context(ctx)
+    if not context.is_initialized():
+        click.echo("Workspace not initialized. Bootstrapping workspace...")
+        initialize_workspace(context=context, force=False)
+    run_setup(chain_config=chain_config, context=context)

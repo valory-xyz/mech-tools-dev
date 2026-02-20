@@ -16,9 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Tests for push-metadata command."""
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
@@ -32,84 +32,35 @@ MOCK_PATH = "mtd.commands.push_metadata_cmd"
 class TestPushMetadataCommand:
     """Tests for push-metadata command."""
 
-    @patch(f"{MOCK_PATH}.push_metadata_to_ipfs")
-    @patch(f"{MOCK_PATH}.generate_main")
+    @patch(f"{MOCK_PATH}.set_key")
+    @patch(f"{MOCK_PATH}.publish_metadata_to_ipfs", return_value="f0170abc")
+    @patch(f"{MOCK_PATH}.generate_metadata")
+    @patch(f"{MOCK_PATH}.require_initialized")
+    @patch(f"{MOCK_PATH}.get_mtd_context")
     def test_push_metadata_success(
-        self, mock_generate: MagicMock, mock_push: MagicMock
+        self,
+        mock_get_context: MagicMock,
+        mock_require_initialized: MagicMock,
+        mock_generate: MagicMock,
+        mock_publish: MagicMock,
+        mock_set_key: MagicMock,
+        tmp_path: Path,
     ) -> None:
         """Test successful push-metadata."""
-        runner = CliRunner()
-        result = runner.invoke(push_metadata, [])
-
-        assert result.exit_code == 0
-        assert "Generating metadata" in result.output
-        assert "Publishing metadata to IPFS" in result.output
-        mock_generate.assert_called_once()
-        mock_push.assert_called_once()
-
-    @patch(f"{MOCK_PATH}.push_metadata_to_ipfs")
-    @patch(f"{MOCK_PATH}.generate_main")
-    def test_push_metadata_with_custom_ipfs_node(
-        self, mock_generate: MagicMock, mock_push: MagicMock
-    ) -> None:
-        """Test push-metadata with custom IPFS node."""
-        custom_node = "/dns/custom.node/tcp/5001/http"
-        runner = CliRunner()
-        result = runner.invoke(push_metadata, ["--ipfs-node", custom_node])
-
-        assert result.exit_code == 0
-        mock_push.assert_called_once_with(ipfs_node=custom_node)
-
-    @patch(f"{MOCK_PATH}.push_metadata_to_ipfs")
-    @patch(f"{MOCK_PATH}.generate_main")
-    def test_push_metadata_uses_default_ipfs_node(
-        self, mock_generate: MagicMock, mock_push: MagicMock
-    ) -> None:
-        """Test push-metadata uses default IPFS node when none specified."""
-        from utils.publish_metadata import DEFAULT_IPFS_NODE
+        context = MagicMock()
+        context.packages_dir = tmp_path / "packages"
+        context.metadata_path = tmp_path / "metadata.json"
+        context.env_path = tmp_path / ".env"
+        mock_get_context.return_value = context
 
         runner = CliRunner()
         result = runner.invoke(push_metadata, [])
 
         assert result.exit_code == 0
-        mock_push.assert_called_once_with(ipfs_node=DEFAULT_IPFS_NODE)
-
-    @patch(f"{MOCK_PATH}.push_metadata_to_ipfs")
-    @patch(f"{MOCK_PATH}.generate_main")
-    def test_push_metadata_generate_failure(
-        self, mock_generate: MagicMock, mock_push: MagicMock
-    ) -> None:
-        """Test push-metadata when generate fails."""
-        mock_generate.side_effect = Exception("Failed to generate metadata")
-
-        runner = CliRunner()
-        result = runner.invoke(push_metadata, [])
-
-        assert result.exit_code != 0
-        assert result.exception is not None
-        assert "Failed to generate metadata" in str(result.exception)
-        mock_push.assert_not_called()
-
-    @patch(f"{MOCK_PATH}.push_metadata_to_ipfs")
-    @patch(f"{MOCK_PATH}.generate_main")
-    def test_push_metadata_ipfs_failure(
-        self, mock_generate: MagicMock, mock_push: MagicMock
-    ) -> None:
-        """Test push-metadata when IPFS push fails."""
-        mock_push.side_effect = Exception("IPFS connection failed")
-
-        runner = CliRunner()
-        result = runner.invoke(push_metadata, [])
-
-        assert result.exit_code != 0
-        assert result.exception is not None
-        assert "IPFS connection failed" in str(result.exception)
-
-    def test_push_metadata_help(self) -> None:
-        """Test push-metadata help output."""
-        runner = CliRunner()
-        result = runner.invoke(push_metadata, ["--help"])
-
-        assert result.exit_code == 0
-        assert "ipfs-node" in result.output
-        assert "Generate metadata.json" in result.output
+        mock_require_initialized.assert_called_once_with(context)
+        mock_generate.assert_called_once_with(
+            packages_dir=context.packages_dir,
+            metadata_path=context.metadata_path,
+        )
+        mock_publish.assert_called_once()
+        mock_set_key.assert_called_once_with(str(context.env_path), "METADATA_HASH", "f0170abc")

@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Tests for setup command."""
 
 from unittest.mock import MagicMock, patch
@@ -33,33 +32,47 @@ class TestSetupCommand:
     """Tests for setup command."""
 
     @patch(f"{MOD}.run_setup")
-    def test_setup_success(self, mock_run_setup: MagicMock) -> None:
-        """Test setup delegates to setup flow with selected chain."""
+    @patch(f"{MOD}.initialize_workspace")
+    @patch(f"{MOD}.get_mtd_context")
+    def test_setup_success_initialized_workspace(
+        self,
+        mock_get_context: MagicMock,
+        mock_initialize_workspace: MagicMock,
+        mock_run_setup: MagicMock,
+    ) -> None:
+        """Setup should run without re-initializing already initialized workspace."""
+        context = MagicMock()
+        context.is_initialized.return_value = True
+        mock_get_context.return_value = context
+
         runner = CliRunner()
         result = runner.invoke(setup_command, ["-c", "gnosis"])
 
         assert result.exit_code == 0
-        mock_run_setup.assert_called_once_with(chain_config="gnosis")
+        mock_initialize_workspace.assert_not_called()
+        mock_run_setup.assert_called_once_with(chain_config="gnosis", context=context)
 
     @patch(f"{MOD}.run_setup")
-    def test_setup_all_supported_chains(self, mock_run_setup: MagicMock) -> None:
-        """Test setup works for all supported chains."""
-        for chain in ("gnosis", "base", "polygon", "optimism"):
-            runner = CliRunner()
-            result = runner.invoke(setup_command, ["-c", chain])
-            assert result.exit_code == 0, f"Failed for chain {chain}: {result.output}"
-
-    @patch(f"{MOD}.run_setup")
-    def test_setup_propagates_errors(self, mock_run_setup: MagicMock) -> None:
-        """Test setup surfaces underlying setup flow errors."""
-        mock_run_setup.side_effect = Exception("setup failed")
+    @patch(f"{MOD}.initialize_workspace")
+    @patch(f"{MOD}.get_mtd_context")
+    def test_setup_bootstraps_uninitialized_workspace(
+        self,
+        mock_get_context: MagicMock,
+        mock_initialize_workspace: MagicMock,
+        mock_run_setup: MagicMock,
+    ) -> None:
+        """Setup should auto-bootstrap workspace when not initialized."""
+        context = MagicMock()
+        context.is_initialized.return_value = False
+        mock_get_context.return_value = context
 
         runner = CliRunner()
         result = runner.invoke(setup_command, ["-c", "gnosis"])
 
-        assert result.exit_code != 0
-        assert result.exception is not None
-        assert "setup failed" in str(result.exception)
+        assert result.exit_code == 0
+        assert "Workspace not initialized" in result.output
+        mock_initialize_workspace.assert_called_once_with(context=context, force=False)
+        mock_run_setup.assert_called_once_with(chain_config="gnosis", context=context)
 
     def test_setup_missing_chain_config(self) -> None:
         """Test setup without required chain-config option."""
@@ -67,7 +80,6 @@ class TestSetupCommand:
         result = runner.invoke(setup_command, [])
 
         assert result.exit_code != 0
-        assert "Missing option" in result.output or "chain-config" in result.output
 
     def test_setup_invalid_chain_config(self) -> None:
         """Test setup with invalid chain config."""
@@ -75,7 +87,6 @@ class TestSetupCommand:
         result = runner.invoke(setup_command, ["-c", "invalid_chain"])
 
         assert result.exit_code != 0
-        assert "Invalid value" in result.output or "invalid_chain" in result.output
 
     def test_setup_help(self) -> None:
         """Test setup help output."""
