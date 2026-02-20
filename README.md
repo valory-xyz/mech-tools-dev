@@ -156,6 +156,53 @@ mtd push-metadata --ipfs-node /dns/custom.node/tcp/5001/http
 mtd update-metadata
 ```
 
+### Adding a new tool
+
+Use this workflow to add and run a custom tool with the current setup-first model:
+
+1. Ensure workspace/setup is initialized:
+
+```bash
+mtd setup -c <gnosis|base|polygon|optimism>
+```
+
+2. Scaffold the tool:
+
+```bash
+mtd add-tool <author> <tool_name> -d "My tool description"
+```
+
+3. Implement tool logic in:
+
+```text
+~/.operate_mtd/packages/<author>/customs/<tool_name>/<tool_name>.py
+```
+
+4. Update component metadata in:
+
+```text
+~/.operate_mtd/packages/<author>/customs/<tool_name>/component.yaml
+```
+
+5. Refresh metadata and update on-chain hash:
+
+```bash
+mtd push-metadata
+mtd update-metadata
+```
+
+6. Run the service:
+
+```bash
+mtd run -c <chain>
+```
+
+Optional: use a custom packages location when scaffolding:
+
+```bash
+mtd add-tool <author> <tool_name> --packages-dir /path/to/packages
+```
+
 ## Workspace troubleshooting
 
 - `setup` auto-bootstraps workspace if missing; `run/stop` still require initialized workspace.
