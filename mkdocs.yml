@@ -1,7 +1,7 @@
 site_name: mech-server #Required format to work with monorepo including a specific route in the address.
 site_url: https://docs.olas.network/mech-tool/
 site_description: Autonolas ContributionKit developer documentation
-repo_url: https://github.com/valory-xyz/mech-server
+repo_url: https://github.com/valory-xyz/mech-tools-dev
 site_author: developer@valory.xyz
 edit_uri: ""
 copyright:  Copyright &copy; 2021 - 2025 Valory AG
