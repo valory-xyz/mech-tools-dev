@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Tests for mtd context helpers."""
+"""Tests for mech context helpers."""
 
 from pathlib import Path
 
@@ -24,8 +24,8 @@ from mtd.context import build_context, get_default_workspace, resolve_workspace_
 
 
 def test_get_default_workspace() -> None:
-    """Default workspace should point to ~/.operate_mtd."""
-    assert get_default_workspace() == Path("~/.operate_mtd").expanduser().resolve()
+    """Default workspace should point to ~/.operate-mech."""
+    assert get_default_workspace() == Path("~/.operate-mech").expanduser().resolve()
 
 
 def test_resolve_workspace_path_uses_default() -> None:

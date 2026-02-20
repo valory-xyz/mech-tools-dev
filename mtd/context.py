@@ -17,18 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Workspace context and path resolution for mtd runtime."""
+"""Workspace context and path resolution for mech runtime."""
 
 from dataclasses import dataclass
 from pathlib import Path
 
 
-INITIALIZED_MARKER = ".mtd_initialized"
+INITIALIZED_MARKER = ".mech_initialized"
 
 
 @dataclass(frozen=True)
 class MtdContext:
-    """Resolved runtime paths for an mtd workspace."""
+    """Resolved runtime paths for a mech workspace."""
 
     workspace_path: Path
     env_path: Path
@@ -58,7 +58,7 @@ class MtdContext:
 
 def get_default_workspace() -> Path:
     """Get the default workspace path."""
-    return Path("~/.operate_mtd").expanduser().resolve()
+    return Path("~/.operate-mech").expanduser().resolve()
 
 
 def resolve_workspace_path() -> Path:

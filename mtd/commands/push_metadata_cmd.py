@@ -41,7 +41,7 @@ from mtd.services.metadata import (
 def push_metadata(ctx: click.Context, ipfs_node: str) -> None:
     """Generate metadata.json from packages and publish to IPFS.
 
-    Example: mtd push-metadata
+    Example: mech push-metadata
     """
     context = get_mtd_context(ctx)
     require_initialized(context)

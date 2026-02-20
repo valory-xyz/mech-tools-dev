@@ -65,7 +65,7 @@ def _workspace_cwd(context: MtdContext) -> Iterator[None]:
 def stop(ctx: click.Context, chain_config: str) -> None:
     """Stop the mech agent service.
 
-    Example: mtd stop -c gnosis
+    Example: mech stop -c gnosis
     """
     context = get_mtd_context(ctx)
     require_initialized(context)

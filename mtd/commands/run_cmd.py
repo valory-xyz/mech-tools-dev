@@ -139,8 +139,8 @@ def run(ctx: click.Context, chain_config: str, dev: bool) -> None:
     via host deployment (Tendermint + agent process).
 
     Examples:
-        mtd run -c gnosis
-        mtd run -c gnosis --dev
+        mech run -c gnosis
+        mech run -c gnosis --dev
     """
     context = get_mtd_context(ctx)
     require_initialized(context)
