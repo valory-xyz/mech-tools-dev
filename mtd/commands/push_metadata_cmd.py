@@ -20,9 +20,14 @@
 """Push-metadata command for generating and publishing metadata to IPFS."""
 
 import click
+from dotenv import set_key
 
-from utils.generate_metadata import main as generate_main
-from utils.publish_metadata import DEFAULT_IPFS_NODE, push_metadata_to_ipfs
+from mtd.commands.context_utils import get_mtd_context, require_initialized
+from mtd.services.metadata import (
+    DEFAULT_IPFS_NODE,
+    generate_metadata,
+    publish_metadata_to_ipfs,
+)
 
 
 @click.command(name="push-metadata")
@@ -32,13 +37,22 @@ from utils.publish_metadata import DEFAULT_IPFS_NODE, push_metadata_to_ipfs
     default=DEFAULT_IPFS_NODE,
     help="IPFS node address.",
 )
-def push_metadata(ipfs_node: str) -> None:
+@click.pass_context
+def push_metadata(ctx: click.Context, ipfs_node: str) -> None:
     """Generate metadata.json from packages and publish to IPFS.
 
     Example: mtd push-metadata
     """
+    context = get_mtd_context(ctx)
+    require_initialized(context)
+
     click.echo("Generating metadata...")
-    generate_main()
+    generate_metadata(packages_dir=context.packages_dir, metadata_path=context.metadata_path)
 
     click.echo("Publishing metadata to IPFS...")
-    push_metadata_to_ipfs(ipfs_node=ipfs_node)
+    metadata_hash = publish_metadata_to_ipfs(
+        metadata_path=context.metadata_path,
+        ipfs_node=ipfs_node,
+    )
+    set_key(str(context.env_path), "METADATA_HASH", metadata_hash)
+    click.echo(f"Metadata hash: {metadata_hash}")
