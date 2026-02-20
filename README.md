@@ -3,10 +3,10 @@
 </p>
 
 <h1 align="center" style="margin-bottom: 0;">
-    Mech Tools Dev
+    Mech Server
     <br>
-    <a href="https://github.com/valory-xyz/mech-tools-dev/blob/main/LICENSE">
-        <img alt="License: Apache-2.0" src="https://img.shields.io/github/license/valory-xyz/mech-tools-dev">
+    <a href="https://github.com/valory-xyz/mech-server/blob/main/LICENSE">
+        <img alt="License: Apache-2.0" src="https://img.shields.io/github/license/valory-xyz/mech-server">
     </a>
     <a href="https://github.com/valory-xyz/mech/releases/tag/v0.10.0">
         <img alt="Mech Core: Mech 0.10.0" src="https://img.shields.io/badge/Mech%20Core%20-0.10.0-blueviolet">
@@ -28,20 +28,20 @@ You need the following requirements installed in your system:
 
 ## CLI
 
-All mech service operations are available through the `mtd` CLI. Install the package and run `mtd --help` to see available commands.
+All mech service operations are available through the `mech` CLI. Install the package and run `mech --help` to see available commands.
 
 ### Commands
 
 | Command | Description |
 |---|---|
-| `mtd setup -c <chain>` | Full first-time setup: operate build, mech deployment, env config, key setup, metadata generation, IPFS publish, and on-chain update |
-| `mtd run -c <chain>` | Run the mech service via Docker deployment |
-| `mtd run -c <chain> --dev` | Dev mode: push local packages to IPFS, refresh service hash, then run via host deployment (no Docker) |
-| `mtd stop -c <chain>` | Stop a running mech service |
-| `mtd deploy-mech -c <chain>` | Deploy a mech on the marketplace for an existing service (also runs automatically during setup) |
-| `mtd push-metadata` | Generate `metadata.json` from packages and publish to IPFS |
-| `mtd update-metadata` | Update the metadata hash on-chain via Safe transaction |
-| `mtd add-tool` | Scaffold a new mech tool (interactive) |
+| `mech setup -c <chain>` | Full first-time setup: operate build, mech deployment, env config, key setup, metadata generation, IPFS publish, and on-chain update |
+| `mech run -c <chain>` | Run the mech service via Docker deployment |
+| `mech run -c <chain> --dev` | Dev mode: push local packages to IPFS, refresh service hash, then run via host deployment (no Docker) |
+| `mech stop -c <chain>` | Stop a running mech service |
+| `mech deploy-mech -c <chain>` | Deploy a mech on the marketplace for an existing service (also runs automatically during setup) |
+| `mech push-metadata` | Generate `metadata.json` from packages and publish to IPFS |
+| `mech update-metadata` | Update the metadata hash on-chain via Safe transaction |
+| `mech add-tool` | Scaffold a new mech tool (interactive) |
 
 Supported chains: `gnosis`, `base`, `polygon`, `optimism`.
 
@@ -52,7 +52,7 @@ Use this sequence for normal operations:
 1. **Initial setup**
 
 ```bash
-mtd setup -c <chain>
+mech setup -c <chain>
 ```
 
 2. **Update API keys in workspace `.env`**
@@ -66,20 +66,20 @@ API_KEYS={"openai":["<YOUR_OPENAI_KEY>"],"google_api_key":["<YOUR_GOOGLE_KEY>"]}
 3. **If tools/packages changed, refresh metadata**
 
 ```bash
-mtd push-metadata
-mtd update-metadata
+mech push-metadata
+mech update-metadata
 ```
 
 4. **Run the service**
 
 ```bash
-mtd run -c <chain>
+mech run -c <chain>
 ```
 
 5. **Stop when needed**
 
 ```bash
-mtd stop -c <chain>
+mech stop -c <chain>
 ```
 
 ### Setup
@@ -87,7 +87,7 @@ mtd stop -c <chain>
 Run the full setup flow for a new mech deployment:
 
 ```bash
-mtd setup -c gnosis
+mech setup -c gnosis
 ```
 
 This runs the following steps in order:
@@ -105,13 +105,13 @@ This runs the following steps in order:
 **Production mode** (Docker deployment):
 
 ```bash
-mtd run -c gnosis
+mech run -c gnosis
 ```
 
 **Dev mode** (host deployment, no Docker):
 
 ```bash
-mtd run -c gnosis --dev
+mech run -c gnosis --dev
 ```
 
 Dev mode pushes your local packages to IPFS, updates the config template with the new service hash, and runs the service directly on the host using `olas-operate-middleware` with `use_docker=False`. Dev mode requires a local workspace `packages/` directory.
@@ -119,15 +119,15 @@ Dev mode pushes your local packages to IPFS, updates the config template with th
 ### Stopping the service
 
 ```bash
-mtd stop -c gnosis
+mech stop -c gnosis
 ```
 
 ### Mech deployment
 
-Deploy a mech on the marketplace. This runs automatically during `mtd setup`, but can also be run standalone for an existing service:
+Deploy a mech on the marketplace. This runs automatically during `mech setup`, but can also be run standalone for an existing service:
 
 ```bash
-mtd deploy-mech -c gnosis
+mech deploy-mech -c gnosis
 ```
 
 The mech type is determined by the `MECH_TYPE` env variable on the service. Supported types per chain:
@@ -147,13 +147,13 @@ Generate and publish metadata independently of the full setup:
 
 ```bash
 # Generate metadata.json and publish to IPFS
-mtd push-metadata
+mech push-metadata
 
 # Use a custom IPFS node
-mtd push-metadata --ipfs-node /dns/custom.node/tcp/5001/http
+mech push-metadata --ipfs-node /dns/custom.node/tcp/5001/http
 
 # Update the on-chain metadata hash
-mtd update-metadata
+mech update-metadata
 ```
 
 ### Adding a new tool
@@ -163,44 +163,44 @@ Use this workflow to add and run a custom tool with the current setup-first mode
 1. Ensure workspace/setup is initialized:
 
 ```bash
-mtd setup -c <gnosis|base|polygon|optimism>
+mech setup -c <gnosis|base|polygon|optimism>
 ```
 
 2. Scaffold the tool:
 
 ```bash
-mtd add-tool <author> <tool_name> -d "My tool description"
+mech add-tool <author> <tool_name> -d "My tool description"
 ```
 
 3. Implement tool logic in:
 
 ```text
-~/.operate_mtd/packages/<author>/customs/<tool_name>/<tool_name>.py
+~/.operate-mech/packages/<author>/customs/<tool_name>/<tool_name>.py
 ```
 
 4. Update component metadata in:
 
 ```text
-~/.operate_mtd/packages/<author>/customs/<tool_name>/component.yaml
+~/.operate-mech/packages/<author>/customs/<tool_name>/component.yaml
 ```
 
 5. Refresh metadata and update on-chain hash:
 
 ```bash
-mtd push-metadata
-mtd update-metadata
+mech push-metadata
+mech update-metadata
 ```
 
 6. Run the service:
 
 ```bash
-mtd run -c <chain>
+mech run -c <chain>
 ```
 
 Optional: use a custom packages location when scaffolding:
 
 ```bash
-mtd add-tool <author> <tool_name> --packages-dir /path/to/packages
+mech add-tool <author> <tool_name> --packages-dir /path/to/packages
 ```
 
 ## Workspace troubleshooting

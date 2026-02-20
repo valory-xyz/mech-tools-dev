@@ -103,19 +103,19 @@ In this example, we will locally run a Mech with a dummy "echo" tool.
 For installed-package usage (no repo clone), use:
 
 ```bash
-pip install mech-tools-dev
-mtd setup -c <gnosis|base|polygon|optimism>
-mtd run -c <gnosis|base|polygon|optimism>
+pip install mech-server
+mech setup -c <gnosis|base|polygon|optimism>
+mech run -c <gnosis|base|polygon|optimism>
 ```
 
-`mtd setup` auto-bootstraps the default workspace if it does not exist yet.
+`mech setup` auto-bootstraps the default workspace if it does not exist yet.
 
 `--dev` mode is only for local package development and requires `packages/` in the workspace.
 
 1. First, clone the following repository:
     ```bash
-    git clone https://github.com/valory-xyz/mech-tools-dev.git
-    cd mech-tools-dev/
+    git clone https://github.com/valory-xyz/mech-server.git
+    cd mech-server/
     ```
 
 2. Install all Python dependencies:
@@ -131,7 +131,7 @@ mtd run -c <gnosis|base|polygon|optimism>
 
 4. Run the setup command:
     ```bash
-    poetry run mtd setup -c <gnosis|base|polygon|optimism>
+    poetry run mech setup -c <gnosis|base|polygon|optimism>
     ```
 
     You will be prompted to select a chain (`gnosis`, `base`, `polygon`, `optimism`) and fill in some details, including the RPC for that chain. Here, you can get one from a provider like [Quiknode](https://www.quicknode.com/) but we encourage you to first test against a virtual network using [Tenderly](https://tenderly.co/). This way, you can also use the faucet to fund the required wallets.
@@ -228,13 +228,13 @@ In order to contribute to Mechs' abilities, one can create and publish a tool. I
 
 In order to create a tool, the steps are as follows:
 
-1. Ensure you have followed the instructions from the previous section to setup the `mech-tools-dev` repository.
+1. Ensure you have followed the instructions from the previous section to setup the `mech-server` repository.
 
 
 2. Create the tool's structure by using the following command, after replacing the values for the `AUTHOR_NAME` and `TOOL_NAME` variables:
 
 ```bash
-poetry run mtd add-tool -d AUTHOR_NAME TOOL_NAME
+poetry run mech add-tool -d AUTHOR_NAME TOOL_NAME
 ```
 
 You will be asked whether this is a dev or a third-party package. Select dev package.
@@ -252,11 +252,11 @@ packages/
 
 For more options, use the tool helper:
 ```bash
-poetry run mtd --help
+poetry run mech --help
 ```
 
 3. Now that your tool's structure is set up, all that's left is to configure the tool component and implement the tool's functionality in Python.
-The [component.yaml](https://github.com/valory-xyz/mech-tools-dev/blob/main/mtd/templates/config.template) file contains the tool's configuration and looks as follows:
+The [component.yaml](https://github.com/valory-xyz/mech-server/blob/main/mtd/templates/config.template) file contains the tool's configuration and looks as follows:
 
     Here is an explanation of its fields:
     - `name`: the name of the tool.

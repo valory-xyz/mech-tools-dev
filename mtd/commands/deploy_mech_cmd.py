@@ -72,7 +72,7 @@ def deploy_mech_command(ctx: click.Context, chain_config: str) -> None:
         manager = operate.service_manager()
         services, _ = manager.get_all_services()
         if not services:
-            raise click.ClickException("No service found. Run 'mtd setup' first.")
+            raise click.ClickException("No service found. Run 'mech setup' first.")
 
         service = services[0]
         if not needs_mech_deployment(service):

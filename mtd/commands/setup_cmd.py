@@ -42,7 +42,7 @@ def setup(ctx: click.Context, chain_config: str) -> None:
     private key setup, metadata generation, IPFS publish, and
     on-chain metadata hash update.
 
-    Example: mtd setup -c gnosis
+    Example: mech setup -c gnosis
     """
     context = get_mtd_context(ctx)
     if not context.is_initialized():

@@ -30,7 +30,7 @@ from mtd.services.metadata.update_onchain import update_metadata_onchain
 def update_metadata(ctx: click.Context) -> None:
     """Update the metadata hash on-chain via Safe transaction.
 
-    Example: mtd update-metadata
+    Example: mech update-metadata
     """
     context = get_mtd_context(ctx)
     require_initialized(context)

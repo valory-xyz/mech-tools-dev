@@ -147,7 +147,7 @@ def generate_metadata(packages_dir: Path, metadata_path: Path) -> Path:
     """Generate metadata from package customs and write to path."""
     if not packages_dir.exists():
         raise FileNotFoundError(
-            f"Packages directory not found: {packages_dir}. Use 'mtd add-tool' first or run in --dev mode."
+            f"Packages directory not found: {packages_dir}. Use 'mech add-tool' first or run in --dev mode."
         )
 
     tools_data = _build_tools_data(packages_dir=packages_dir)

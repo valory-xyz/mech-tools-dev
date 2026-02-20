@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Helpers for accessing mtd click context."""
+"""Helpers for accessing mech click context."""
 
 import click
 
@@ -25,7 +25,7 @@ from mtd.context import MtdContext, build_context
 
 
 def get_mtd_context(ctx: click.Context) -> MtdContext:
-    """Get mtd context from click context object."""
+    """Get mech context from click context object."""
     ctx_obj = ctx.ensure_object(dict)
     context = ctx_obj.get("mtd_context")
     if isinstance(context, MtdContext):
@@ -41,5 +41,5 @@ def require_initialized(context: MtdContext) -> None:
     if not context.is_initialized():
         raise click.ClickException(
             f"Workspace is not initialized: {context.workspace_path}. "
-            "Run 'mtd init' first."
+            "Run 'mech setup -c <chain>' first."
         )
