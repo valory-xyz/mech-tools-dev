@@ -40,13 +40,16 @@ def _workspace_cwd(context: MtdContext) -> Iterator[None]:
     """Run operations from workspace root."""
     previous = Path.cwd()
     previous_operate_home = os.environ.get("OPERATE_HOME")
-    context.ensure_workspace_exists()
     os.environ["OPERATE_HOME"] = str(context.operate_dir)
-    os.chdir(context.workspace_path)
+    changed_dir = False
+    if context.workspace_path.exists():
+        os.chdir(context.workspace_path)
+        changed_dir = True
     try:
         yield
     finally:
-        os.chdir(previous)
+        if changed_dir:
+            os.chdir(previous)
         if previous_operate_home is None:
             os.environ.pop("OPERATE_HOME", None)
         else:
